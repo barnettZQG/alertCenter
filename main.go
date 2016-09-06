@@ -6,6 +6,7 @@ import (
 	_ "github.com/barnettZQG/alertCenter/routers"
 )
 
+
 func main() {
 	re := core.Relation{}
 	beego.AddAPPStartHook(func() error {

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+  <meta charset="utf-8">
+  <title>光音网络监控报警处理平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+  <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+  <meta name="author" content="Goyoo-Cloud-zengqingguo">
+  <meta name="robots" content="index,follow">
+  <meta name="application-name" content="goyoo.com">
+  <!-- Site CSS -->
+  <link href="/static/css/bootstrap.css" rel="stylesheet">
+  <link href="/static/css/site.css" rel="stylesheet">
+  <style>
+    .job-hot {
+      position: absolute;
+      color: #d9534f;
+      right: 0;
+      top: 15px;
+    }
+  </style>
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+
+  <script>
+      var _hmt = _hmt || [];
+    </script>
+
+  <style>
+    .title {
+      width: 100%;
+      height: 50px;
+      color: #fff;
+      padding: 15px 0px;
+      background-color: #F20F4C;
+    }
+    
+    .title.title3 {
+      background-color: #F20F4C;
+    }
+    
+    .title.title2 {
+      background-color: #F20FE3;
+    }
+    
+    .title.title1 {
+      background-color: #0F6EF2;
+    }
+    
+    .title span {
+      text-align: center;
+    }
+    
+    .thumbnail {
+      max-width: 100% !important
+    }
+    
+    .caption {
+      height: auto!important;
+    }
+    
+    .caption p {
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+
+<body>
+{{template "menu.html" .}}
+  <div class="container projects">
+
+    <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+    <div id="alert"></div>
+    <div class="row">
+      <div class="table-responsive" style="border-color: #ddd;border-width: 1px;border-radius: 4px 4px 0 0;padding: 5px;border-style: solid;">
+        <table class="table table-hover table-bordered">
+          <thead>
+            <tr>
+              <th>报警名</th>
+              <th>报警次数</th>
+              <th>目标主机</th>
+              <th>开始时间</th>
+              <th>结束时间</th>
+              <th>处理团队</th>
+              <th>处理状态</th>
+            </tr>
+          </thead>
+          <tbody id="alerts">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- /.container -->
+
+  <footer class="footer ">
+    <div class="container">
+      <div class="row footer-bottom">
+       <!--<h2>光音网络监控报警平台</h2>-->
+        <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.js"></script>
+  <script src="/static/js/site.js"></script>
+  <script>
+       $(function(){
+         $("#alerts").html('加载中。。。')
+         $.get("/api/alerts/all",function(result){
+           $("#alerts").html("")
+           if(result.status == "success"){
+             $.each(result.data,function(i,alert){
+                var html='<td>'+alert.labels.alertname+'</td>'+
+                 '<td>'+alert.AlertCount+'</td>'+
+                 '<td>'+alert.labels.instance+'</td>'
+                   html+='<td>'+alert.startsAt+'</td>'
+                 if(alert.endsAt=="0001-01-01T00:00:00Z"){
+                   html+='<td>持续中。。。</td>'
+                 }else{
+                   html+='<td>'+alert.endsAt+'</td>'
+                 }
+                 html+='<td>'+alert.Receiver+'</td>';
+                 
+                 if(alert.IsHandle==1){
+                   html+='<td>'+已处理+'</td>'
+                   html='<tr class="success">'+html+'</tr>'
+                 }else if (alert.IsHandle==2){
+                    html+='<td>报警已自动停止</td>'
+                    html='<tr class="success">'+html+'</tr>'
+                 }else if (alert.IsHandle==-1){
+                    html+='<td>报警已忽略</td>'
+                    html='<tr class="warning">'+html+'</tr>'
+                 }else{
+                    html+='<td>未处理</td>'
+                    html='<tr class="danger">'+html+'</tr>'
+                 }
+                 $("#alerts").append(html)
+             })
+           }else{
+             $.alert("alert",result)
+           }
+         })
+       })
+    </script>
+</body>
+
+</html>

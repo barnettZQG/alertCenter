@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    
+    <meta charset="utf-8">
+    <title>光音网络监控报警处理平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="author" content="Goyoo-Cloud-zengqingguo">
+    <meta name="robots" content="index,follow">
+    <meta name="application-name" content="goyoo.com">
+    <!-- Site CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/site.css" rel="stylesheet">
+    <style>
+    .job-hot {
+    	position: absolute;
+    	color: #d9534f;
+    	right: 0;
+    	top: 15px;
+    }
+    </style>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+    <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+    
+    <script>
+      var _hmt = _hmt || [];
+    </script>
+    
+    <script>
+    var qqgroup = '318630708';
+    </script>
+    <style>
+       .title{
+         width: 100%;
+         height: 50px;
+         color: #fff;
+         padding: 15px 0px;
+         background-color: #F20F4C;
+       }
+       .title.title3{
+         background-color: #F20F4C;
+       }
+       .title.title2{
+         background-color: #F20FE3;
+       }
+       .title.title1{
+         background-color: #0F6EF2;
+       }
+       .title span{
+         text-align: center;
+       }
+       .thumbnail{
+         max-width: 100% !important
+       }
+       .caption{
+         height: auto!important;
+       }
+       .caption p{
+         border-bottom: 1px solid #ddd;
+       }
+    </style>
+  </head>
+  <body>
+
+    {{template "menu.html" .}}
+    <div class="container projects">
+
+      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+      <div id="alert"></div>
+      <div class="row" id="alerts">
+      </div>
+</div><!-- /.container -->
+
+
+    <footer class="footer ">
+      <div class="container">
+        <div class="row footer-bottom">
+          <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script>
+       $(function(){
+          $("#alerts").html('加载中。。。')
+          $.get("/api/alerts/{{receiver}}",function(result){
+            if(result.status=="success"){
+              $("#alerts").html('')
+              $.each(result.data,function(i,alert){
+                var html='<div class="col-sm-6 col-md-4 col-lg-3 alert" id="'+alert.ID+'">'+
+                    '<div class="thumbnail">'+
+                     '<div class="title title'+alert.AlertCount+'">'+
+                      '<span>'+alert.labels.alertname+'('+alert.AlertCount+'次报警)</span>'+
+                      '</div>'+
+                      '<div class="caption">'+
+                       ' <p><b>'+alert.Annotations.description+'</b></p>'+
+                        '<table class="table table-bordered">'+
+                         ' <tr><td><b>开始时间</b></td><td>'+alert.StartsAt+'</td></tr>'+
+                         ' <tr><td><b>结束时间</b></td><td>'+alert.EndsAt+'</td></tr>'+
+                        '</table>
+                        '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.ID+'" data-loading-text="处理中...">忽略报警</button>'+
+                        '<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.ID+'" data-loading-text="处理中...">我已解决</button>'+
+                      '</div>'+
+                    '</div>'+
+                  '</div>'
+               $("#alerts").append(html)   
+              })
+            }else{
+              $.alert("alert",result)
+            }
+          })
+          
+          $(".handle").click(function(){
+             $(this).button("loading")
+              var alertID= $(this).attr("alert-id")
+              var handleType= $(this).attr("data")
+              var url="/api/alert/handle/"+alertID+"/"+handleType
+             $.post(url,{
+               message:"已处理"
+             },function(data,status){
+                if(status=="success"){
+                  if(data.status=="success"){
+                     $("#"+alertID).fadeOut(1000)
+                  }
+                }else{
+                  $.alert("alert",result)
+                }
+             })
+          })
+       })
+    </script>
+  </body>
+</html>

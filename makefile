@@ -12,6 +12,6 @@ image: clean
 	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo ${GO_LDFLAGS} .
 	@docker build -t $(PREFIX):$(TAG) .
 	@docker push $(PREFIX):$(TAG)
-	
+	@rm -f alertCenter
 clean:
 	@rm -f alertCenter

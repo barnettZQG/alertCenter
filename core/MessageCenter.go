@@ -68,12 +68,27 @@ func HandleAlerts(alerts []*models.Alert) {
 				old.IsHandle = 2
 				old.HandleDate = time.Now()
 				old.HandleMessage = "报警已自动恢复"
+				SaveHistory(alertService, old)
 			}
 			old.UpdatedAt = time.Now()
 			alertService.Update(old)
-		} else if old != nil && !old.EndsAt.IsZero() { //判断是否是新报警，此报警曾出现过并已结束
+		} else if old != nil && !old.EndsAt.IsZero() { //此报警曾出现过并已结束
 			if alert.StartsAt.After(old.EndsAt) { //报警开始时间在原报警之后，我们认为这是新报警
-				SaveAlert(alertService, alert)
+				old = old.Merge(alert)
+				//old已更新时间信息
+				if old.EndsAt.IsZero() {
+					old.AlertCount = 1
+					old.IsHandle = 0
+					old.HandleDate = time.Now()
+					old.HandleMessage = "报警再次产生"
+				} else {
+					old.IsHandle = 2
+					old.HandleDate = time.Now()
+					old.HandleMessage = "报警已自动恢复"
+					SaveHistory(alertService, old)
+				}
+				old.UpdatedAt = time.Now()
+				alertService.Update(old)
 			} else {
 				//忽略，相同已结束报警信息只接收一次
 			}
@@ -81,6 +96,17 @@ func HandleAlerts(alerts []*models.Alert) {
 			SaveAlert(alertService, alert)
 		}
 	}
+}
+
+//SaveHistory 存快照纪录
+func SaveHistory(alertService *AlertService, alert *models.Alert) {
+	history := &models.AlertHistory{
+		Mark:     alert.Fingerprint().String(),
+		StartsAt: alert.StartsAt,
+		EndsAt:   alert.EndsAt,
+		Message:  string(alert.Annotations["description"]),
+	}
+	alertService.Session.Insert("AlertHistory", history)
 }
 
 //SaveAlert 保存alert信息
@@ -98,11 +124,13 @@ func SaveAlert(alertService *AlertService, alert *models.Alert) {
 		alert.IsHandle = 2
 		alert.HandleDate = time.Now()
 		alert.HandleMessage = "报警已自动恢复"
+		SaveHistory(alertService, alert)
 	}
 	alert.UpdatedAt = now
 	alertService.Save(alert)
 }
 
+//SaveMessage 储存alertmanager的消息
 func SaveMessage(message *models.AlertReceive, session *MongoSession) bool {
 	ok := session.Insert("AlertReceive", message)
 	return ok

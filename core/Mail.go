@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"time"
 
+	"alertCenter/models"
+	"alertCenter/util"
+
 	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/models"
-	"github.com/barnettZQG/alertCenter/util"
 	"gopkg.in/gomail.v2"
 )
 

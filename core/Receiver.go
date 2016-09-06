@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"alertCenter/core/interfaces"
+	"alertCenter/models"
+	"alertCenter/util"
+
 	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/core/interfaces"
-	"github.com/barnettZQG/alertCenter/models"
-	"github.com/barnettZQG/alertCenter/util"
 	"github.com/prometheus/common/model"
 	uuid "github.com/satori/go.uuid"
 )

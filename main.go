@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/core"
-	_ "github.com/barnettZQG/alertCenter/routers"
-)
+	"alertCenter/core"
+	_ "alertCenter/routers"
 
+	"github.com/astaxie/beego"
+)
 
 func main() {
 	re := core.Relation{}

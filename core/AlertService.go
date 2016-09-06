@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/barnettZQG/alertCenter/models"
-	"github.com/barnettZQG/alertCenter/util"
+	"alertCenter/models"
+	"alertCenter/util"
 	"gopkg.in/mgo.v2/bson"
 )
 

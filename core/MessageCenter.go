@@ -3,8 +3,8 @@ package core
 import (
 	"time"
 
-	"github.com/barnettZQG/alertCenter/models"
-	"github.com/barnettZQG/alertCenter/util"
+	"alertCenter/models"
+	"alertCenter/util"
 )
 
 //HandleMessage 处理alertmanager回来的数据

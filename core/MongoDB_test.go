@@ -3,7 +3,7 @@ package core
 import (
 	"testing"
 
-	"github.com/barnettZQG/alertCenter/util"
+	"alertCenter/util"
 )
 
 type Person struct {

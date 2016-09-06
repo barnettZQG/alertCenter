@@ -1,8 +1,9 @@
 package routers
 
 import (
+	"alertCenter/controllers"
+
 	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/controllers"
 )
 
 func init() {

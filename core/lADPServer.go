@@ -3,8 +3,9 @@ package core
 import (
 	"fmt"
 
+	"alertCenter/models"
+
 	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/models"
 
 	ldap "gopkg.in/ldap.v2"
 )

@@ -1,6 +1,6 @@
 package interfaces
 
-import "github.com/barnettZQG/alertCenter/models"
+import "alertCenter/models"
 
 type UserManager interface {
 	SearchTeams() (teams []*models.Team, err error)

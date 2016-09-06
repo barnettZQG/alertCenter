@@ -1,6 +1,6 @@
 package core
 
-import "github.com/barnettZQG/alertCenter/models"
+import "alertCenter/models"
 
 type TeamService struct {
 	Session *MongoSession

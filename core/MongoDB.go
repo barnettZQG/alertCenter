@@ -3,8 +3,9 @@ package core
 import (
 	"errors"
 
+	"alertCenter/util"
+
 	"github.com/astaxie/beego"
-	"github.com/barnettZQG/alertCenter/util"
 	mgo "gopkg.in/mgo.v2"
 )
 

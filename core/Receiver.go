@@ -5,14 +5,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"alertCenter/core/interfaces"
 	"alertCenter/models"
 	"alertCenter/util"
-
 	"github.com/astaxie/beego"
 	"github.com/prometheus/common/model"
 	uuid "github.com/satori/go.uuid"
+	"strings"
+	"alertCenter/core/user"
 )
 
 var (
@@ -23,7 +22,7 @@ var (
 	cacheTeamUsers map[string][]*models.User
 )
 
-func (r *Relation) Init(usermanager interfaces.UserManager) error {
+func (r *Relation) Init() error {
 	beego.Info("Relation init begin")
 	defer beego.Info("Relation init over")
 	if cacheTeams == nil {
@@ -41,14 +40,38 @@ func (r *Relation) Init(usermanager interfaces.UserManager) error {
 	if cacheTeamUsers == nil {
 		cacheTeamUsers = make(map[string][]*models.User, 0)
 	}
-	ts, err := usermanager.SearchTeams()
-	if err != nil {
-		return err
+
+	ts := []*models.Team{}
+	us := []*models.User{}
+	source := beego.AppConfig.String("UserSource")
+	sources := strings.Split(source, ",")
+	for _, s := range sources {
+		userServer, err := user.GetUserBySource(s)
+		if err != nil {
+			util.Error(err.Error())
+		}
+		tmpTS, err := userServer.SearchTeams()
+		if err != nil {
+			return err
+		}
+
+		tmpUS, err := userServer.SearchUsers()
+		if err != nil {
+			return err
+		}
+
+		ts = append(ts,tmpTS...)
+		us = append(us,tmpUS...)
 	}
-	us, err := usermanager.SearchUsers()
-	if err != nil {
-		return err
-	}
+
+	//ts, err := usermanager.SearchTeams()
+	//if err != nil {
+	//	return err
+	//}
+	//us, err := usermanager.SearchUsers()
+	//if err != nil {
+	//	return err
+	//}
 	beego.Info("load users number is " + strconv.Itoa(len(us)))
 	beego.Info("load teams number is " + strconv.Itoa(len(ts)))
 	if ts != nil {
@@ -88,7 +111,7 @@ func (r *Relation) Init(usermanager interfaces.UserManager) error {
 
 func GetAllAppInfo() (apps []*models.APP, err error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"/cloud-api/alert/apps", nil)
+	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI") + "/cloud-api/alert/apps", nil)
 	if err != nil {
 		util.Error("create get appInfo request faild." + err.Error())
 		return nil, err
@@ -114,7 +137,7 @@ func GetAllAppInfo() (apps []*models.APP, err error) {
 }
 func GetAppInfoById(id string) (app *models.APP, err error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"cloud-api/alert/app/"+id, nil)
+	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI") + "cloud-api/alert/app/" + id, nil)
 	if err != nil {
 		util.Error("create get appInfo request faild." + err.Error())
 		return nil, err
@@ -200,6 +223,7 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 	}
 	app := cacheApps[appID]
 	if app == nil {
+		var err error
 		app, err = GetAppInfoById(appID)
 		if err != nil {
 			return nil

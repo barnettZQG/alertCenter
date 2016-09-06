@@ -1,4 +1,5 @@
-package core
+package user
+
 
 import (
 	"fmt"

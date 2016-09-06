@@ -74,23 +74,18 @@ func HandleAlerts(alerts []*models.Alert) {
 			alertService.Update(old)
 		} else if old != nil && !old.EndsAt.IsZero() { //此报警曾出现过并已结束
 			if alert.StartsAt.After(old.EndsAt) { //报警开始时间在原报警之后，我们认为这是新报警
-				old = old.Merge(alert)
-				//old已更新时间信息
-				if old.EndsAt.IsZero() {
-					old.AlertCount = 1
-					old.IsHandle = 0
-					old.HandleDate = time.Now()
-					old.HandleMessage = "报警再次产生"
-				} else {
-					old.IsHandle = 2
-					old.HandleDate = time.Now()
-					old.HandleMessage = "报警已自动恢复"
+				//old更新状态信息
+				old = old.Reset(alert)
+				if old.IsHandle == 2 {
 					SaveHistory(alertService, old)
 				}
-				old.UpdatedAt = time.Now()
 				alertService.Update(old)
-			} else {
-				//忽略，相同已结束报警信息只接收一次
+			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) { // 新的结束时间
+				history := alertService.FindHistory(old)
+				old.EndsAt = alert.EndsAt
+				history.EndsAt = alert.EndsAt
+				alertService.Update(old)
+				alertService.UpdateHistory(history)
 			}
 		} else { //曾经没出现过的报警
 			SaveAlert(alertService, alert)

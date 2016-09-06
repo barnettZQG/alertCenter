@@ -3,6 +3,7 @@ package core
 import (
 	"alertCenter/models"
 	"alertCenter/util"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -95,4 +96,34 @@ func (e *AlertService) FindAll() (alerts []*models.Alert) {
 	}
 	coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Select(nil).All(&alerts)
 	return
+}
+
+//FindHistory 获取history通过alert
+func (e *AlertService) FindHistory(alert *models.Alert) (history *models.AlertHistory) {
+	coll := e.Session.GetCollection("AlertHistory")
+	if coll == nil {
+		return nil
+	}
+	err := coll.Find(bson.M{"mark": alert.Fingerprint().String(), "startsat": alert.StartsAt}).One(&history)
+	if err != nil {
+		util.Error("find alerthistory by mark and startsAt faild." + err.Error())
+	}
+	return
+}
+
+//UpdateHistory 更新history时间信息
+func (e *AlertService) UpdateHistory(history *models.AlertHistory) {
+	coll := e.Session.GetCollection("AlertHistory")
+	if coll == nil {
+		return
+	}
+	err := coll.Update(bson.M{"mark": history.Mark, "startsat": history.StartsAt}, bson.M{
+		"$set": bson.M{
+			"endsat":   history.EndsAt,
+			"startsat": history.StartsAt,
+		},
+	})
+	if err != nil {
+		util.Error("update alerthistory by mark and startsAt faild." + err.Error())
+	}
 }

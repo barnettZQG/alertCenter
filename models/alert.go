@@ -51,6 +51,25 @@ func (a *Alert) Merge(o *Alert) *Alert {
 	return &res
 }
 
+//Reset 重置alert状态
+func (a *Alert) Reset(o *Alert) *Alert {
+	res := *a
+	res.StartsAt = o.StartsAt
+	res.EndsAt = o.EndsAt
+	if res.EndsAt.IsZero() {
+		res.AlertCount = 1
+		res.IsHandle = 0
+		res.HandleDate = time.Now()
+		res.HandleMessage = "报警再次产生"
+	} else {
+		res.IsHandle = 2
+		res.HandleDate = time.Now()
+		res.HandleMessage = "报警已自动恢复"
+	}
+	res.UpdatedAt = time.Now()
+	return &res
+}
+
 type AlertHistory struct {
 	Mark     string    `json:"mark"`
 	StartsAt time.Time `json:"startsat"`

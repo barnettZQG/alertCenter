@@ -1,17 +1,18 @@
 package core
 
 import (
+	"alertCenter/core/user"
+	"alertCenter/models"
+	"alertCenter/util"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"alertCenter/models"
-	"alertCenter/util"
+	"strings"
+
 	"github.com/astaxie/beego"
 	"github.com/prometheus/common/model"
 	uuid "github.com/satori/go.uuid"
-	"strings"
-	"alertCenter/core/user"
 )
 
 var (
@@ -45,8 +46,11 @@ func (r *Relation) Init() error {
 	us := []*models.User{}
 	source := beego.AppConfig.String("UserSource")
 	sources := strings.Split(source, ",")
+
+	var userServer user.UserInterface
+	var err error
 	for _, s := range sources {
-		userServer, err := user.GetUserBySource(s)
+		userServer, err = user.GetUserBySource(s)
 		if err != nil {
 			util.Error(err.Error())
 		}
@@ -60,39 +64,36 @@ func (r *Relation) Init() error {
 			return err
 		}
 
-		ts = append(ts,tmpTS...)
-		us = append(us,tmpUS...)
+		ts = append(ts, tmpTS...)
+		us = append(us, tmpUS...)
 	}
-
-	//ts, err := usermanager.SearchTeams()
-	//if err != nil {
-	//	return err
-	//}
-	//us, err := usermanager.SearchUsers()
-	//if err != nil {
-	//	return err
-	//}
 	beego.Info("load users number is " + strconv.Itoa(len(us)))
 	beego.Info("load teams number is " + strconv.Itoa(len(ts)))
-	if ts != nil {
-		for _, team := range ts {
-			if team.Name != "" {
-				cacheTeams[team.Name] = team
-			}
-		}
-	}
 	if us != nil {
 		for _, user := range us {
 			if user.Name != "" {
 				cacheUsers[user.Name] = user
-				if us := cacheTeamUsers[user.TeamID]; us != nil {
-					us = append(us, user)
-					cacheTeamUsers[user.TeamID] = us
-				} else {
-					var us []*models.User
-					us = append(us, user)
-					cacheTeamUsers[user.TeamID] = us
+			}
+		}
+	}
+	if ts != nil {
+		for _, team := range ts {
+			beego.Debug("load team " + team.Name)
+			if team.Name != "" {
+				cacheTeams[team.Name] = team
+				users, err := userServer.GetUserByTeam(team.ID)
+				if err != nil {
+					return err
 				}
+				var completeUsers []*models.User
+				for _, user := range users {
+					if user.Mail == "" { //信息是否完整
+						user = cacheUsers[user.Name]
+					}
+					completeUsers = append(completeUsers, user)
+					beego.Debug("load user " + user.Name + " in team " + team.Name)
+				}
+				cacheTeamUsers[team.Name] = completeUsers
 			}
 		}
 	}
@@ -111,7 +112,7 @@ func (r *Relation) Init() error {
 
 func GetAllAppInfo() (apps []*models.APP, err error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI") + "/cloud-api/alert/apps", nil)
+	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"/cloud-api/alert/apps", nil)
 	if err != nil {
 		util.Error("create get appInfo request faild." + err.Error())
 		return nil, err
@@ -137,7 +138,7 @@ func GetAllAppInfo() (apps []*models.APP, err error) {
 }
 func GetAppInfoById(id string) (app *models.APP, err error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI") + "cloud-api/alert/app/" + id, nil)
+	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"cloud-api/alert/app/"+id, nil)
 	if err != nil {
 		util.Error("create get appInfo request faild." + err.Error())
 		return nil, err

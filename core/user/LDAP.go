@@ -1,6 +1,5 @@
 package user
 
-
 import (
 	"fmt"
 
@@ -106,6 +105,51 @@ func (e *LDAPServer) SearchUsers() (users []*models.User, err error) {
 			Mail:   entry.GetAttributeValue("Email"),
 		}
 		users = append(users, user)
+	}
+	return users, nil
+}
+
+func (e *LDAPServer) GetUserByTeam(id string) ([]*models.User, error) {
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", ldapServer, ldapPort))
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	defer l.Close()
+	err = l.Bind(ldapDN, ldapPass)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	searchRequest := ldap.NewSearchRequest(
+		"dc=yunpro,dc=cn", // The base dn to search
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		"(&(objectClass=posixAccount))", // The filter to apply
+		nil, // A list attributes to retrieve
+		nil,
+	)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	var users []*models.User
+	for _, entry := range sr.Entries {
+		if entry.GetAttributeValue("gidNumber") == id {
+			user := &models.User{
+				ID:     entry.GetAttributeValue("uidNumber"),
+				Name:   entry.GetAttributeValue("cn"),
+				TeamID: entry.GetAttributeValue("gidNumber"),
+				Phone:  entry.GetAttributeValue("mobile"),
+				Mail:   entry.GetAttributeValue("Email"),
+			}
+			users = append(users, user)
+		}
 	}
 	return users, nil
 }

@@ -134,7 +134,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func GetUserByTeam(id string) ([]*models.User, error) {
+func (e *GitlabServer)GetUserByTeam(id string) ([]*models.User, error) {
 	fmt.Println("In Gitlab Server GetUserByTeam")
 	users := []*models.User{}
 

@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
+	"github.com/barnettZQG/alertCenter/core/interfaces"
 	"github.com/barnettZQG/alertCenter/models"
 	"github.com/barnettZQG/alertCenter/util"
 	"github.com/prometheus/common/model"
@@ -21,7 +22,7 @@ var (
 	cacheTeamUsers map[string][]*models.User
 )
 
-func (r *Relation) Init() error {
+func (r *Relation) Init(usermanager interfaces.UserManager) error {
 	beego.Info("Relation init begin")
 	defer beego.Info("Relation init over")
 	if cacheTeams == nil {
@@ -39,19 +40,11 @@ func (r *Relation) Init() error {
 	if cacheTeamUsers == nil {
 		cacheTeamUsers = make(map[string][]*models.User, 0)
 	}
-	// session := GetMongoSession()
-	// if session == nil {
-	// 	return errors.New("create or get mongo session faild")
-	// }
-	// defer session.Close()
-	// teamService := GetTeamService(session)
-	// ts := teamService.FindAll()
-	ldap := &LDAPServer{}
-	ts, err := ldap.SearchTeams()
+	ts, err := usermanager.SearchTeams()
 	if err != nil {
 		return err
 	}
-	us, err := ldap.SearchUsers()
+	us, err := usermanager.SearchUsers()
 	if err != nil {
 		return err
 	}

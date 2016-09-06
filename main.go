@@ -9,7 +9,7 @@ import (
 func main() {
 	re := core.Relation{}
 	beego.AddAPPStartHook(func() error {
-		return re.Init()
+		return re.Init(&core.LDAPServer{})
 	})
 	// we := core.WeAlertSend{}
 	// beego.AddAPPStartHook(func() error {

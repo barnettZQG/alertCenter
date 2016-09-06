@@ -10,6 +10,7 @@ type AlertService struct {
 	Session *MongoSession
 }
 
+//GetAlertService  获取servcie
 func GetAlertService(session *MongoSession) *AlertService {
 	return &AlertService{
 		Session: session,
@@ -23,7 +24,7 @@ func (e *AlertService) GetAlertByLabels(alert *models.Alert) (result *models.Ale
 	if coll == nil {
 		return nil
 	}
-	err := coll.Find(bson.M{"mark": mark, "ishandle": 0}).Select(nil).One(&result)
+	err := coll.Find(bson.M{"mark": mark}).Select(nil).One(&result)
 	if err != nil {
 		util.Debug("Get alert by Mark " + mark + " error." + err.Error())
 		return nil
@@ -92,6 +93,6 @@ func (e *AlertService) FindAll() (alerts []*models.Alert) {
 	if coll == nil {
 		return nil
 	}
-	coll.Find(nil).Select(nil).All(&alerts)
+	coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Select(nil).All(&alerts)
 	return
 }

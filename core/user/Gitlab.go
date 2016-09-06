@@ -17,6 +17,7 @@ const (
 	apiVersion = "/api/v3"
 	getUser = "/users?per_page=100"
 	getGroup = "/groups?per_page=100"
+	getGroupUsers = "/groups/:id/members?per_page=100"
 )
 
 var (
@@ -40,6 +41,7 @@ type GitlabUser struct {
 	Is_admin bool
 	Bio      string
 }
+
 
 type GitlabGroup struct {
 	Id          int
@@ -123,6 +125,50 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 			tmp.ID = strconv.Itoa(u.Id)
 			tmp.Name = u.Username
 			tmp.Mail = u.Email
+			users = append(users, tmp)
+		}
+		page = page + 1
+
+	}
+
+	return users, nil
+}
+
+func GetUserByTeam(id string) ([]*models.User, error) {
+	fmt.Println("In Gitlab Server GetUserByTeam")
+	users := []*models.User{}
+
+	page := 1
+	for {
+
+		guUrl := strings.Replace(getGroupUsers, ":id", id, -1)
+
+		url := gitlab + apiVersion + guUrl + "&page=" + strconv.Itoa(page)
+		resp, err := GitlabApi("GET", url, nil)
+		if err != nil {
+			util.Error(err.Error())
+			return nil, err
+		}
+
+		gitlabusers := []GitlabUser{}
+
+		//fmt.Println("debug:", string(resp))
+		err = json.Unmarshal(resp, &gitlabusers)
+		if err != nil {
+			util.Error(err.Error())
+			break
+		}
+		if len(gitlabusers) == 0 {
+			break
+		}
+
+		for _, u := range gitlabusers {
+			if u.State != "active" {
+				continue
+			}
+			tmp := &models.User{}
+			tmp.ID = strconv.Itoa(u.Id)
+			tmp.Name = u.Username
 			users = append(users, tmp)
 		}
 		page = page + 1

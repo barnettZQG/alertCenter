@@ -2,12 +2,14 @@ package models
 
 import (
 	"time"
+
+	"github.com/prometheus/common/model"
 )
 
 type Receiver struct {
 	ID        string   `json:"id"`
 	Name      string   `json:"name"`
-	UserIDs   []string `json:"userIDs"`
+	UserNames []string `json:"userNames"`
 	WeGroupID []string `json:"weiGroupId"`
 }
 type Team struct {
@@ -36,8 +38,11 @@ type User struct {
 	Mail   string `json:"mail"`
 	WeID   string `json:"weId"`
 }
-type UserConfig struct {
-	NoticeRate time.Duration `json:"noticeRate"`
-	NoticeWays []string      `json:"noticeWays"`
-	UserID     string        `json:"userId"`
+type UserIgnoreRule struct {
+	UserID   string         `json:"userId"`
+	Labels   model.LabelSet `json:"labels"`
+	StartsAt time.Time      `json:"startsAt"`
+	EndsAt   time.Time      `json:"endsAt"`
+	AddTime  time.Time      `json:"addTime"`
+	IsLive   bool           `json:"isLive"`
 }

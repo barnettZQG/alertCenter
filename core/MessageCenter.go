@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 
 	"alertCenter/core/db"
+	"alertCenter/core/notice"
 	"alertCenter/core/service"
 	"alertCenter/models"
 )
@@ -72,6 +73,7 @@ func HandleAlerts(alerts []*models.Alert) {
 				old.HandleDate = time.Now()
 				old.HandleMessage = "报警已自动恢复"
 				SaveHistory(alertService, old)
+				Notice(old)
 			}
 			old.UpdatedAt = time.Now()
 			alertService.Update(old)
@@ -81,6 +83,8 @@ func HandleAlerts(alerts []*models.Alert) {
 				old = old.Reset(alert)
 				if old.IsHandle == 2 {
 					SaveHistory(alertService, old)
+				} else {
+					Notice(old)
 				}
 				alertService.Update(old)
 			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) { // 新的结束时间
@@ -94,6 +98,16 @@ func HandleAlerts(alerts []*models.Alert) {
 			SaveAlert(alertService, alert)
 		}
 	}
+}
+
+//Notice 发送报警通知信号
+func Notice(alert *models.Alert) {
+
+	ch := notice.GetChannelByMark(alert.Fingerprint().String())
+	if ch != nil {
+		ch <- alert
+	}
+
 }
 
 //SaveHistory 存快照纪录
@@ -118,13 +132,16 @@ func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 	if alert.StartsAt.IsZero() {
 		alert.StartsAt = now
 	}
+	alert.UpdatedAt = now
 	if !alert.EndsAt.IsZero() {
 		alert.IsHandle = 2
 		alert.HandleDate = time.Now()
 		alert.HandleMessage = "报警已自动恢复"
 		SaveHistory(alertService, alert)
+	} else {
+		//发送第一次报警信号，开始报警发送计时
+		Notice(alert)
 	}
-	alert.UpdatedAt = now
 	alertService.Save(alert)
 }
 

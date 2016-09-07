@@ -23,6 +23,7 @@ var (
 	cacheTeamUsers map[string][]string
 )
 
+//Init 初始化用户关系缓存
 func (r *Relation) Init() error {
 	beego.Info("Relation init begin")
 	defer beego.Info("Relation init over")
@@ -87,7 +88,7 @@ func (r *Relation) Init() error {
 				}
 				var completeUsers []string
 				for _, user := range users {
-					completeUsers = append(completeUsers, user.ID)
+					completeUsers = append(completeUsers, user.Name)
 					beego.Debug("load user " + user.Name + " in team " + team.Name)
 				}
 				cacheTeamUsers[team.Name] = completeUsers
@@ -107,6 +108,7 @@ func (r *Relation) Init() error {
 	return nil
 }
 
+//GetAllAppInfo 获取全部app信息
 func GetAllAppInfo() (apps []*models.APP, err error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"/cloud-api/alert/apps", nil)
@@ -133,7 +135,9 @@ func GetAllAppInfo() (apps []*models.APP, err error) {
 	}
 	return AppInfo, nil
 }
-func GetAppInfoById(id string) (app *models.APP, err error) {
+
+//GetAppInfoByID 通过id查询app信息
+func GetAppInfoByID(id string) (app *models.APP, err error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"cloud-api/alert/app/"+id, nil)
 	if err != nil {
@@ -222,7 +226,7 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 	app := cacheApps[appID]
 	if app == nil {
 		var err error
-		app, err = GetAppInfoById(appID)
+		app, err = GetAppInfoByID(appID)
 		if err != nil {
 			return nil
 		}
@@ -231,12 +235,12 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 		var us []string
 		for _, mail := range app.Mails {
 			user := FindUserByMail(mail)
-			us = append(us, user.ID)
+			us = append(us, user.Name)
 		}
 		receiver = &models.Receiver{
-			ID:      uuid.NewV4().String(),
-			Name:    appID,
-			UserIDs: us,
+			ID:        uuid.NewV4().String(),
+			Name:      appID,
+			UserNames: us,
 		}
 		cacheReceivers[appID] = receiver
 	}
@@ -253,9 +257,9 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 	if t != nil {
 		us := cacheTeamUsers[t.Name]
 		receiver = &models.Receiver{
-			ID:      uuid.NewV4().String(),
-			Name:    team,
-			UserIDs: us,
+			ID:        uuid.NewV4().String(),
+			Name:      team,
+			UserNames: us,
 		}
 		cacheReceivers[team] = receiver
 		return

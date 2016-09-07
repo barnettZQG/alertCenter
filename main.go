@@ -16,5 +16,6 @@ func main() {
 	beego.AddAPPStartHook(func() error {
 		return notice.StartCenter()
 	})
+	beego.Info("mongo:",beego.AppConfig.String("mongoURI"))
 	beego.Run()
 }

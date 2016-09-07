@@ -20,8 +20,3 @@ func GetNoticeServer(name string) NoticeServer {
 	return nil
 }
 
-//GetChannelByMark 获取发送报警通道
-func GetChannelByMark(mark string) chan<- *models.Alert {
-
-	return nil
-}

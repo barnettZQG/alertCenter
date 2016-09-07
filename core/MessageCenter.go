@@ -73,43 +73,56 @@ func HandleAlerts(alerts []*models.Alert) {
 				old.HandleDate = time.Now()
 				old.HandleMessage = "报警已自动恢复"
 				SaveHistory(alertService, old)
-				Notice(old)
+				Notice(old, false)
 			}
 			old.UpdatedAt = time.Now()
 			alertService.Update(old)
-		} else if old != nil && !old.EndsAt.IsZero() { //此报警曾出现过并已结束
-			if alert.StartsAt.After(old.EndsAt) { //报警开始时间在原报警之后，我们认为这是新报警
+		} else if old != nil && !old.EndsAt.IsZero() {
+			//此报警曾出现过并已结束
+			if alert.StartsAt.After(old.EndsAt) {
+				//报警开始时间在原报警之后，我们认为这是新报警
 				//old更新状态信息
 				old = old.Reset(alert)
 				if old.IsHandle == 2 {
 					SaveHistory(alertService, old)
 				} else {
-					Notice(old)
+					Notice(old, true)
 				}
 				alertService.Update(old)
-			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) { // 新的结束时间
+			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) {
+				// 新的结束时间
 				history := alertService.FindHistory(old)
 				old.EndsAt = alert.EndsAt
 				history.EndsAt = alert.EndsAt
 				alertService.Update(old)
 				alertService.UpdateHistory(history)
 			}
-		} else { //曾经没出现过的报警
+		} else {
+			//曾经没出现过的报警
 			SaveAlert(alertService, alert)
 		}
 	}
 }
 
 //Notice 发送报警通知信号
-func Notice(alert *models.Alert) {
-	if users, ok := CheckRules(alert); ok {
-		alert.Receiver.UserNames = users
+
+func Notice(alert *models.Alert, new bool) {
+	//if users, ok := CheckRules(alert); ok {
+	//	alert.Receiver.UserNames = users
+	beego.Debug("In notice, alert mark:", alert.Mark)
+	if new {
+		err := notice.CreateChanByMark(alert.Fingerprint().String())
+		if err != nil {
+			beego.Error(err)
+		}
+		go notice.NoticControl(alert)
+	} else {
 		ch := notice.GetChannelByMark(alert.Fingerprint().String())
 		if ch != nil {
 			ch <- alert
 		}
 	}
-
+	//}
 }
 
 //CheckRules 检验是否为用户忽略的报警
@@ -179,7 +192,7 @@ func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 		SaveHistory(alertService, alert)
 	} else {
 		//发送第一次报警信号，开始报警发送计时
-		Notice(alert)
+		Notice(alert, true)
 	}
 	alertService.Save(alert)
 }

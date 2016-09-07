@@ -73,7 +73,7 @@ func HandleAlerts(alerts []*models.Alert) {
 				old.HandleDate = time.Now()
 				old.HandleMessage = "报警已自动恢复"
 				SaveHistory(alertService, old)
-				Notice(old, false)
+				Notice(old)
 			}
 			old.UpdatedAt = time.Now()
 			alertService.Update(old)
@@ -86,7 +86,7 @@ func HandleAlerts(alerts []*models.Alert) {
 				if old.IsHandle == 2 {
 					SaveHistory(alertService, old)
 				} else {
-					Notice(old, true)
+					Notice(old)
 				}
 				alertService.Update(old)
 			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) {
@@ -106,23 +106,36 @@ func HandleAlerts(alerts []*models.Alert) {
 
 //Notice 发送报警通知信号
 
-func Notice(alert *models.Alert, new bool) {
-	//if users, ok := CheckRules(alert); ok {
-	//	alert.Receiver.UserNames = users
-	beego.Debug("In notice, alert mark:", alert.Mark)
-	if new {
-		err := notice.CreateChanByMark(alert.Fingerprint().String())
-		if err != nil {
-			beego.Error(err)
-		}
-		go notice.NoticControl(alert)
-	} else {
-		ch := notice.GetChannelByMark(alert.Fingerprint().String())
-		if ch != nil {
+func Notice(alert *models.Alert) {
+	if users, ok := CheckRules(alert); ok {
+		alert.Receiver.UserNames = users
+		beego.Debug("In notice, alert mark:", alert.Mark)
+		mark := alert.Fingerprint().String()
+
+		ch, ok := notice.GetChannelByMark(mark)
+		if ok&& ch != nil {
 			ch <- alert
+		} else {
+			err := notice.CreateChanByMark(alert.Fingerprint().String())
+			if err != nil {
+				beego.Error(err)
+			}
+			go notice.NoticControl(alert)
 		}
+
+		//if new {
+		//	err := notice.CreateChanByMark(alert.Fingerprint().String())
+		//	if err != nil {
+		//		beego.Error(err)
+		//	}
+		//	go notice.NoticControl(alert)
+		//} else {
+		//	ch := notice.GetChannelByMark(alert.Fingerprint().String())
+		//	if ch != nil {
+		//		ch <- alert
+		//	}
+		//}
 	}
-	//}
 }
 
 //CheckRules 检验是否为用户忽略的报警
@@ -192,7 +205,7 @@ func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 		SaveHistory(alertService, alert)
 	} else {
 		//发送第一次报警信号，开始报警发送计时
-		Notice(alert, true)
+		Notice(alert)
 	}
 	alertService.Save(alert)
 }

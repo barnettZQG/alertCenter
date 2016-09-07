@@ -14,16 +14,17 @@ var DefaultSendInterval = 5 * time.Second
 func NoticControl(alert *models.Alert) {
 	beego.Info("start alert:", alert.Mark)
 	defer beego.Info("end alert:", alert.Mark)
+	ch,ok := GetChannelByMark(alert.Fingerprint().String())
+	if !ok{
+		beego.Error("Can not find the channel.")
+		return
+	}
+	defer DeleteChanByMark(alert.Fingerprint().String())
 
-	timeout := make(chan bool)
-	go func() {
-		time.Sleep(DefaultTimeout)
-		timeout <- true
-	}()
+	var timeout = time.NewTimer(DefaultTimeout)
 	noNeedFlag := false
 
-	ch := GetChannelByMark(alert.Fingerprint().String())
-	defer DeleteChanByMark(alert.Fingerprint().String())
+
 	NoNeedSend:
 	for {
 		select {
@@ -32,8 +33,7 @@ func NoticControl(alert *models.Alert) {
 				beego.Info("No need send this alert.")
 			}
 			noNeedFlag = true
-		case <-timeout:
-		//fmt.Println("timeout 1")
+		case <-timeout.C:
 			break NoNeedSend
 		}
 	}
@@ -42,11 +42,6 @@ func NoticControl(alert *models.Alert) {
 		return
 	}
 
-	//tout := make(chan bool)
-	//go func() {
-	//	time.Sleep(DefaultSendInterval)
-	//	tout <- true
-	//}()
 	var timer = time.NewTimer(DefaultSendInterval)
 
 	for {
@@ -60,6 +55,7 @@ func NoticControl(alert *models.Alert) {
 			return
 		case <-timer.C:
 			beego.Info("Sending email")
+			//cacheServer["mail"].SendAlert(alert)
 			timer.Reset(DefaultSendInterval)
 		//fmt.Println("send email")
 		}

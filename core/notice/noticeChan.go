@@ -12,11 +12,10 @@ func init() {
 }
 
 //GetChannelByMark 获取发送报警通道
-func GetChannelByMark(mark string) chan *models.Alert {
-	if result, ok := NoticChans[mark]; ok {
-		return result
-	}
-	return nil
+func GetChannelByMark(mark string) (chan *models.Alert, bool) {
+	result, ok := NoticChans[mark]
+	return result, ok
+
 }
 
 func CreateChanByMark(mark string) error {

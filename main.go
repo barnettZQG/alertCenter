@@ -8,6 +8,10 @@ import (
 	"github.com/astaxie/beego"
 )
 
+func init(){
+
+}
+
 func main() {
 	re := core.Relation{}
 	beego.AddAPPStartHook(func() error {

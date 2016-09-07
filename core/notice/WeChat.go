@@ -28,7 +28,7 @@ func (e *WeNoticeServer) SendAlert(alert *models.Alert) error {
 	url := beego.AppConfig.String("url")
 	me := e.GetWeAlertByTag(alert.Receiver.Name)
 	message := ``
-	message += string(alert.Annotations["description"]) + "\n\t"
+	message += string(alert.Annotations.LabelSet["description"]) + "\n\t"
 	message += `------------------\n\r`
 	message += `[<a href=\"` + url + `/alertList?receiver＝` + alert.Receiver.Name + `\">点击查看详情</a>]`
 	me = strings.Replace(me, "CONTENT", message, -1)

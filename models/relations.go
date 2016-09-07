@@ -1,10 +1,6 @@
 package models
 
-import (
-	"time"
-
-	"github.com/prometheus/common/model"
-)
+import "time"
 
 type Receiver struct {
 	ID        string   `json:"id"`
@@ -39,10 +35,11 @@ type User struct {
 	WeID   string `json:"weId"`
 }
 type UserIgnoreRule struct {
-	UserID   string         `json:"userId"`
-	Labels   model.LabelSet `json:"labels"`
-	StartsAt time.Time      `json:"startsAt"`
-	EndsAt   time.Time      `json:"endsAt"`
-	AddTime  time.Time      `json:"addTime"`
-	IsLive   bool           `json:"isLive"`
+	RuleID   string    `json:"ruleID"`
+	UserID   string    `json:"userId"`
+	Labels   Label     `json:"labels"`
+	StartsAt time.Time `json:"startsAt"`
+	EndsAt   time.Time `json:"endsAt"`
+	AddTime  time.Time `json:"addTime"`
+	IsLive   bool      `json:"isLive"`
 }

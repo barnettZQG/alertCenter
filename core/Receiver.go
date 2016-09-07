@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/prometheus/common/model"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -199,6 +198,20 @@ func (r *Relation) GetAllUser() (result []*models.User) {
 	return
 }
 
+//GetUserByName 获取指定用户
+func (r *Relation) GetUserByName(name string) *models.User {
+	if name == "" {
+		return nil
+	}
+	user := cacheUsers[name]
+	if user != nil {
+		return user
+	} else {
+		//暂时不实现
+		return nil
+	}
+}
+
 //FindUserByMail 通过邮箱获取用户
 func FindUserByMail(mail string) *models.User {
 	if mail == "" {
@@ -269,12 +282,12 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 }
 
 //GetReceiver 获取receiver
-func GetReceiver(labels model.LabelSet) (receiver *models.Receiver) {
+func GetReceiver(labels models.Label) (receiver *models.Receiver) {
 
-	if v, ok := labels["team"]; ok {
+	if v, ok := labels.LabelSet["team"]; ok {
 		return GetReceiverByTeam(string(v))
 	}
-	if v, ok := labels["container_label_app_id"]; ok {
+	if v, ok := labels.LabelSet["container_label_app_id"]; ok {
 		return GetReceiverByAPPID(string(v))
 	}
 	return nil

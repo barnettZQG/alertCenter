@@ -9,18 +9,36 @@ import (
 
 type Alert struct {
 	_ID           bson.ObjectId
-	Labels        model.LabelSet `json:"labels"`
-	Annotations   model.LabelSet `json:"annotations"`
-	StartsAt      time.Time      `json:"startsAt,omitempty"`
-	EndsAt        time.Time      `json:"endsAt,omitempty"`
-	GeneratorURL  string         `json:"generatorURL"`
-	Mark          string         `json:"mark" bson:"mark"`
-	Receiver      *Receiver      `json:"receiver"`
+	Labels        Label     `json:"labels"`
+	Annotations   Label     `json:"annotations"`
+	StartsAt      time.Time `json:"startsAt,omitempty"`
+	EndsAt        time.Time `json:"endsAt,omitempty"`
+	GeneratorURL  string    `json:"generatorURL"`
+	Mark          string    `json:"mark" bson:"mark"`
+	Receiver      *Receiver `json:"receiver"`
 	AlertCount    int
 	IsHandle      int
 	HandleDate    time.Time `json:"handleDate,omitempty"`
 	HandleMessage string
 	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+}
+
+type Label struct {
+	model.LabelSet
+}
+
+//Contains a是否包含source
+func (a Label) Contains(source Label) bool {
+	for k, v := range source.LabelSet {
+		if va, ok := a.LabelSet[k]; ok {
+			if v != va {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+	return true
 }
 
 func (a *Alert) Fingerprint() model.Fingerprint {

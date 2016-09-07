@@ -102,12 +102,51 @@ func HandleAlerts(alerts []*models.Alert) {
 
 //Notice 发送报警通知信号
 func Notice(alert *models.Alert) {
-
-	ch := notice.GetChannelByMark(alert.Fingerprint().String())
-	if ch != nil {
-		ch <- alert
+	if users, ok := CheckRules(alert); ok {
+		alert.Receiver.UserNames = users
+		ch := notice.GetChannelByMark(alert.Fingerprint().String())
+		if ch != nil {
+			ch <- alert
+		}
 	}
 
+}
+
+//CheckRules 检验是否为用户忽略的报警
+func CheckRules(alert *models.Alert) ([]string, bool) {
+	userNames := alert.Receiver.UserNames
+	//没有接收对象，不需要发送
+	if userNames == nil || len(userNames) < 1 {
+		return nil, false
+	}
+	relation := Relation{}
+	var users []string
+	session := db.GetMongoSession()
+	defer session.Close()
+	ruleService := &service.IgnoreRuleService{
+		Session: session,
+	}
+	for _, userName := range userNames {
+		user := relation.GetUserByName(userName)
+		var ignore bool
+		if user != nil {
+			rules := ruleService.FindRuleByUser(user.ID)
+			if rules != nil && len(rules) > 0 {
+				for _, rule := range rules {
+					if alert.Labels.Contains(rule.Labels) {
+						ignore = true
+					}
+				}
+			}
+		}
+		if !ignore {
+			users = append(users, user.Name)
+		}
+	}
+	if len(users) == 0 {
+		return nil, false
+	}
+	return users, true
 }
 
 //SaveHistory 存快照纪录
@@ -116,7 +155,7 @@ func SaveHistory(alertService *service.AlertService, alert *models.Alert) {
 		Mark:     alert.Fingerprint().String(),
 		StartsAt: alert.StartsAt,
 		EndsAt:   alert.EndsAt,
-		Message:  string(alert.Annotations["description"]),
+		Message:  string(alert.Annotations.LabelSet["description"]),
 	}
 	alertService.Session.Insert("AlertHistory", history)
 }

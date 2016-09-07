@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 type Receiver struct {
 	ID        string   `json:"id"`
 	Name      string   `json:"name"`
@@ -31,4 +35,9 @@ type User struct {
 	Phone  string `json:"phone"`
 	Mail   string `json:"mail"`
 	WeID   string `json:"weId"`
+}
+type UserConfig struct {
+	NoticeRate time.Duration `json:"noticeRate"`
+	NoticeWays []string      `json:"noticeWays"`
+	UserID     string        `json:"userId"`
 }

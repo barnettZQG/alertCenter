@@ -2,6 +2,7 @@ package main
 
 import (
 	"alertCenter/core"
+	"alertCenter/core/notice"
 	_ "alertCenter/routers"
 
 	"github.com/astaxie/beego"
@@ -12,15 +13,8 @@ func main() {
 	beego.AddAPPStartHook(func() error {
 		return re.Init()
 	})
-	// we := core.WeAlertSend{}
-	// beego.AddAPPStartHook(func() error {
-	// 	return we.StartWork()
-	// })
-	// mail := core.MailAlertSend{}
-	// beego.AddAPPStartHook(func() error {
-	// 	return mail.StartWork()
-	// })
+	beego.AddAPPStartHook(func() error {
+		return notice.StartCenter()
+	})
 	beego.Run()
-	//mail.StopWork()
-	//we.StopWork()
 }

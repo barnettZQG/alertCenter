@@ -99,7 +99,7 @@
     <script>
        $(function(){
           $("#alerts").html('加载中。。。')
-          $.get("/api/alerts/{{receiver}}",function(result){
+          $.get("/api/alerts/{{.receiver}}",function(result){
             if(result.status=="success"){
               $("#alerts").html('')
               $.each(result.data,function(i,alert){

@@ -3,7 +3,7 @@ package models
 type Receiver struct {
 	ID        string   `json:"id"`
 	Name      string   `json:"name"`
-	Users     []*User  `json:"mail"`
+	UserIDs   []string `json:"userIDs"`
 	WeGroupID []string `json:"weiGroupId"`
 }
 type Team struct {

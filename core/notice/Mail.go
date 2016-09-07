@@ -1,28 +1,22 @@
-package core
+package notice
 
 import (
 	"crypto/tls"
+	"errors"
 	"time"
 
 	"alertCenter/models"
-	"alertCenter/util"
 
 	"github.com/astaxie/beego"
 	"gopkg.in/gomail.v2"
 )
 
-type AlertSend interface {
-	StartWork()
-	StopWork()
-	SendAlert(alert *models.Alert)
-}
-
-type MailAlertSend struct {
+type MailNoticeServer struct {
 	mailChan chan *MailMessage
 	stopChan chan bool
 }
 
-func (e *MailAlertSend) GetMailDialer() *gomail.Dialer {
+func (e *MailNoticeServer) GetMailDialer() *gomail.Dialer {
 	mailServer := beego.AppConfig.String("mailServer")
 	mailPort, _ := beego.AppConfig.Int("mailPort")
 	mailUser := beego.AppConfig.String("mailUser")
@@ -31,15 +25,13 @@ func (e *MailAlertSend) GetMailDialer() *gomail.Dialer {
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: mailPort == 465}
 	return d
 }
-
-func (e *MailAlertSend) SendMail(message ...*gomail.Message) {
+func (e *MailNoticeServer) SendMail(message ...*gomail.Message) {
 	d := e.GetMailDialer()
 	d.DialAndSend(message...)
 }
-
-func (e *MailAlertSend) StartWork() error {
-	beego.Info("mail send init start")
-	defer beego.Info("mail send init over")
+func (e *MailNoticeServer) StartWork() error {
+	beego.Info("mail notice server init start")
+	defer beego.Info("mail notice server init over")
 	mailCount, err := beego.AppConfig.Int("mailCount")
 	if err != nil {
 		beego.Error("mailCount's type is not int ." + err.Error())
@@ -61,7 +53,6 @@ func (e *MailAlertSend) StartWork() error {
 		var s gomail.SendCloser
 		var err error
 		open := false
-		util.Info("mail work start success")
 		for {
 			select {
 			case m, ok := <-e.mailChan:
@@ -101,11 +92,12 @@ func (e *MailAlertSend) StartWork() error {
 			}
 		}
 	exit:
-		util.Info("mail work stop success")
+		beego.Info("mail work stop success")
 	}()
+	beego.Info("mail notice server start success")
 	return nil
 }
-func (e *MailAlertSend) StopWork() {
+func (e *MailNoticeServer) StopWork() error {
 	if e.stopChan != nil {
 		e.stopChan <- true
 		close(e.stopChan)
@@ -113,6 +105,7 @@ func (e *MailAlertSend) StopWork() {
 	if e.mailChan != nil {
 		close(e.mailChan)
 	}
+	return nil
 }
 
 type MailMessage struct {
@@ -121,7 +114,7 @@ type MailMessage struct {
 	alert    *models.Alert
 }
 
-func (e *MailAlertSend) GetMessage(body string, subject string, receiver ...string) *MailMessage {
+func (e *MailNoticeServer) GetMessage(body string, subject string, receiver ...string) *MailMessage {
 	m := gomail.NewMessage()
 	m.SetHeader("From", beego.AppConfig.String("mailFrom"))
 	m.SetHeader("To", receiver...)
@@ -132,27 +125,17 @@ func (e *MailAlertSend) GetMessage(body string, subject string, receiver ...stri
 		errCount: 0,
 	}
 }
-
-func (e *MailAlertSend) GetMessageByAlert(alert *models.Alert) *MailMessage {
+func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) *MailMessage {
 
 	m := e.GetMessage("", "", "")
 	m.alert = alert
 	return m
 }
-
-func (e *MailAlertSend) SendAlert(alert *models.Alert) {
+func (e *MailNoticeServer) SendAlert(alert *models.Alert) error {
 	m := e.GetMessageByAlert(alert)
+	if m == nil {
+		return errors.New("create mail message faild")
+	}
 	e.mailChan <- m
+	return nil
 }
-
-// func TestSendMail() {
-// 	m := gomail.NewMessage()
-// 	m.SetHeader("From", beego.AppConfig.String("mailFrom"))
-// 	m.SetHeader("To", "zengqingguo@goyoo.com")
-// 	m.SetHeader("Subject", "Hello!")
-// 	m.SetBody("text/plain", "Hello!")
-// 	mailChan <- m
-// 	stopChan <- true
-// 	close(stopChan)
-// 	close(mailChan)
-// }

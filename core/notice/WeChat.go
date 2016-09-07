@@ -1,4 +1,4 @@
-package core
+package notice
 
 import (
 	"bytes"
@@ -10,21 +10,21 @@ import (
 	"strings"
 	"time"
 
+	"alertCenter/core/db"
 	"alertCenter/models"
-	"alertCenter/util"
 
 	"github.com/astaxie/beego"
 	"gopkg.in/mgo.v2/bson"
 )
 
-type WeAlertSend struct {
+type WeNoticeServer struct {
 	weChan   chan *WeMessage
 	stopChan chan bool
 }
 
 var WeTag map[string]*models.WeTag
 
-func (e *WeAlertSend) SendAlert(alert *models.Alert) {
+func (e *WeNoticeServer) SendAlert(alert *models.Alert) error {
 	url := beego.AppConfig.String("url")
 	me := e.GetWeAlertByTag(alert.Receiver.Name)
 	message := ``
@@ -37,113 +37,11 @@ func (e *WeAlertSend) SendAlert(alert *models.Alert) {
 		alert:    alert,
 		errCount: 0,
 	}
-}
-
-func (e *WeAlertSend) SendWeChatMessage(mestr string) error {
-	//util.Debug("send weiChat message :" + mestr)
-	MessageURI := beego.AppConfig.String("weURI") + "/cgi-bin/message/send?access_token=ACCESS_TOKEN"
-	body := bytes.NewBufferString(mestr) //.NewReader(me)
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", MessageURI, body)
-	if err != nil {
-		util.Error("create wechat request faild." + err.Error())
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json;charset=utf-8")
-	req.Header.Set("token", beego.AppConfig.String("weToken"))
-	resp, err := client.Do(req)
-	if err != nil {
-		util.Error("Send weChat message error," + err.Error())
-		return err
-	}
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		util.Error("Send weChat message error," + err.Error())
-		return err
-	} else {
-		util.Info("Send WeChat result feedback：" + string(content))
-	}
 	return nil
 }
-func (e *WeAlertSend) GetWeAlertByTag(tags string) string {
-	AgentId := beego.AppConfig.String("weiAgentId")
-	tagId, err := e.GetTagIdByTag(tags)
-	if err == nil {
-		return `{"totag": " ` + strconv.Itoa(tagId) + ` ","msgtype": "text","agentid": ` + AgentId + `,"text": {"content": "CONTENT"},"safe":0}`
-	}
-	return ""
-}
-func (e *WeAlertSend) GetTagIdByTag(tag string) (int, error) {
-	session := GetMongoSession()
-	defer session.Close()
-	coll := session.GetCollection("WeiTag")
-	if coll == nil {
-		return 0, errors.New("get collection WeiTag faild")
-	}
-	weTag := &models.WeTag{}
-	err := coll.Find(bson.M{"tagname": tag}).Select(nil).One(&weTag)
-	if err != nil {
-		util.Error("get weiTag by name error." + err.Error())
-		return 0, err
-	}
-	return weTag.TagId, nil
-}
-func (e *WeAlertSend) GetAllTags() bool {
-	TagListURI := beego.AppConfig.String("weURI") + "/cgi-bin/tag/list?access_token=ACCESS_TOKEN"
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", TagListURI, nil)
-	if err != nil {
-		util.Error("create get taglist request faild." + err.Error())
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("token", beego.AppConfig.String("weToken"))
-	resp, err := client.Do(req)
-	if err != nil {
-		util.Error("GET taglist error," + err.Error())
-		return false
-	}
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		util.Error("GET taglist error," + err.Error())
-		return false
-	}
-	WeiTagResult := &models.WeiTagResult{}
-	err = json.Unmarshal(content, WeiTagResult)
-	if err != nil {
-		util.Error("Parse the taglist data error ." + err.Error())
-		return false
-	}
-	for _, tag := range WeiTagResult.TagList {
-		WeTag[tag.TagName] = &tag
-	}
-
-	session := GetMongoSession()
-	defer session.Close()
-	if session == nil {
-		util.Error("Get mongo session error." + err.Error())
-		return false
-	}
-	if ok := session.RemoveAll("WeTag"); ok {
-
-		var data []interface{}
-		for _, tag := range WeiTagResult.TagList {
-			data = append(data, tag)
-		}
-		util.Debug("Got the wetag number is " + strconv.Itoa(len(data)))
-		return session.Insert("WeTag", data...)
-	}
-	return false
-}
-
-type WeMessage struct {
-	alert    *models.Alert
-	errCount int
-	message  string
-}
-
-func (e *WeAlertSend) StartWork() error {
-	beego.Info("Wexin sender init begin")
-	defer beego.Info("Wexin sender init over")
+func (e *WeNoticeServer) StartWork() error {
+	beego.Info("Wexin notice server init begin")
+	defer beego.Info("Wexin notice server init over")
 
 	weCount, err := beego.AppConfig.Int("weCount")
 	if err != nil {
@@ -168,8 +66,6 @@ func (e *WeAlertSend) StartWork() error {
 		e.stopChan = make(chan bool)
 	}
 	go func() {
-
-		util.Info("wexin work start success")
 		for {
 			select {
 			case m, ok := <-e.weChan:
@@ -193,12 +89,12 @@ func (e *WeAlertSend) StartWork() error {
 			}
 		}
 	exit:
-		util.Info("mail work stop success")
+		beego.Info("mail work stop success")
 	}()
-
+	beego.Info("wexin notice server start success")
 	return nil
 }
-func (e *WeAlertSend) StopWork() {
+func (e *WeNoticeServer) StopWork() error {
 	if e.stopChan != nil {
 		e.stopChan <- true
 		close(e.stopChan)
@@ -206,6 +102,106 @@ func (e *WeAlertSend) StopWork() {
 	if e.weChan != nil {
 		close(e.weChan)
 	}
+	return nil
+}
+
+func (e *WeNoticeServer) SendWeChatMessage(mestr string) error {
+	//util.Debug("send weiChat message :" + mestr)
+	MessageURI := beego.AppConfig.String("weURI") + "/cgi-bin/message/send?access_token=ACCESS_TOKEN"
+	body := bytes.NewBufferString(mestr) //.NewReader(me)
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", MessageURI, body)
+	if err != nil {
+		beego.Error("create wechat request faild." + err.Error())
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json;charset=utf-8")
+	req.Header.Set("token", beego.AppConfig.String("weToken"))
+	resp, err := client.Do(req)
+	if err != nil {
+		beego.Error("Send weChat message error," + err.Error())
+		return err
+	}
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		beego.Error("Send weChat message error," + err.Error())
+		return err
+	} else {
+		beego.Info("Send WeChat result feedback：" + string(content))
+	}
+	return nil
+}
+func (e *WeNoticeServer) GetWeAlertByTag(tags string) string {
+	AgentId := beego.AppConfig.String("weiAgentId")
+	tagId, err := e.GetTagIdByTag(tags)
+	if err == nil {
+		return `{"totag": " ` + strconv.Itoa(tagId) + ` ","msgtype": "text","agentid": ` + AgentId + `,"text": {"content": "CONTENT"},"safe":0}`
+	}
+	return ""
+}
+func (e *WeNoticeServer) GetTagIdByTag(tag string) (int, error) {
+	session := db.GetMongoSession()
+	defer session.Close()
+	coll := session.GetCollection("WeiTag")
+	if coll == nil {
+		return 0, errors.New("get collection WeiTag faild")
+	}
+	weTag := &models.WeTag{}
+	err := coll.Find(bson.M{"tagname": tag}).Select(nil).One(&weTag)
+	if err != nil {
+		beego.Error("get weiTag by name error." + err.Error())
+		return 0, err
+	}
+	return weTag.TagId, nil
+}
+func (e *WeNoticeServer) GetAllTags() bool {
+	TagListURI := beego.AppConfig.String("weURI") + "/cgi-bin/tag/list?access_token=ACCESS_TOKEN"
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", TagListURI, nil)
+	if err != nil {
+		beego.Error("Get mongo session error." + err.Error())
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("token", beego.AppConfig.String("weToken"))
+	resp, err := client.Do(req)
+	if err != nil {
+		beego.Error("GET taglist error," + err.Error())
+		return false
+	}
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		beego.Error("GET taglist error," + err.Error())
+		return false
+	}
+	WeiTagResult := &models.WeiTagResult{}
+	err = json.Unmarshal(content, WeiTagResult)
+	if err != nil {
+		beego.Error("Parse the taglist data error ." + err.Error())
+		return false
+	}
+	for _, tag := range WeiTagResult.TagList {
+		WeTag[tag.TagName] = &tag
+	}
+
+	session := db.GetMongoSession()
+	defer session.Close()
+	if ok := session.RemoveAll("WeTag"); ok {
+
+		var data []interface{}
+		for _, tag := range WeiTagResult.TagList {
+			data = append(data, tag)
+		}
+		beego.Debug("Got the wetag number is " + strconv.Itoa(len(data)))
+		return session.Insert("WeTag", data...)
+	}
+	return false
+}
+
+type WeMessage struct {
+	alert    *models.Alert
+	errCount int
+	message  string
 }
 
 func GetWeTagByName(name string) *models.WeTag {

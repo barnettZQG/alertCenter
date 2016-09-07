@@ -2,26 +2,25 @@ package user
 
 import (
 	"alertCenter/models"
-	"fmt"
-	"strings"
-	"net/http"
 	"bytes"
-	"alertCenter/util"
-	"github.com/astaxie/beego"
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
 	"strconv"
+	"strings"
+
+	"github.com/astaxie/beego"
 )
 
 const (
-	apiVersion = "/api/v3"
-	getUser = "/users?per_page=100"
-	getGroup = "/groups?per_page=100"
+	apiVersion    = "/api/v3"
+	getUser       = "/users?per_page=100"
+	getGroup      = "/groups?per_page=100"
 	getGroupUsers = "/groups/:id/members?per_page=100"
 )
 
 var (
-	gitlab = ""
+	gitlab      = ""
 	accessToken = ""
 )
 
@@ -42,7 +41,6 @@ type GitlabUser struct {
 	Bio      string
 }
 
-
 type GitlabGroup struct {
 	Id          int
 	Name        string
@@ -51,11 +49,10 @@ type GitlabGroup struct {
 }
 
 type GitlabServer struct {
-
 }
 
 func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
-	fmt.Println("In Gitlab Server SearchTeam")
+	beego.Info("In Gitlab Server SearchTeam")
 
 	teams := []*models.Team{}
 
@@ -64,7 +61,7 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 		url := gitlab + apiVersion + getGroup + "&page=" + strconv.Itoa(page)
 		resp, err := GitlabApi("GET", url, nil)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			return nil, err
 		}
 
@@ -73,7 +70,7 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 
 		err = json.Unmarshal(resp, &gitlabGroup)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			break
 		}
 		if len(gitlabGroup) == 0 {
@@ -93,7 +90,7 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 }
 
 func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
-	fmt.Println("In Gitlab Server SearchUsers")
+	beego.Info("In Gitlab Server SearchUsers")
 	users := []*models.User{}
 
 	page := 1
@@ -101,7 +98,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 		url := gitlab + apiVersion + getUser + "&page=" + strconv.Itoa(page)
 		resp, err := GitlabApi("GET", url, nil)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			return nil, err
 		}
 
@@ -110,7 +107,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			break
 		}
 		if len(gitlabusers) == 0 {
@@ -134,8 +131,8 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (e *GitlabServer)GetUserByTeam(id string) ([]*models.User, error) {
-	fmt.Println("In Gitlab Server GetUserByTeam")
+func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
+	beego.Info("In Gitlab Server GetUserByTeam")
 	users := []*models.User{}
 
 	page := 1
@@ -146,7 +143,7 @@ func (e *GitlabServer)GetUserByTeam(id string) ([]*models.User, error) {
 		url := gitlab + apiVersion + guUrl + "&page=" + strconv.Itoa(page)
 		resp, err := GitlabApi("GET", url, nil)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			return nil, err
 		}
 
@@ -155,7 +152,7 @@ func (e *GitlabServer)GetUserByTeam(id string) ([]*models.User, error) {
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 			break
 		}
 		if len(gitlabusers) == 0 {
@@ -184,7 +181,7 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 	b := bytes.NewBuffer(body)
 	req, err := http.NewRequest(method, url, b)
 	if err != nil {
-		util.Error(err.Error())
+		beego.Error(err.Error())
 		return []byte{}, err
 	}
 
@@ -192,17 +189,15 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 	//req.Header.Set("Authorization", "Bearer " + accessToken)
 	resp, err := client.Do(req)
 	if err != nil {
-		util.Error(err.Error())
+		beego.Error(err.Error())
 		return []byte{}, err
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		util.Error(err.Error())
+		beego.Error(err.Error())
 		return []byte{}, err
 	}
 	defer resp.Body.Close()
 	return respBody, nil
 }
-
-

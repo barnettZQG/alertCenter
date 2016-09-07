@@ -1,18 +1,20 @@
-package core
+package service
 
 import (
+	"alertCenter/core/db"
 	"alertCenter/models"
-	"alertCenter/util"
+
+	"github.com/astaxie/beego"
 
 	"gopkg.in/mgo.v2/bson"
 )
 
 type AlertService struct {
-	Session *MongoSession
+	Session *db.MongoSession
 }
 
 //GetAlertService  获取servcie
-func GetAlertService(session *MongoSession) *AlertService {
+func GetAlertService(session *db.MongoSession) *AlertService {
 	return &AlertService{
 		Session: session,
 	}
@@ -27,7 +29,7 @@ func (e *AlertService) GetAlertByLabels(alert *models.Alert) (result *models.Ale
 	}
 	err := coll.Find(bson.M{"mark": mark}).Select(nil).One(&result)
 	if err != nil {
-		util.Debug("Get alert by Mark " + mark + " error." + err.Error())
+		beego.Debug("Get alert by Mark " + mark + " error." + err.Error())
 		return nil
 	}
 	return
@@ -39,7 +41,7 @@ func (e *AlertService) Update(alert *models.Alert) bool {
 	if coll == nil {
 		return false
 	}
-	err := coll.Update(bson.M{"mark": alert.Mark, "ishandle": 0}, bson.M{
+	err := coll.Update(bson.M{"mark": alert.Mark}, bson.M{
 		"$set": bson.M{
 			"alertcount":    alert.AlertCount,
 			"ishandle":      alert.IsHandle,
@@ -51,7 +53,7 @@ func (e *AlertService) Update(alert *models.Alert) bool {
 		},
 	})
 	if err != nil {
-		util.Debug("Update the alert Error By Mark " + alert.Mark + "," + err.Error())
+		beego.Debug("Update the alert Error By Mark " + alert.Mark + "," + err.Error())
 		return false
 	}
 	return true
@@ -83,7 +85,7 @@ func (e *AlertService) FindByID(ID string) (alert *models.Alert) {
 	}
 	err := coll.Find(bson.M{"id": ID}).One(&alert)
 	if err != nil {
-		util.Debug("find alert by id faild." + err.Error())
+		beego.Debug("find alert by id faild." + err.Error())
 	}
 	return
 }
@@ -106,7 +108,7 @@ func (e *AlertService) FindHistory(alert *models.Alert) (history *models.AlertHi
 	}
 	err := coll.Find(bson.M{"mark": alert.Fingerprint().String(), "startsat": alert.StartsAt}).One(&history)
 	if err != nil {
-		util.Error("find alerthistory by mark and startsAt faild." + err.Error())
+		beego.Error("find alerthistory by mark and startsAt faild." + err.Error())
 	}
 	return
 }
@@ -124,6 +126,6 @@ func (e *AlertService) UpdateHistory(history *models.AlertHistory) {
 		},
 	})
 	if err != nil {
-		util.Error("update alerthistory by mark and startsAt faild." + err.Error())
+		beego.Error("update alerthistory by mark and startsAt faild." + err.Error())
 	}
 }

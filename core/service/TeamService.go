@@ -1,12 +1,15 @@
-package core
+package service
 
-import "alertCenter/models"
+import (
+	"alertCenter/core/db"
+	"alertCenter/models"
+)
 
 type TeamService struct {
-	Session *MongoSession
+	Session *db.MongoSession
 }
 
-func GetTeamService(session *MongoSession) *TeamService {
+func GetTeamService(session *db.MongoSession) *TeamService {
 	return &TeamService{
 		Session: session,
 	}

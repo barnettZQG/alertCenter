@@ -3,20 +3,23 @@ package core
 import (
 	"time"
 
+	"github.com/astaxie/beego"
+
+	"alertCenter/core/db"
+	"alertCenter/core/service"
 	"alertCenter/models"
-	"alertCenter/util"
 )
 
 //HandleMessage 处理alertmanager回来的数据
 func HandleMessage(message *models.AlertReceive) {
-	session := GetMongoSession()
+	session := db.GetMongoSession()
 	defer session.Close()
-	alertService := &AlertService{
+	alertService := &service.AlertService{
 		Session: session,
 	}
 	ok := SaveMessage(message, session)
 	if !ok {
-		util.Error("save a message fail,message receiver:" + message.Receiver)
+		beego.Error("save a message fail,message receiver:" + message.Receiver)
 	}
 	for _, alert := range message.Alerts {
 		old := alertService.GetAlertByLabels(&alert)
@@ -52,9 +55,9 @@ func HandleMessage(message *models.AlertReceive) {
 
 //HandleAlerts 处理prometheus回来的数据
 func HandleAlerts(alerts []*models.Alert) {
-	session := GetMongoSession()
+	session := db.GetMongoSession()
 	defer session.Close()
-	alertService := &AlertService{
+	alertService := &service.AlertService{
 		Session: session,
 	}
 	for _, alert := range alerts {
@@ -94,7 +97,7 @@ func HandleAlerts(alerts []*models.Alert) {
 }
 
 //SaveHistory 存快照纪录
-func SaveHistory(alertService *AlertService, alert *models.Alert) {
+func SaveHistory(alertService *service.AlertService, alert *models.Alert) {
 	history := &models.AlertHistory{
 		Mark:     alert.Fingerprint().String(),
 		StartsAt: alert.StartsAt,
@@ -105,7 +108,7 @@ func SaveHistory(alertService *AlertService, alert *models.Alert) {
 }
 
 //SaveAlert 保存alert信息
-func SaveAlert(alertService *AlertService, alert *models.Alert) {
+func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 	alert.AlertCount = 1
 	alert.IsHandle = 0
 	alert.Mark = alert.Fingerprint().String()
@@ -126,7 +129,7 @@ func SaveAlert(alertService *AlertService, alert *models.Alert) {
 }
 
 //SaveMessage 储存alertmanager的消息
-func SaveMessage(message *models.AlertReceive, session *MongoSession) bool {
+func SaveMessage(message *models.AlertReceive, session *db.MongoSession) bool {
 	ok := session.Insert("AlertReceive", message)
 	return ok
 }

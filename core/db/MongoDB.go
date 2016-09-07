@@ -1,9 +1,7 @@
-package core
+package db
 
 import (
 	"errors"
-
-	"alertCenter/util"
 
 	"github.com/astaxie/beego"
 	mgo "gopkg.in/mgo.v2"
@@ -17,7 +15,7 @@ func GetSession() (*mgo.Session, error) {
 		//URL := "10.12.1.129:27017"
 		session, err := mgo.Dial(URL) //连接数据库
 		if err != nil {
-			util.Error("Get mongo session error." + err.Error())
+			beego.Error("Get mongo session error." + err.Error())
 			return nil, err
 		}
 		//defer session.Close()
@@ -50,7 +48,7 @@ func GetDB(session *mgo.Session) (*mgo.Database, error) {
 	db := session.DB(dbName)
 	err := db.Login(dbUser, dbPass)
 	if err != nil {
-		util.Error("Login mongodb userName or password error." + err.Error())
+		beego.Error("Login mongodb userName or password error." + err.Error())
 		return nil, err
 	}
 	return db, nil
@@ -98,7 +96,7 @@ func (e *MongoSession) Insert(collection string, data ...interface{}) bool {
 	}
 	err = coll.Insert(data...)
 	if err != nil {
-		util.Error("insert data in " + collection + " error," + err.Error())
+		beego.Error("insert data in " + collection + " error," + err.Error())
 		return false
 	}
 	return true

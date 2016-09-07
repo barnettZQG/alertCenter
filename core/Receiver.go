@@ -1,9 +1,9 @@
 package core
 
 import (
+	"alertCenter/core/db"
 	"alertCenter/core/user"
 	"alertCenter/models"
-	"alertCenter/util"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -20,7 +20,7 @@ var (
 	cacheApps      map[string]*models.APP
 	cacheReceivers map[string]*models.Receiver
 	cacheUsers     map[string]*models.User
-	cacheTeamUsers map[string][]*models.User
+	cacheTeamUsers map[string][]string
 )
 
 func (r *Relation) Init() error {
@@ -39,7 +39,7 @@ func (r *Relation) Init() error {
 		cacheUsers = make(map[string]*models.User, 0)
 	}
 	if cacheTeamUsers == nil {
-		cacheTeamUsers = make(map[string][]*models.User, 0)
+		cacheTeamUsers = make(map[string][]string, 0)
 	}
 
 	ts := []*models.Team{}
@@ -52,7 +52,7 @@ func (r *Relation) Init() error {
 	for _, s := range sources {
 		userServer, err = user.GetUserBySource(s)
 		if err != nil {
-			util.Error(err.Error())
+			beego.Error(err.Error())
 		}
 		tmpTS, err := userServer.SearchTeams()
 		if err != nil {
@@ -85,12 +85,9 @@ func (r *Relation) Init() error {
 				if err != nil {
 					return err
 				}
-				var completeUsers []*models.User
+				var completeUsers []string
 				for _, user := range users {
-					if user.Mail == "" { //信息是否完整
-						user = cacheUsers[user.Name]
-					}
-					completeUsers = append(completeUsers, user)
+					completeUsers = append(completeUsers, user.ID)
 					beego.Debug("load user " + user.Name + " in team " + team.Name)
 				}
 				cacheTeamUsers[team.Name] = completeUsers
@@ -114,24 +111,24 @@ func GetAllAppInfo() (apps []*models.APP, err error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"/cloud-api/alert/apps", nil)
 	if err != nil {
-		util.Error("create get appInfo request faild." + err.Error())
+		beego.Error("create get appInfo request faild." + err.Error())
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		util.Error("GET appinfo error," + err.Error())
+		beego.Error("GET appinfo error," + err.Error())
 		return nil, err
 	}
 	content, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		util.Error("GET appinfo error," + err.Error())
+		beego.Error("GET appinfo error," + err.Error())
 		return nil, err
 	}
 	var AppInfo = make([]*models.APP, 0)
 	err = json.Unmarshal(content, &AppInfo)
 	if err != nil {
-		util.Error("Parse the appinfo data error ." + err.Error())
+		beego.Error("Parse the appinfo data error ." + err.Error())
 		return nil, err
 	}
 	return AppInfo, nil
@@ -140,31 +137,31 @@ func GetAppInfoById(id string) (app *models.APP, err error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", beego.AppConfig.String("cloudURI")+"cloud-api/alert/app/"+id, nil)
 	if err != nil {
-		util.Error("create get appInfo request faild." + err.Error())
+		beego.Error("create get appInfo request faild." + err.Error())
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		util.Error("GET appinfo error," + err.Error())
+		beego.Error("GET appinfo error," + err.Error())
 		return nil, err
 	}
 	content, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		util.Error("GET appinfo error," + err.Error())
+		beego.Error("GET appinfo error," + err.Error())
 		return nil, err
 	}
 	var AppInfo = models.APP{}
 	err = json.Unmarshal(content, &AppInfo)
 	if err != nil {
-		util.Error("Parse the appinfo data error ." + err.Error())
+		beego.Error("Parse the appinfo data error ." + err.Error())
 		return nil, err
 	}
 	return &AppInfo, nil
 }
 
 type Relation struct {
-	session *MongoSession
+	session *db.MongoSession
 }
 
 func (r *Relation) SetTeam(team *models.Team) {
@@ -173,7 +170,7 @@ func (r *Relation) SetTeam(team *models.Team) {
 	// 	team.WeTag = GetWeTagByName(team.Name)
 	// }
 	cacheTeams[team.Name] = team
-	r.session = GetMongoSession()
+	r.session = db.GetMongoSession()
 	defer r.session.Close()
 	r.session.Insert("team", team)
 }
@@ -231,15 +228,15 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 		}
 	}
 	if app != nil {
-		var us = make([]*models.User, 0)
+		var us []string
 		for _, mail := range app.Mails {
 			user := FindUserByMail(mail)
-			us = append(us, user)
+			us = append(us, user.ID)
 		}
 		receiver = &models.Receiver{
-			ID:    uuid.NewV4().String(),
-			Name:  appID,
-			Users: us,
+			ID:      uuid.NewV4().String(),
+			Name:    appID,
+			UserIDs: us,
 		}
 		cacheReceivers[appID] = receiver
 	}
@@ -254,11 +251,11 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 	}
 	t := cacheTeams[team]
 	if t != nil {
-		us := cacheTeamUsers[t.ID]
+		us := cacheTeamUsers[t.Name]
 		receiver = &models.Receiver{
-			ID:    uuid.NewV4().String(),
-			Name:  team,
-			Users: us,
+			ID:      uuid.NewV4().String(),
+			Name:    team,
+			UserIDs: us,
 		}
 		cacheReceivers[team] = receiver
 		return

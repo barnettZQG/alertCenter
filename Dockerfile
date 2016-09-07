@@ -6,8 +6,11 @@ COPY ./static /alert/static
 COPY ./views /alert/views
 COPY ./alertCenter /alert/alertCenter
 
-CMD chmod 655 /alert/alertCenter
+RUN chmod 655 /alert/alertCenter && apk --update upgrade && \
+    apk add curl ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/cache/apk/*
 
 EXPOSE 8888
 
-ENTRYPOINT ["/alert/alertCenter"] 
+ENTRYPOINT ["/alert/alertCenter"]

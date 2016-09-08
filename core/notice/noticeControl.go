@@ -83,13 +83,15 @@ NoNeedSend:
 			_ = alert
 			if al.EndsAt.After(alert.StartsAt) {
 				beego.Info("Alert has been fix")
+				return
 			}
-			return
 		case <-timer.C:
-			beego.Info("Sending email")
-			cacheServer["mail"].SendAlert(alert)
+			for _, server := range cacheServer {
+				if server != nil {
+					server.SendAlert(alert)
+				}
+			}
 			timer.Reset(GetSendMsgInterval(alert.Level))
-			//fmt.Println("send email")
 		}
 	}
 

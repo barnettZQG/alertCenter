@@ -27,12 +27,13 @@ type APP struct {
 }
 
 type User struct {
-	ID     string `json:"id"`
-	Name   string `json:"Name"`
-	TeamID string `json:"teamId"`
-	Phone  string `json:"phone"`
-	Mail   string `json:"mail"`
-	WeID   string `json:"weId"`
+	ID        string `json:"id"`
+	Name      string `json:"Name"`
+	TeamID    string `json:"teamId"`
+	Phone     string `json:"phone"`
+	Mail      string `json:"mail"`
+	WeID      string `json:"weId"`
+	AvatarURL string `json:"avatar_url"`
 }
 type UserIgnoreRule struct {
 	RuleID   string    `json:"ruleID"`

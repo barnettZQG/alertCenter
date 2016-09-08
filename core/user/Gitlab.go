@@ -155,9 +155,6 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 			beego.Error(err.Error())
 			break
 		}
-		if len(gitlabusers) == 0 {
-			break
-		}
 
 		for _, u := range gitlabusers {
 			if u.State != "active" {
@@ -169,7 +166,10 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 			users = append(users, tmp)
 		}
 		page = page + 1
-
+		//此处不严谨，根据api版本可能不成立
+		if len(gitlabusers) < 100 {
+			break
+		}
 	}
 
 	return users, nil

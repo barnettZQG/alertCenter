@@ -6,7 +6,6 @@ import (
 	"github.com/astaxie/beego"
 
 	"alertCenter/core/db"
-	"alertCenter/core/notice"
 	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"alertCenter/models"
@@ -74,9 +73,9 @@ func HandleAlerts(alerts []*models.Alert) {
 				old.HandleDate = time.Now()
 				old.HandleMessage = "报警已自动恢复"
 				SaveHistory(alertService, old)
-				Notice(old)
 			}
 			old.UpdatedAt = time.Now()
+			Notice(old)
 			alertService.Update(old)
 		} else if old != nil && !old.EndsAt.IsZero() {
 			//此报警曾出现过并已结束
@@ -86,9 +85,8 @@ func HandleAlerts(alerts []*models.Alert) {
 				old = old.Reset(alert)
 				if old.IsHandle == 2 {
 					SaveHistory(alertService, old)
-				} else {
-					Notice(old)
 				}
+				Notice(old)
 				alertService.Update(old)
 			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) {
 				// 新的结束时间
@@ -105,38 +103,23 @@ func HandleAlerts(alerts []*models.Alert) {
 	}
 }
 
-//Notice 发送报警通知信号
-
+//Notice 发送报警通知信息
 func Notice(alert *models.Alert) {
-	if users, ok := CheckRules(alert); ok {
-		alert.Receiver.UserNames = users
-		beego.Debug("In notice, alert mark:", alert.Mark)
-		mark := alert.Fingerprint().String()
+	// if users, ok := CheckRules(alert); ok {
+	// 	alert.Receiver.UserNames = users
+	// 	mark := alert.Fingerprint().String()
 
-		ch, err := notice.GetChannelByMark(mark)
-		if err ==nil && ch != nil {
-			ch <- alert
-		} else {
-			err := notice.CreateChanByMark(alert.Fingerprint().String())
-			if err != nil {
-				beego.Error(err)
-			}
-			go notice.NoticControl(alert)
-		}
-
-		//if new {
-		//	err := notice.CreateChanByMark(alert.Fingerprint().String())
-		//	if err != nil {
-		//		beego.Error(err)
-		//	}
-		//	go notice.NoticControl(alert)
-		//} else {
-		//	ch := notice.GetChannelByMark(alert.Fingerprint().String())
-		//	if ch != nil {
-		//		ch <- alert
-		//	}
-		//}
-	}
+	// 	ch, err := notice.GetChannelByMark(mark)
+	// 	if err == nil && ch != nil {
+	// 		ch <- alert
+	// 	} else {
+	// 		err := notice.CreateChanByMark(alert.Fingerprint().String())
+	// 		if err != nil {
+	// 			beego.Error(err)
+	// 		}
+	// 		go notice.NoticControl(alert)
+	// 	}
+	// }
 }
 
 //CheckRules 检验是否为用户忽略的报警
@@ -166,6 +149,8 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 						}
 					}
 				}
+			} else {
+
 			}
 			if !ignore {
 				users = append(users, user.Name)
@@ -207,10 +192,8 @@ func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 		alert.HandleDate = time.Now()
 		alert.HandleMessage = "报警已自动恢复"
 		SaveHistory(alertService, alert)
-	} else {
-		//发送第一次报警信号，开始报警发送计时
-		Notice(alert)
 	}
+	Notice(alert)
 	alertService.Save(alert)
 }
 

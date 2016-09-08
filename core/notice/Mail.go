@@ -2,7 +2,6 @@ package notice
 
 import (
 	"crypto/tls"
-	"errors"
 	"time"
 
 	"alertCenter/core/user"
@@ -17,6 +16,7 @@ type MailNoticeServer struct {
 	stopChan chan bool
 }
 
+//GetMailDialer 获取邮箱服务器代理
 func (e *MailNoticeServer) GetMailDialer() *gomail.Dialer {
 	mailServer := beego.AppConfig.String("mailServer")
 	mailPort, _ := beego.AppConfig.Int("mailPort")
@@ -26,10 +26,14 @@ func (e *MailNoticeServer) GetMailDialer() *gomail.Dialer {
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: mailPort == 465}
 	return d
 }
+
+//SendMail 发送邮件
 func (e *MailNoticeServer) SendMail(message ...*gomail.Message) {
 	d := e.GetMailDialer()
 	d.DialAndSend(message...)
 }
+
+//StartWork 开始工作
 func (e *MailNoticeServer) StartWork() error {
 	beego.Info("mail notice server init start")
 	defer beego.Info("mail notice server init over")
@@ -99,6 +103,8 @@ func (e *MailNoticeServer) StartWork() error {
 	beego.Info("mail notice server start success")
 	return nil
 }
+
+//StopWork 结束工作
 func (e *MailNoticeServer) StopWork() error {
 	if e.stopChan != nil {
 		e.stopChan <- true
@@ -116,6 +122,7 @@ type MailMessage struct {
 	alert    *models.Alert
 }
 
+//GetMessage 构建邮件消息
 func (e *MailNoticeServer) GetMessage(body string, subject string, receiver ...string) *MailMessage {
 	m := gomail.NewMessage()
 	m.SetHeader("From", beego.AppConfig.String("mailFrom"))
@@ -127,25 +134,33 @@ func (e *MailNoticeServer) GetMessage(body string, subject string, receiver ...s
 		errCount: 0,
 	}
 }
-func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) *MailMessage {
+
+//GetMessageByAlert 通过alert获取邮件消息
+func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) (messages []*MailMessage) {
 	userNames := alert.Receiver.UserNames
 	relation := user.Relation{}
-	var mails []string
 	for _, userName := range userNames {
 		user := relation.GetUserByName(userName)
 		if user != nil && user.Mail != "" {
-			mails = append(mails, "zengqingguo@goyoo.com")
+			m := e.GetMessage("xxxx", "xxxxxx", user.Mail)
+			m.alert = alert
+			messages = append(messages, m)
+		} else {
+			beego.Debug("send mail to " + userName + ",user is not exit")
 		}
 	}
-	m := e.GetMessage("xxxx", "xxxxxx", mails...)
-	m.alert = alert
-	return m
+	return
 }
+
+//SendAlert 发送报警邮件实现
 func (e *MailNoticeServer) SendAlert(alert *models.Alert) error {
-	m := e.GetMessageByAlert(alert)
-	if m == nil {
-		return errors.New("create mail message faild")
+	//beego.Debug("start SendAlert ")
+	messages := e.GetMessageByAlert(alert)
+	//beego.Debug("mail count:" + strconv.Itoa(len(messages)))
+	if len(messages) > 0 {
+		for _, m := range messages {
+			e.mailChan <- m
+		}
 	}
-	e.mailChan <- m
 	return nil
 }

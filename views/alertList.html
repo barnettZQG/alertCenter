@@ -106,14 +106,14 @@
                 var html='<div class="col-sm-6 col-md-4 col-lg-3 alert" id="'+alert.ID+'">'+
                     '<div class="thumbnail">'+
                      '<div class="title title'+alert.AlertCount+'">'+
-                      '<span>'+alert.labels.alertname+'('+alert.AlertCount+'次报警)</span>'+
+                      '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
                       '</div>'+
                       '<div class="caption">'+
-                       ' <p><b>'+alert.Annotations.description+'</b></p>'+
+                       ' <p><b>'+alert.annotations.LabelSet.description+'</b></p>'+
                         '<table class="table table-bordered">'+
-                         ' <tr><td><b>开始时间</b></td><td>'+alert.StartsAt+'</td></tr>'+
-                         ' <tr><td><b>结束时间</b></td><td>'+alert.EndsAt+'</td></tr>'+
-                        '</table>
+                         ' <tr><td><b>开始时间</b></td><td>'+alert.startsAt+'</td></tr>'+
+                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt+'</td></tr>'+
+                        '</table>'+
                         '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.ID+'" data-loading-text="处理中...">忽略报警</button>'+
                         '<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.ID+'" data-loading-text="处理中...">我已解决</button>'+
                       '</div>'+

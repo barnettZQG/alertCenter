@@ -127,16 +127,16 @@
            $("#alerts").html("")
            if(result.status == "success"){
              $.each(result.data,function(i,alert){
-                var html='<td>'+alert.labels.alertname+'</td>'+
+                var html='<td>'+alert.labels.LabelSet.alertname+'</td>'+
                  '<td>'+alert.AlertCount+'</td>'+
-                 '<td>'+alert.labels.instance+'</td>'
+                 '<td>'+alert.labels.LabelSet.instance+'</td>'
                    html+='<td>'+alert.startsAt+'</td>'
                  if(alert.endsAt=="0001-01-01T00:00:00Z"){
                    html+='<td>持续中。。。</td>'
                  }else{
                    html+='<td>'+alert.endsAt+'</td>'
                  }
-                 html+='<td>'+alert.Receiver+'</td>';
+                 html+='<td>'+alert.Receiver.Name+'</td>';
                  
                  if(alert.IsHandle==1){
                    html+='<td>'+已处理+'</td>'

@@ -141,39 +141,42 @@ func Notice(alert *models.Alert) {
 
 //CheckRules 检验是否为用户忽略的报警
 func CheckRules(alert *models.Alert) ([]string, bool) {
-	userNames := alert.Receiver.UserNames
-	//没有接收对象，不需要发送
-	if userNames == nil || len(userNames) < 1 {
-		return nil, false
-	}
-	relation := user.Relation{}
-	var users []string
-	session := db.GetMongoSession()
-	defer session.Close()
-	ruleService := &service.IgnoreRuleService{
-		Session: session,
-	}
-	for _, userName := range userNames {
-		user := relation.GetUserByName(userName)
-		var ignore bool
-		if user != nil {
-			rules := ruleService.FindRuleByUser(user.ID)
-			if rules != nil && len(rules) > 0 {
-				for _, rule := range rules {
-					if alert.Labels.Contains(rule.Labels) {
-						ignore = true
+	if alert != nil && alert.Receiver != nil {
+		userNames := alert.Receiver.UserNames
+		//没有接收对象，不需要发送
+		if userNames == nil || len(userNames) < 1 {
+			return nil, false
+		}
+		relation := user.Relation{}
+		var users []string
+		session := db.GetMongoSession()
+		defer session.Close()
+		ruleService := &service.IgnoreRuleService{
+			Session: session,
+		}
+		for _, userName := range userNames {
+			user := relation.GetUserByName(userName)
+			var ignore bool
+			if user != nil {
+				rules := ruleService.FindRuleByUser(user.ID)
+				if rules != nil && len(rules) > 0 {
+					for _, rule := range rules {
+						if alert.Labels.Contains(rule.Labels) {
+							ignore = true
+						}
 					}
 				}
 			}
+			if !ignore {
+				users = append(users, user.Name)
+			}
 		}
-		if !ignore {
-			users = append(users, user.Name)
+		if len(users) == 0 {
+			return nil, false
 		}
+		return users, true
 	}
-	if len(users) == 0 {
-		return nil, false
-	}
-	return users, true
+	return nil, false
 }
 
 //SaveHistory 存快照纪录

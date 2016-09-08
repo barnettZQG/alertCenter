@@ -1,10 +1,10 @@
 package notice
 
-import ()
 import (
 	//"fmt"
-	"time"
 	"alertCenter/models"
+	"time"
+
 	"github.com/astaxie/beego"
 )
 
@@ -46,6 +46,7 @@ func init() {
 func NoticControl(alert *models.Alert) {
 	beego.Info("start alert:", alert.Mark)
 	defer beego.Info("end alert:", alert.Mark)
+
 	ch, err := GetChannelByMark(alert.Fingerprint().String())
 	if err != nil {
 		beego.Error(err)
@@ -56,7 +57,7 @@ func NoticControl(alert *models.Alert) {
 	var timeout = time.NewTimer(DefaultTimeout)
 	noNeedFlag := false
 
-	NoNeedSend:
+NoNeedSend:
 	for {
 		select {
 		case tmp := <-ch:
@@ -86,16 +87,16 @@ func NoticControl(alert *models.Alert) {
 			return
 		case <-timer.C:
 			beego.Info("Sending email")
-			//cacheServer["mail"].SendAlert(alert)
+			cacheServer["mail"].SendAlert(alert)
 			timer.Reset(GetSendMsgInterval(alert.Level))
-		//fmt.Println("send email")
+			//fmt.Println("send email")
 		}
 	}
 
 }
 
 func GetSendMsgInterval(level int) time.Duration {
-	switch level{
+	switch level {
 	case 0:
 		return SendMsgInterval_0
 	case 1:

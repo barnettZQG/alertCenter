@@ -71,6 +71,7 @@ func (e *MailNoticeServer) StartWork() error {
 					m.errCount++
 					if m.errCount < mailReCount {
 						//5秒后重试
+						beego.Debug("mail errCount:", m.errCount)
 						go func(m *MailMessage) {
 							time.Sleep(time.Second * 5)
 							e.mailChan <- m
@@ -133,10 +134,10 @@ func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) *MailMessage {
 	for _, userName := range userNames {
 		user := relation.GetUserByName(userName)
 		if user != nil && user.Mail != "" {
-			mails = append(mails, user.Mail)
+			mails = append(mails, "zengqingguo@goyoo.com")
 		}
 	}
-	m := e.GetMessage("", "", mails...)
+	m := e.GetMessage("xxxx", "xxxxxx", mails...)
 	m.alert = alert
 	return m
 }

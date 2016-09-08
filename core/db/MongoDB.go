@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/astaxie/beego"
 	mgo "gopkg.in/mgo.v2"
@@ -18,6 +19,7 @@ func init() {
 }
 func createSession() *mgo.Session {
 	URL := beego.AppConfig.String("mongoURI")
+	fmt.Println("Url:", URL)
 	//URL := "10.12.1.129:27017"
 	session, err := mgo.Dial(URL) //连接数据库
 	if err != nil {

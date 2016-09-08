@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"alertCenter/core/user"
 	"alertCenter/models"
 
 	"github.com/astaxie/beego"
@@ -126,8 +127,16 @@ func (e *MailNoticeServer) GetMessage(body string, subject string, receiver ...s
 	}
 }
 func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) *MailMessage {
-
-	m := e.GetMessage("", "", "")
+	userNames := alert.Receiver.UserNames
+	relation := user.Relation{}
+	var mails []string
+	for _, userName := range userNames {
+		user := relation.GetUserByName(userName)
+		if user != nil && user.Mail != "" {
+			mails = append(mails, user.Mail)
+		}
+	}
+	m := e.GetMessage("", "", mails...)
 	m.alert = alert
 	return m
 }

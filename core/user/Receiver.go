@@ -1,8 +1,7 @@
-package core
+package user
 
 import (
 	"alertCenter/core/db"
-	"alertCenter/core/user"
 	"alertCenter/models"
 	"encoding/json"
 	"io/ioutil"
@@ -47,10 +46,10 @@ func (r *Relation) Init() error {
 	source := beego.AppConfig.String("UserSource")
 	sources := strings.Split(source, ",")
 
-	var userServer user.UserInterface
+	var userServer UserInterface
 	var err error
 	for _, s := range sources {
-		userServer, err = user.GetUserBySource(s)
+		userServer, err = GetUserBySource(s)
 		if err != nil {
 			beego.Error(err.Error())
 		}

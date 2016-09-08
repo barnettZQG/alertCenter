@@ -8,6 +8,7 @@ import (
 	"alertCenter/core"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
+	"alertCenter/core/user"
 	"alertCenter/models"
 	"alertCenter/util"
 
@@ -130,7 +131,7 @@ func (e *APIController) GetTeams() {
 	if e.session == nil {
 		e.Data["json"] = util.GetFailJson("get database session faild.")
 	} else {
-		relation := &core.Relation{}
+		relation := &user.Relation{}
 		teams := relation.GetAllTeam()
 		if teams == nil {
 			e.Data["json"] = util.GetFailJson("There is no info of team")
@@ -147,7 +148,7 @@ func (e *APIController) AddTeam() {
 		var team *models.Team = &models.Team{}
 		err := json.Unmarshal(data, team)
 		if err == nil {
-			relation := &core.Relation{}
+			relation := &user.Relation{}
 			relation.SetTeam(team)
 			e.Data["json"] = util.GetSuccessJson("receive team info success")
 		} else {

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"alertCenter/core/db"
+	"alertCenter/core/user"
 	"alertCenter/models"
 
 	"github.com/astaxie/beego"
@@ -24,21 +25,31 @@ type WeNoticeServer struct {
 
 var WeTag map[string]*models.WeTag
 
+//SendAlert 从一个alert构建wemessage送往发送通道
 func (e *WeNoticeServer) SendAlert(alert *models.Alert) error {
 	url := beego.AppConfig.String("url")
-	me := e.GetWeAlertByTag(alert.Receiver.Name)
-	message := ``
-	message += string(alert.Annotations.LabelSet["description"]) + "\n\t"
-	message += `------------------\n\r`
-	message += `[<a href=\"` + url + `/alertList?receiver＝` + alert.Receiver.Name + `\">点击查看详情</a>]`
-	me = strings.Replace(me, "CONTENT", message, -1)
-	e.weChan <- &WeMessage{
-		message:  me,
-		alert:    alert,
-		errCount: 0,
+	userNames := alert.Receiver.UserNames
+	relation := user.Relation{}
+	for _, userName := range userNames {
+		user := relation.GetUserByName(userName)
+		if user != nil && user.WeID != "" {
+			me := e.GetWeAlertByUser(user.WeID)
+			message := ``
+			message += string(alert.Annotations.LabelSet["description"]) + "\n\t"
+			message += `------------------\n\r`
+			message += `[<a href=\"` + url + `/alertList?receiver＝` + alert.Receiver.Name + `\">点击查看详情</a>]`
+			me = strings.Replace(me, "CONTENT", message, -1)
+			e.weChan <- &WeMessage{
+				message:  me,
+				alert:    alert,
+				errCount: 0,
+			}
+		}
 	}
 	return nil
 }
+
+//StartWork 开始工作
 func (e *WeNoticeServer) StartWork() error {
 	beego.Info("Wexin notice server init begin")
 	defer beego.Info("Wexin notice server init over")
@@ -72,7 +83,7 @@ func (e *WeNoticeServer) StartWork() error {
 				if !ok {
 					return
 				}
-				if err := e.SendWeChatMessage(m.message); err != nil {
+				if err := e.sendWeChatMessage(m.message); err != nil {
 					m.errCount++
 					if m.errCount < weReCount {
 						//5秒后重试
@@ -94,6 +105,8 @@ func (e *WeNoticeServer) StartWork() error {
 	beego.Info("wexin notice server start success")
 	return nil
 }
+
+//StopWork 停止工作
 func (e *WeNoticeServer) StopWork() error {
 	if e.stopChan != nil {
 		e.stopChan <- true
@@ -105,7 +118,8 @@ func (e *WeNoticeServer) StopWork() error {
 	return nil
 }
 
-func (e *WeNoticeServer) SendWeChatMessage(mestr string) error {
+//SendWeChatMessage 发送微信消息
+func (e *WeNoticeServer) sendWeChatMessage(mestr string) error {
 	//util.Debug("send weiChat message :" + mestr)
 	MessageURI := beego.AppConfig.String("weURI") + "/cgi-bin/message/send?access_token=ACCESS_TOKEN"
 	body := bytes.NewBufferString(mestr) //.NewReader(me)
@@ -131,15 +145,25 @@ func (e *WeNoticeServer) SendWeChatMessage(mestr string) error {
 	}
 	return nil
 }
+
+//GetWeAlertByTag 发送给标签组的消息
 func (e *WeNoticeServer) GetWeAlertByTag(tags string) string {
-	AgentId := beego.AppConfig.String("weiAgentId")
-	tagId, err := e.GetTagIdByTag(tags)
+	AgentID := beego.AppConfig.String("weiAgentId")
+	tagID, err := e.GetTagIDByTag(tags)
 	if err == nil {
-		return `{"totag": " ` + strconv.Itoa(tagId) + ` ","msgtype": "text","agentid": ` + AgentId + `,"text": {"content": "CONTENT"},"safe":0}`
+		return `{"totag": " ` + strconv.Itoa(tagID) + ` ","msgtype": "text","agentid": ` + AgentID + `,"text": {"content": "CONTENT"},"safe":0}`
 	}
 	return ""
 }
-func (e *WeNoticeServer) GetTagIdByTag(tag string) (int, error) {
+
+//GetWeAlertByUser 发送给用户的消息
+func (e *WeNoticeServer) GetWeAlertByUser(WeID string) string {
+	AgentID := beego.AppConfig.String("weiAgentId")
+	return `{"touser": " ` + WeID + ` ","msgtype": "text","agentid": ` + AgentID + `,"text": {"content": "CONTENT"},"safe":0}`
+}
+
+//GetTagIDByTag 通过tag name获取tag id
+func (e *WeNoticeServer) GetTagIDByTag(tag string) (int, error) {
 	session := db.GetMongoSession()
 	defer session.Close()
 	coll := session.GetCollection("WeiTag")
@@ -154,6 +178,8 @@ func (e *WeNoticeServer) GetTagIdByTag(tag string) (int, error) {
 	}
 	return weTag.TagId, nil
 }
+
+//GetAllTags 获取微信服务器全部tag
 func (e *WeNoticeServer) GetAllTags() bool {
 	TagListURI := beego.AppConfig.String("weURI") + "/cgi-bin/tag/list?access_token=ACCESS_TOKEN"
 	client := &http.Client{}

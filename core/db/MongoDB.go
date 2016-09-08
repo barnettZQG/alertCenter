@@ -9,18 +9,28 @@ import (
 
 var Session *mgo.Session
 
+func init() {
+	session := createSession()
+	if session == nil {
+		panic("mongodb init error!")
+	}
+	Session = session
+}
+func createSession() *mgo.Session {
+	URL := beego.AppConfig.String("mongoURI")
+	//URL := "10.12.1.129:27017"
+	session, err := mgo.Dial(URL) //连接数据库
+	if err != nil {
+		beego.Error("Get mongo session error." + err.Error())
+		return nil
+	}
+	//defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	return session
+}
 func GetSession() (*mgo.Session, error) {
 	if Session == nil {
-		URL := beego.AppConfig.String("mongoURI")
-		//URL := "10.12.1.129:27017"
-		session, err := mgo.Dial(URL) //连接数据库
-		if err != nil {
-			beego.Error("Get mongo session error." + err.Error())
-			return nil, err
-		}
-		//defer session.Close()
-		session.SetMode(mgo.Monotonic, true)
-		Session = session
+		return createSession(), nil
 	}
 	return Session.Clone(), nil
 }

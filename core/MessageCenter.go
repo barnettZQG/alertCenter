@@ -8,6 +8,7 @@ import (
 	"alertCenter/core/db"
 	"alertCenter/core/notice"
 	"alertCenter/core/service"
+	"alertCenter/core/user"
 	"alertCenter/models"
 )
 
@@ -37,7 +38,7 @@ func HandleMessage(message *models.AlertReceive) {
 			alert.AlertCount = 1
 			alert.IsHandle = 0
 			alert.Mark = alert.Fingerprint().String()
-			alert.Receiver = GetReceiverByTeam(message.Receiver)
+			alert.Receiver = user.GetReceiverByTeam(message.Receiver)
 			now := time.Now()
 			// Ensure StartsAt is set.
 			if alert.StartsAt.IsZero() {
@@ -113,7 +114,7 @@ func Notice(alert *models.Alert) {
 		mark := alert.Fingerprint().String()
 
 		ch, ok := notice.GetChannelByMark(mark)
-		if ok&& ch != nil {
+		if ok && ch != nil {
 			ch <- alert
 		} else {
 			err := notice.CreateChanByMark(alert.Fingerprint().String())
@@ -145,7 +146,7 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 	if userNames == nil || len(userNames) < 1 {
 		return nil, false
 	}
-	relation := Relation{}
+	relation := user.Relation{}
 	var users []string
 	session := db.GetMongoSession()
 	defer session.Close()
@@ -191,7 +192,7 @@ func SaveAlert(alertService *service.AlertService, alert *models.Alert) {
 	alert.AlertCount = 1
 	alert.IsHandle = 0
 	alert.Mark = alert.Fingerprint().String()
-	alert.Receiver = GetReceiver(alert.Labels)
+	alert.Receiver = user.GetReceiver(alert.Labels)
 	now := time.Now()
 	// Ensure StartsAt is set.
 	if alert.StartsAt.IsZero() {

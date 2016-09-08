@@ -113,8 +113,8 @@ func Notice(alert *models.Alert) {
 		beego.Debug("In notice, alert mark:", alert.Mark)
 		mark := alert.Fingerprint().String()
 
-		ch, ok := notice.GetChannelByMark(mark)
-		if ok && ch != nil {
+		ch, err := notice.GetChannelByMark(mark)
+		if err ==nil && ch != nil {
 			ch <- alert
 		} else {
 			err := notice.CreateChanByMark(alert.Fingerprint().String())

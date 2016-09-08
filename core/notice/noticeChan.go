@@ -14,7 +14,12 @@ func init() {
 //GetChannelByMark 获取发送报警通道
 func GetChannelByMark(mark string) (chan *models.Alert, bool) {
 	result, ok := NoticChans[mark]
-	return result, ok
+	if ok {
+		return result,nil
+	}else{
+		return nil, fmt.Errorf("Can not find the channel.")
+
+	}
 
 }
 

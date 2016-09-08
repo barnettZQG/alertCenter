@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	apiVersion    = "/api/v3"
-	getUser       = "/users?per_page=100"
-	getGroup      = "/groups?per_page=100"
+	apiVersion = "/api/v3"
+	getUser = "/users?per_page=100"
+	getGroup = "/groups?per_page=100"
 	getGroupUsers = "/groups/:id/members?per_page=100"
 )
 
 var (
-	gitlab      = ""
+	gitlab = ""
 	accessToken = ""
 )
 
@@ -110,6 +110,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 			beego.Error(err.Error())
 			break
 		}
+		beego.Debug("SearchUsers, this loop get user:", len(gitlabusers))
 		if len(gitlabusers) == 0 {
 			break
 		}

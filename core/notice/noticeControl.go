@@ -57,7 +57,7 @@ func NoticControl(alert *models.Alert) {
 	var timeout = time.NewTimer(DefaultTimeout)
 	noNeedFlag := false
 
-NoNeedSend:
+	NoNeedSend:
 	for {
 		select {
 		case tmp := <-ch:

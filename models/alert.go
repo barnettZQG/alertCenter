@@ -21,6 +21,7 @@ type Alert struct {
 	HandleDate    time.Time `json:"handleDate,omitempty"`
 	HandleMessage string
 	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+	Level         int        `json:"level,omitempty"`
 }
 
 type Label struct {

@@ -43,4 +43,5 @@ type UserIgnoreRule struct {
 	EndsAt   time.Time `json:"endsAt"`
 	AddTime  time.Time `json:"addTime"`
 	IsLive   bool      `json:"isLive"`
+	Mark     string    `json:"mark"`
 }

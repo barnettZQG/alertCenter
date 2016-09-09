@@ -21,6 +21,9 @@
       right: 0;
       top: 15px;
     }
+    .table{
+      margin-bottom: 0px
+    }
   </style>
 
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -101,6 +104,7 @@
           </tbody>
         </table>
       </div>
+      <div id="page"></div>
     </div>
   </div>
   <!-- /.container -->
@@ -121,9 +125,31 @@
   <script src="/static/js/bootstrap.js"></script>
   <script src="/static/js/site.js"></script>
   <script>
+       var page = 1
+       var pageSize = 12
        $(function(){
          $("#alerts").html('加载中。。。')
-         $.get("/api/alerts/all",function(result){
+         load()
+         $("#page").on('click','.previous a',function(){
+            if ($('.previous').attr("class")!="previous disabled"){
+              if (page>1){
+                page=page-1
+              }else{
+                page=1
+              }
+              load()
+            }
+         })
+         $("#page").on('click','.next a',function(){
+          if ($('.next').attr("class")!="next disabled"){
+             page=page+1
+             load()
+          }  
+         })
+       })
+
+       function load(){
+         $.get("/api/alerts/all/"+pageSize+"/"+page,function(result){
            $("#alerts").html("")
            if(result.status == "success"){
              $.each(result.data,function(i,alert){
@@ -136,7 +162,11 @@
                  }else{
                    html+='<td>'+alert.endsAt+'</td>'
                  }
-                 html+='<td>'+alert.Receiver.Name+'</td>';
+                 if (alert.receiver!=null){
+                    html+='<td>'+alert.receiver.name+'</td>';
+                 }else{
+                   html+='<td>未知</td>';
+                 }
                  
                  if(alert.IsHandle==1){
                    html+='<td>'+已处理+'</td>'
@@ -153,11 +183,19 @@
                  }
                  $("#alerts").append(html)
              })
-           }else{
+             
+             $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
+             if (page==1){
+               $("#page .previous").addClass("disabled")
+             }
+             if (result.data.length<pageSize){
+               $("#page .next").addClass("disabled")
+             } 
+          }else{
              $.alert("alert",result)
            }
          })
-       })
+       }
     </script>
 </body>
 

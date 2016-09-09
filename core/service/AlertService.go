@@ -65,25 +65,22 @@ func (e *AlertService) Save(alert *models.Alert) bool {
 }
 
 //FindByUser 根据receiver的name或者id获取报警信息
-func (e *AlertService) FindByUser(user string) (alerts []*models.Alert) {
+func (e *AlertService) FindByUser(user string, pageSize int, page int) (alerts []*models.Alert) {
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {
 		return nil
 	}
-	coll.Find(bson.M{"receiver.name": user, "ishandle": 0}).Select(nil).All(&alerts)
-	if alerts == nil || len(alerts) == 0 {
-		coll.Find(bson.M{"receiver.id": user, "ishandle": 0}).Select(nil).All(&alerts)
-	}
+	coll.Find(bson.M{"receiver.usernames": user, "ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
 	return
 }
 
-//FindByID 根据ID获取报警
+//FindByID 根据mark获取报警
 func (e *AlertService) FindByID(ID string) (alert *models.Alert) {
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {
 		return nil
 	}
-	err := coll.Find(bson.M{"id": ID}).One(&alert)
+	err := coll.Find(bson.M{"mark": ID}).One(&alert)
 	if err != nil {
 		beego.Debug("find alert by id faild." + err.Error())
 	}
@@ -91,12 +88,12 @@ func (e *AlertService) FindByID(ID string) (alert *models.Alert) {
 }
 
 //FindAll 获取全部报警
-func (e *AlertService) FindAll() (alerts []*models.Alert) {
+func (e *AlertService) FindAll(pageSize int, page int) (alerts []*models.Alert) {
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {
 		return nil
 	}
-	coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Select(nil).All(&alerts)
+	coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
 	return
 }
 

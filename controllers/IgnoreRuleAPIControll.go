@@ -6,6 +6,7 @@ import (
 	"alertCenter/models"
 	"alertCenter/util"
 	"encoding/json"
+	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -14,6 +15,7 @@ type IgnoreRuleAPIControll struct {
 	beego.Controller
 }
 
+//AddRule 添加自定义忽略规则
 func (e *IgnoreRuleAPIControll) AddRule() {
 	data := e.Ctx.Input.RequestBody
 	if data != nil && len(data) > 0 {
@@ -38,6 +40,7 @@ func (e *IgnoreRuleAPIControll) AddRule() {
 	e.ServeJSON()
 }
 
+//GetRulesByUser 获取用户的规则
 func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 	user := e.GetString(":user")
 	if user == "" {
@@ -53,6 +56,37 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 			e.Data["json"] = util.GetSuccessReJson(rules)
 		} else {
 			e.Data["json"] = util.GetFailJson("userID is not exit or this user have not rules")
+		}
+	}
+	e.ServeJSON()
+}
+
+//AddRuleByAlert 添加某alert的忽略规则
+func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
+	ID := e.GetString(":mark")
+	UserID := "zengqingguo"
+	if ID == "" {
+		e.Data["json"] = util.GetErrorJson("api error,mark is not provided")
+	} else {
+		session := db.GetMongoSession()
+		defer session.Close()
+		alertService := &service.AlertService{
+			Session: session,
+		}
+		alert := alertService.FindByID(ID)
+		if alert == nil {
+			e.Data["json"] = util.GetErrorJson("alertID is not exit")
+		} else {
+			rule := &models.UserIgnoreRule{
+				Labels:   alert.Labels,
+				StartsAt: time.Now(),
+				UserID:   UserID,
+			}
+			ruleService := &service.IgnoreRuleService{
+				Session: session,
+			}
+			ruleService.AddRule(rule)
+			e.Data["json"] = util.GetSuccessJson("add user ignore rule success")
 		}
 	}
 	e.ServeJSON()

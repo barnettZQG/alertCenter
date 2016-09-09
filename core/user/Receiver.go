@@ -70,6 +70,9 @@ func (r *Relation) Init() error {
 	beego.Info("load teams number is " + strconv.Itoa(len(ts)))
 	if us != nil {
 		for _, user := range us {
+			if user.AvatarURL == "" {
+				user.AvatarURL = "/static/img/default.jpg"
+			}
 			if user.Name != "" {
 				cacheUsers[user.Name] = user
 			}
@@ -192,6 +195,20 @@ func (r *Relation) GetAllUser() (result []*models.User) {
 	if cacheUsers != nil {
 		for _, v := range cacheUsers {
 			result = append(result, v)
+		}
+	}
+	return
+}
+
+//GetUsersByTeam 根据组名获取用户
+func (r *Relation) GetUsersByTeam(name string) (users []*models.User) {
+	if cacheTeamUsers != nil {
+		userNames := cacheTeamUsers[name]
+		for _, userName := range userNames {
+			user := cacheUsers[userName]
+			if user != nil {
+				users = append(users, user)
+			}
 		}
 	}
 	return

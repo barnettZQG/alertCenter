@@ -23,3 +23,23 @@ func main() {
 	beego.Info("mongo:", beego.AppConfig.String("mongoURI"))
 	beego.Run()
 }
+
+// func GetAPIFilter() func() {
+// 	source := beego.AppConfig.String("UserSource")
+// 	sources := strings.Split(source, ",")
+// 	server, err := user.GetUserBySource(sources[0])
+// 	if err == nil {
+// 		return server.APIFilter()
+// 	}
+// 	return nil
+// }
+
+// func GetHTTPFilter() func() {
+// 	source := beego.AppConfig.String("UserSource")
+// 	sources := strings.Split(source, ",")
+// 	server, err := user.GetUserBySource(sources[0])
+// 	if err == nil {
+// 		return server.HTTPFilter()
+// 	}
+// 	return nil
+// }

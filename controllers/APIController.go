@@ -8,7 +8,6 @@ import (
 	"alertCenter/core"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
-	"alertCenter/core/user"
 	"alertCenter/models"
 	"alertCenter/util"
 
@@ -98,66 +97,47 @@ func (e *APIController) HandleAlert() {
 
 func (e *APIController) GetAlerts() {
 	receiver := e.GetString(":receiver")
+	pageSize, err := e.GetInt(":pageSize")
+	page, perr := e.GetInt(":page")
+	if err != nil {
+		e.Data["json"] = util.GetErrorJson("api use error,the type of pageSize is not int")
+		goto over
+	}
+	if perr != nil {
+		e.Data["json"] = util.GetErrorJson("api use error,the type of page is not int")
+		goto over
+	}
 	e.session = db.GetMongoSession()
 	if e.session == nil {
 		e.Data["json"] = util.GetFailJson("get database session faild.")
+		goto over
 	} else {
 		e.alertService = service.GetAlertService(e.session)
 		defer e.session.Close()
 		if len(receiver) != 0 && receiver != "all" {
-			alerts := e.alertService.FindByUser(receiver)
+			alerts := e.alertService.FindByUser(receiver, pageSize, page)
 			beego.Info("Get" + strconv.Itoa(len(alerts)) + " alerts")
 			if alerts == nil {
 				e.Data["json"] = util.GetFailJson("get database collection faild or receiver is error ")
+				goto over
 			} else {
 				e.Data["json"] = util.GetSuccessReJson(alerts)
+				goto over
 			}
 		} else if receiver == "all" {
-			alerts := e.alertService.FindAll()
+			alerts := e.alertService.FindAll(pageSize, page)
 			if alerts == nil {
 				e.Data["json"] = util.GetFailJson("get database collection faild")
+				goto over
 			} else {
 				e.Data["json"] = util.GetSuccessReJson(alerts)
+				goto over
 			}
 		} else {
 			e.Data["json"] = util.GetErrorJson("api use error,please provide receiver")
+			goto over
 		}
 	}
-	e.ServeJSON()
-}
-func (e *APIController) GetTeams() {
-
-	e.session = db.GetMongoSession()
-	if e.session == nil {
-		e.Data["json"] = util.GetFailJson("get database session faild.")
-	} else {
-		relation := &user.Relation{}
-		teams := relation.GetAllTeam()
-		if teams == nil {
-			e.Data["json"] = util.GetFailJson("There is no info of team")
-		} else {
-			e.Data["json"] = util.GetSuccessReJson(teams)
-		}
-	}
-	e.ServeJSON()
-}
-
-func (e *APIController) AddTeam() {
-	data := e.Ctx.Input.RequestBody
-	if data != nil && len(data) > 0 {
-		var team *models.Team = &models.Team{}
-		err := json.Unmarshal(data, team)
-		if err == nil {
-			relation := &user.Relation{}
-			relation.SetTeam(team)
-			e.Data["json"] = util.GetSuccessJson("receive team info success")
-		} else {
-			beego.Error("Parse the received message to teams faild." + err.Error())
-			e.Data["json"] = util.GetFailJson("Parse the received message to teams faild.")
-		}
-	} else {
-		beego.Error("receive a unknow data")
-		e.Data["jaon"] = util.GetErrorJson("receive a unknow data")
-	}
+over:
 	e.ServeJSON()
 }

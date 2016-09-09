@@ -6,7 +6,8 @@ alerts1='[
             "instance": "10.10.12.18:9100",
             "job": "node",
             "monitor": "codelab-monitor",
-            "team":"cloud"
+            "team":"cloud",
+            "asdasfasfasfasfasfasfasfasfasfasfafs":"asfasfasfasfasfasfasfasfasfasfasfasfafs"
         },
         "annotations": {
             "description": "10.10.12.18:9100 of node memory active out "

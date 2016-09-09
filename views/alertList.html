@@ -21,6 +21,9 @@
     	right: 0;
     	top: 15px;
     }
+    td{
+      text-align: left
+    }
     </style>
     
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -80,6 +83,9 @@
       <div id="alert"></div>
       <div class="row" id="alerts">
       </div>
+    <div class="row">
+     <div id="page"></div>
+    </div>
 </div><!-- /.container -->
 
 
@@ -97,40 +103,36 @@
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <script>
+       var page=1
+       var pageSize=15
        $(function(){
           $("#alerts").html('加载中。。。')
-          $.get("/api/alerts/{{.receiver}}",function(result){
-            if(result.status=="success"){
-              $("#alerts").html('')
-              $.each(result.data,function(i,alert){
-                var html='<div class="col-sm-6 col-md-4 col-lg-3 alert" id="'+alert.ID+'">'+
-                    '<div class="thumbnail">'+
-                     '<div class="title title'+alert.AlertCount+'">'+
-                      '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
-                      '</div>'+
-                      '<div class="caption">'+
-                       ' <p><b>'+alert.annotations.LabelSet.description+'</b></p>'+
-                        '<table class="table table-bordered">'+
-                         ' <tr><td><b>开始时间</b></td><td>'+alert.startsAt+'</td></tr>'+
-                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt+'</td></tr>'+
-                        '</table>'+
-                        '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.ID+'" data-loading-text="处理中...">忽略报警</button>'+
-                        '<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.ID+'" data-loading-text="处理中...">我已解决</button>'+
-                      '</div>'+
-                    '</div>'+
-                  '</div>'
-               $("#alerts").append(html)   
-              })
-            }else{
-              $.alert("alert",result)
+          load()
+         $("#page").on('click','.previous a',function(){
+            if ($('.previous').attr("class")!="previous disabled"){
+              if (page>1){
+                page=page-1
+              }else{
+                page=1
+              }
+              load()
             }
-          })
-          
-          $(".handle").click(function(){
+         })
+         $("#page").on('click','.next a',function(){
+          if ($('.next').attr("class")!="next disabled"){
+             page=page+1
+             load()
+          }  
+         })
+        $("#alerts").on("click",".handle",function(){
              $(this).button("loading")
               var alertID= $(this).attr("alert-id")
               var handleType= $(this).attr("data")
-              var url="/api/alert/handle/"+alertID+"/"+handleType
+              if (handleType=="miss"){
+                var url="/api/ignoreAlert/"+alertID
+              }else{
+                 var url="/api/alert/handle/"+alertID+"/"+handleType
+              }
              $.post(url,{
                message:"已处理"
              },function(data,status){
@@ -144,6 +146,49 @@
              })
           })
        })
+
+       function load(){
+         $.get("/api/alerts/{{.receiver}}/"+pageSize+"/"+page,function(result){
+            if(result.status=="success"){
+              $("#alerts").html('')
+              $.each(result.data,function(i,alert){
+                var html='<div class="col-sm-6 col-md-4 col-lg-4 alertInfo" id="'+alert.mark+'">'+
+                    '<div class="thumbnail">'+
+                     '<div class="title title'+alert.AlertCount+'">'+
+                      '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
+                      '</div>'+
+                      '<div class="caption">'+
+                       ' <p><b>'+alert.annotations.LabelSet.description+'</b></p>'+
+                        '<table class="table table-bordered">'+
+                         ' <tr><td><b>开始时间</b></td><td>'+alert.startsAt+'</td></tr>'+
+                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt+'</td></tr>'
+
+                        $.each(alert.labels.LabelSet,function(k,v){
+                               if (k.length<10){
+                               html+=' <tr><td><b>'+k+'</b></td><td>'+v+'</td></tr>'
+                               }
+                        }) 
+
+                        html+='</table>'+
+                        '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.mark+'" data-loading-text="处理中...">忽略报警</button>'+
+                        '<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.mark+'" data-loading-text="处理中...">我已解决</button>'+
+                      '</div>'+
+                    '</div>'+
+                  '</div>'
+               $("#alerts").append(html)   
+              })
+               $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
+             if (page==1){
+               $("#page .previous").addClass("disabled")
+             }
+             if (result.data.length<pageSize){
+               $("#page .next").addClass("disabled")
+             } 
+            }else{
+              $.alert("alert",result)
+            }
+          })
+       }
     </script>
   </body>
 </html>

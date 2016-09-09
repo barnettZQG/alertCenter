@@ -24,10 +24,24 @@ func (e *IgnoreRuleService) FindRuleByUser(userID string) (rules []*models.UserI
 	return
 }
 
+//FindRuleByMark 通过mark获取规则
+func (e *IgnoreRuleService) FindRuleByMark(mark string) (rule *models.UserIgnoreRule) {
+	coll := e.Session.GetCollection("IgnoreRule")
+	if coll == nil {
+		return nil
+	}
+	coll.Find(bson.M{"mark": mark}).Select(nil).All(&rule)
+	return
+}
+
 //AddRule 添加规则
 func (e *IgnoreRuleService) AddRule(rule *models.UserIgnoreRule) {
-	rule.AddTime = time.Now()
-	rule.RuleID = uuid.NewV4().String()
-	rule.IsLive = true
-	e.Session.Insert("IgnoreRule", rule)
+	rule.Mark = rule.Labels.FastFingerprint().String()
+	old := e.FindRuleByMark(rule.Mark)
+	if old == nil {
+		rule.AddTime = time.Now()
+		rule.RuleID = uuid.NewV4().String()
+		rule.IsLive = true
+		e.Session.Insert("IgnoreRule", rule)
+	}
 }

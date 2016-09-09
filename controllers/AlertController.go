@@ -1,9 +1,8 @@
 package controllers
 
-import "github.com/astaxie/beego"
 
 type AlertController struct {
-	beego.Controller
+	BaseController
 }
 
 func (e *AlertController) AlertList() {

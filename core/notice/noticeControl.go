@@ -86,11 +86,14 @@ func NoticControl(alert *models.Alert) {
 				return
 			}
 		case <-timer.C:
-			for _, server := range cacheServer {
-				if server != nil {
-					server.SendAlert(alert)
+			//if beego.AppConfig.String("runmode") != "dev" {
+				for _, server := range cacheServer {
+					if server != nil {
+						server.SendAlert(alert)
+					}
 				}
-			}
+			//}
+
 			timer.Reset(GetSendMsgInterval(alert.Level))
 		}
 	}

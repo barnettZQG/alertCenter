@@ -13,6 +13,7 @@ import (
 
 type BaseController struct {
 	beego.Controller
+	Username string
 }
 
 func (this *BaseController) Prepare() {
@@ -62,6 +63,8 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
+		this.Username = username
+		this.Data["user"] = username
 		gitlab.Tokens.Add(username, access)
 	} else {
 		fmt.Println("in sessUsername != nil && paramCode != nil")
@@ -71,4 +74,5 @@ func (this *BaseController) Prepare() {
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}
+
 }

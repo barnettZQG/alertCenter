@@ -20,8 +20,7 @@ func (c *MainController) Get() {
 		beego.Debug("do not have code.")
 	}
 
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
+	//c.Data["Website"] = "beego.me"
 	c.TplName = "index.html"
 }
 

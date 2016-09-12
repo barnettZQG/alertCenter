@@ -17,7 +17,6 @@ func (e *UserController) UserHome() {
 	if user == nil {
 		e.Abort("404")
 	} else {
-		e.Data["user"] = user
 		if self != nil && user.Name == self.(*models.User).Name {
 			e.Data["self"] = true
 		}

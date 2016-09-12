@@ -7,5 +7,12 @@ jQuery.extend({
             '</div>'
             $("#"+dom).html(html)
         }
+    },
+    alertFail: function (dom, message) {
+            html = '<div class="alert alert-danger">' +
+                ' <a class="close" data-dismiss="alert">×</a> ' +
+                '<strong>Fail!</strong>  ' + message
+            '</div>'
+            $("#"+dom).html(html)
     }
 })

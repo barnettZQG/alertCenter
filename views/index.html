@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    
+    <meta charset="utf-8">
+    <title>光音网络监控报警处理平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="author" content="Goyoo-Cloud-zengqingguo">
+    <meta name="robots" content="index,follow">
+    <meta name="application-name" content="goyoo.com">
+    <!-- Site CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/site.css" rel="stylesheet">
+    <style>
+    
+    </style>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+    <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+    
+    <script>
+      var _hmt = _hmt || [];
+    </script>
+  </head>
+  <body>
+    {{template "menu.html" .}}
+    <div class="container projects">
+      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+      <div id="alert"></div>
+      <div id="home">
+          
+      </div>
+    </div><!-- /.container -->
+    <footer class="footer ">
+      <div class="container">
+        <div class="row footer-bottom">
+           <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script>
+       $(function(){
+          
+       })
+    </script>
+  </body>
+</html>

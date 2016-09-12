@@ -11,7 +11,7 @@ import (
 )
 
 type TeamAPIController struct {
-	beego.Controller
+	APIBaseController
 	session *db.MongoSession
 }
 

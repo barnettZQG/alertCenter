@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    
+    <meta charset="utf-8">
+    <title>光音网络监控报警处理平台-个人主页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="author" content="Goyoo-Cloud-zengqingguo">
+    <meta name="robots" content="index,follow">
+    <meta name="application-name" content="goyoo.com">
+    <!-- Site CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/site.css" rel="stylesheet">
+    <style> 
+     .content{
+       margin-bottom: 20px;
+     }
+     #home{
+          min-height: 300px;
+          background: #ffffff;
+          opacity: 1;
+          position: relative;
+          transform: none;
+          -webkit-transform: none;
+          transform-origin: 50% 0 0;
+          -webkit-transform-origin: 50% 0 0;
+          border-bottom: 1px solid #e6e6e6;
+          border: 1px solid #dbdfd6;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+     }
+     .member-info {
+    padding: 20px;
+    }
+    .member-info .avatar {
+    float: left;
+    width: 50px;
+    height: 50px;
+    margin-top: 2px;
+    border-radius: 50%;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+    }
+    .member-info .info {
+    margin-left: 70px;
+    } 
+    .member-info h2{
+      margin:0;padding:0;
+    }
+    .tab-pane{
+      padding:15px;
+    }
+    </style>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+    <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+    
+    <script>
+      var _hmt = _hmt || [];
+    </script>
+  </head>
+  <body>
+    {{template "menu.html" .}}
+    <div class="container content">
+      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+      <div id="alert"></div>
+      <div id="home">
+          <div class="member-info">
+              <img class="avatar" alt="曾庆国" src="/static/img/default.jpg">
+              <div class="info">
+                  <h2>曾庆国</h2>
+                  <p><a class="link email" href="mailto:zengqingguo@goyoo.com" target="_blank">zengqingguo@goyoo.com</a></p>
+                  
+              </div>
+              <div class="member-control">
+              </div>
+          </div>
+
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>
+            <li role="presentation"><a href="#project" role="tab" data-toggle="tab">Project</a></li>
+            <li role="presentation"><a href="#messages" role="tab" data-toggle="tab">Messages</a></li>
+            <li role="presentation"><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="UserHome">...</div>
+            <div role="tabpanel" class="tab-pane" id="project">
+              <form id="projectForm" >
+                <div class="form-group">
+                  <label for="projectName">ProjectName</label>
+                  <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter projectName">
+                </div>
+                <button type="submit" class="btn btn-default" id="projectSubmit">创建</button>
+              </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="messages">...</div>
+            <div role="tabpanel" class="tab-pane" id="settings">...</div>
+          </div>
+      </div>
+    </div><!-- /.container -->
+    <footer class="footer ">
+      <div class="container">
+        <div class="row footer-bottom">
+           <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script>
+       $(function(){
+          $("#projectSubmit").click(function(){
+            projectName = $("input[name='projectName']").val()
+            if(projectName == ""){
+               $.alertFail("alert","项目名不能为空！")
+            }else{
+              $.post("/token/addToken",{"projectName":projectName},function(result,status){
+                 $.alert(result)
+              })
+            }
+            return false
+          })
+       })
+    </script>
+  </body>
+</html>

@@ -6,17 +6,22 @@ import (
 	"net/http"
 	//"fmt"
 	"fmt"
+	"alertCenter/core/gitlab"
 )
 
 type BaseController struct {
 	beego.Controller
 }
 
-var clientId = "1b44e5046e51199065f89f0ad2a59385978cd025bedb1353c9148f7496907804"
-var sercet = "15b139748d066635620491ebfcd0349b5a4b5457ba9d7728e2e3105621b227cc"
 var globalSessions *session.Manager
 
+const (
+	SESSION_USER = "user"
+	SESSION_USERNAME = "username"
+)
+
 func init() {
+
 	mangeConfig := &session.ManagerConfig{CookieLifeTime:3600, CookieName:"gosessionid", Gclifetime:3600, EnableSetCookie:true}
 
 	globalSessions, _ = session.NewManager("memory", mangeConfig)
@@ -30,32 +35,46 @@ func (this *BaseController) Prepare() {
 		return
 	}
 
-	sessCode := sess.Get("code")
+	sessUsername := sess.Get(SESSION_USERNAME)
 	paramCode := this.GetString("code")
-	fmt.Printf("paramCode: %s,session: %#v\n",paramCode, sess)
+	fmt.Printf("paramCode: %s,session: %#v\n", paramCode, sess)
 
-	if sessCode == nil && paramCode == "" {
-		redirct := beego.AppConfig.String("Gitlab") + "/oauth/authorize?response_type=code&client_id=1b44e5046e51199065f89f0ad2a59385978cd025bedb1353c9148f7496907804&redirect_uri=http%3A%2F%2Flocalhost:8888"
+	if sessUsername == nil && paramCode == "" {
+		fmt.Println("in sessUsername == nil && paramCode == nil")
+		redirct := gitlab.GetGitlabOAuthUrl()
 		http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, redirct, http.StatusTemporaryRedirect)
 		return
-	}else if sessCode == nil && paramCode != ""{
-		// check if the code is right.
-		err := sess.Set("code", paramCode)
+	} else if sessUsername == nil && paramCode != "" {
+		fmt.Println("in sessUsername == nil && paramCode != nil")
+		access, err := gitlab.GetGitlabAccessToken(paramCode)
 		if err != nil {
 			beego.Error(err)
+			return
 		}
-	}else {
+		user, err := gitlab.GetCurrentUserWithToken(access.AccessToken)
+		if err != nil {
+			beego.Error(err)
+			return
+		}
+		err = sess.Set(SESSION_USER, user)
+		if err != nil {
+			beego.Error(err)
+			return
+		}
+		// check if the code is right.
+		err = sess.Set(SESSION_USERNAME, user.Username)
+		if err != nil {
+			beego.Error(err)
+			return
+		}
+		gitlab.Tokens.Add(user.Username, access)
+	} else {
+		fmt.Println("in sessUsername != nil && paramCode != nil")
+		u := sess.Get(SESSION_USER)
+		n := sess.Get(SESSION_USERNAME)
+		fmt.Println("username:", n, "user:", u)
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}
 }
 
-func GetGitlabAccessToken(code string) (error) {
-	url := beego.AppConfig.String("Gitlab") + "/oauth/token?client_id=" + clientId + "&client_secret=" + sercet + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://localhost:8888"
-	resp, err := http.Post(url, "application/json", nil)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}

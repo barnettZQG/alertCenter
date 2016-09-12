@@ -13,6 +13,7 @@ func init() {
 }
 
 func main() {
+
 	re := user.Relation{}
 	beego.AddAPPStartHook(func() error {
 		return re.Init()

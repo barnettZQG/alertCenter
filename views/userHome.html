@@ -74,16 +74,15 @@
       <div id="alert"></div>
       <div id="home">
           <div class="member-info">
-              <img class="avatar" alt="曾庆国" src="/static/img/default.jpg">
+              <img class="avatar" alt="{{.user.Name}}" src="{{.user.AvatarURL}}">
               <div class="info">
-                  <h2>曾庆国</h2>
-                  <p><a class="link email" href="mailto:zengqingguo@goyoo.com" target="_blank">zengqingguo@goyoo.com</a></p>
-                  
+                  <h2>{{.user.Name}}</h2>
+                  <p><a class="link email" href="mailto:{{.user.Mail}}" target="_blank">{{.user.Mail}}</a></p>
               </div>
               <div class="member-control">
               </div>
           </div>
-
+          {{if .self}}
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>
@@ -107,6 +106,7 @@
             <div role="tabpanel" class="tab-pane" id="messages">...</div>
             <div role="tabpanel" class="tab-pane" id="settings">...</div>
           </div>
+          {{end}}
       </div>
     </div><!-- /.container -->
     <footer class="footer ">

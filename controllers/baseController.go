@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/session"
-	"net/http"
 	//"fmt"
-	"fmt"
 	"alertCenter/core/gitlab"
+	"fmt"
 )
 
 type BaseController struct {
@@ -16,13 +17,13 @@ type BaseController struct {
 var globalSessions *session.Manager
 
 const (
-	SESSION_USER = "user"
+	SESSION_USER     = "user"
 	SESSION_USERNAME = "username"
 )
 
 func init() {
 
-	mangeConfig := &session.ManagerConfig{CookieLifeTime:3600, CookieName:"gosessionid", Gclifetime:3600, EnableSetCookie:true}
+	mangeConfig := &session.ManagerConfig{CookieLifeTime: 3600, CookieName: "gosessionid", Gclifetime: 3600, EnableSetCookie: true}
 
 	globalSessions, _ = session.NewManager("memory", mangeConfig)
 	go globalSessions.GC()
@@ -77,4 +78,3 @@ func (this *BaseController) Prepare() {
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}
 }
-

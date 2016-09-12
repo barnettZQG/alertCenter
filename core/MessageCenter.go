@@ -3,13 +3,44 @@ package core
 import (
 	"time"
 
+	"gopkg.in/mgo.v2/bson"
+
 	"github.com/astaxie/beego"
 
 	"alertCenter/core/db"
+	"alertCenter/core/notice"
 	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"alertCenter/models"
 )
+
+var NoticeOn bool
+
+func init() {
+	session := db.GetMongoSession()
+	if session == nil {
+		beego.Error("get mongo session error when init NoticeOn ")
+		NoticeOn = true
+	} else {
+		coll := session.GetCollection("GlobalConfig")
+		if coll == nil {
+			beego.Error("get GlobalConfig collection error when init NoticeOn ")
+			NoticeOn = true
+		} else {
+			var config *models.GlobalConfig
+			err := coll.Find(bson.M{"name": "noticeOn"}).One(config)
+			if err != nil || config == nil {
+				config = &models.GlobalConfig{}
+				config.Name = "noticeOn"
+				config.Value = true
+				coll.Insert(config)
+				NoticeOn = true
+			} else {
+				NoticeOn = config.Value.(bool)
+			}
+		}
+	}
+}
 
 //HandleMessage 处理alertmanager回来的数据
 func HandleMessage(message *models.AlertReceive) {
@@ -105,21 +136,25 @@ func HandleAlerts(alerts []*models.Alert) {
 
 //Notice 发送报警通知信息
 func Notice(alert *models.Alert) {
-	// if users, ok := CheckRules(alert); ok {
-	// 	alert.Receiver.UserNames = users
-	// 	mark := alert.Fingerprint().String()
+	//全局通知开关关闭
+	if !NoticeOn {
+		return
+	}
+	if users, ok := CheckRules(alert); ok {
+		alert.Receiver.UserNames = users
+		mark := alert.Fingerprint().String()
 
-	// 	ch, err := notice.GetChannelByMark(mark)
-	// 	if err == nil && ch != nil {
-	// 		ch <- alert
-	// 	} else {
-	// 		err := notice.CreateChanByMark(alert.Fingerprint().String())
-	// 		if err != nil {
-	// 			beego.Error(err)
-	// 		}
-	// 		go notice.NoticControl(alert)
-	// 	}
-	// }
+		ch, err := notice.GetChannelByMark(mark)
+		if err == nil && ch != nil {
+			ch <- alert
+		} else {
+			err := notice.CreateChanByMark(alert.Fingerprint().String())
+			if err != nil {
+				beego.Error(err)
+			}
+			go notice.NoticControl(alert)
+		}
+	}
 }
 
 //CheckRules 检验是否为用户忽略的报警

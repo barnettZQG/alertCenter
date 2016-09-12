@@ -12,21 +12,23 @@ type TokenController struct {
 }
 
 func (e *TokenController) AddToken() {
-	user := e.GetSession("user").(*models.User)
+	user := e.GetSession("user")
 	if user == nil {
 		e.Data["json"] = util.GetErrorJson("please certification")
 		e.ServeJSON()
-	}
-	projectName := e.GetString("projectName")
-	if projectName == "" {
-		e.Data["json"] = util.GetErrorJson("projectName can't be empty")
-		e.ServeJSON()
 	} else {
-		service := &service.TokenService{
-			Session: db.GetMongoSession(),
+		u := user.(*models.User)
+		projectName := e.GetString("projectName")
+		if projectName == "" {
+			e.Data["json"] = util.GetErrorJson("projectName can't be empty")
+			e.ServeJSON()
+		} else {
+			service := &service.TokenService{
+				Session: db.GetMongoSession(),
+			}
+			token := service.CreateToken(projectName, u.Name)
+			e.Data["json"] = util.GetSuccessReJson(token)
+			e.ServeJSON()
 		}
-		token := service.CreateToken(projectName, user.Name)
-		e.Data["json"] = util.GetSuccessReJson(token)
-		e.ServeJSON()
 	}
 }

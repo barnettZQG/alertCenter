@@ -29,6 +29,7 @@ type APP struct {
 type User struct {
 	ID        string `json:"id"`
 	Name      string `json:"Name"`
+	RealName  string `json:"realName"`
 	TeamID    string `json:"teamId"`
 	Phone     string `json:"phone"`
 	Mail      string `json:"mail"`

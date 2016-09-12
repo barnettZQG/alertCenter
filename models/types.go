@@ -1,5 +1,9 @@
 package models
 
+type GlobalConfig struct {
+	Name  string
+	Value interface{}
+}
 type AlertReceive struct {
 	Version           string            `json:"version"`
 	Status            string            `json:"status"`

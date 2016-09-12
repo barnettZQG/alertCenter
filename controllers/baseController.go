@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/astaxie/beego"
 
-	"net/http"
-	//"fmt"
+	"alertCenter/controllers/session"
 	"fmt"
 	"alertCenter/core/gitlab"
-	"alertCenter/controllers/session"
 )
 
 type BaseController struct {
@@ -64,4 +64,3 @@ func (this *BaseController) Prepare() {
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}
 }
-

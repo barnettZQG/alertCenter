@@ -52,6 +52,7 @@ func (r *Relation) Init() error {
 		userServer, err = GetUserBySource(s)
 		if err != nil {
 			beego.Error(err.Error())
+			return err
 		}
 		tmpTS, err := userServer.SearchTeams()
 		if err != nil {

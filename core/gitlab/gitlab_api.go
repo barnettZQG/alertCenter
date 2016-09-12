@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	apiVersion = "/api/v3"
-	getUser = "/users?per_page=100"
-	getGroup = "/groups?per_page=100"
-	getGroupUsers = "/groups/:id/members?per_page=100"
+	ApiVersion = "/api/v3"
+	GetUser = "/users?per_page=100"
+	GetGroup = "/groups?per_page=100"
+	GetGroupUsers = "/groups/:id/members?per_page=100"
 	currentUser = "/user"
 )
 
@@ -45,7 +45,7 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 
 
 func GetCurrentUserWithToken(token string) (*GitlabUser, error) {
-	url := GetGitlabUrl() + apiVersion + currentUser
+	url := GetGitlabUrl() + ApiVersion + currentUser
 	body, err := RequestGitlabWithToken(token, url, "GET", nil)
 	if err != nil {
 		beego.Error(err)

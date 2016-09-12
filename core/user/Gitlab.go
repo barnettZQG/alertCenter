@@ -2,34 +2,13 @@ package user
 
 import (
 	"alertCenter/models"
-	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 
+	"alertCenter/core/gitlab"
 	"github.com/astaxie/beego"
 )
-
-const (
-	apiVersion = "/api/v3"
-	getUser = "/users?per_page=100"
-	getGroup = "/groups?per_page=100"
-	getGroupUsers = "/groups/:id/members?per_page=100"
-)
-
-var (
-	gitlab = ""
-	accessToken = ""
-)
-
-func init() {
-	gitlab = beego.AppConfig.String("Gitlab")
-	gitlab = strings.TrimSuffix(gitlab, "/")
-	accessToken = beego.AppConfig.String("GitlabAccessToken")
-
-}
 
 type GitlabUser struct {
 	Id       int
@@ -58,8 +37,8 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 
 	page := 1
 	for {
-		url := gitlab + apiVersion + getGroup + "&page=" + strconv.Itoa(page)
-		resp, err := GitlabApi("GET", url, nil)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion +gitlab.GetGroup + "&page=" + strconv.Itoa(page)
+		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
 			return nil, err
@@ -95,8 +74,8 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 
 	page := 1
 	for {
-		url := gitlab + apiVersion + getUser + "&page=" + strconv.Itoa(page)
-		resp, err := GitlabApi("GET", url, nil)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetUser + "&page=" + strconv.Itoa(page)
+		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
 			return nil, err
@@ -139,10 +118,10 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 	page := 1
 	for {
 
-		guUrl := strings.Replace(getGroupUsers, ":id", id, -1)
+		guUrl := strings.Replace(gitlab.GetGroupUsers, ":id", id, -1)
 
-		url := gitlab + apiVersion + guUrl + "&page=" + strconv.Itoa(page)
-		resp, err := GitlabApi("GET", url, nil)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + guUrl + "&page=" + strconv.Itoa(page)
+		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
 			return nil, err
@@ -174,31 +153,4 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 	}
 
 	return users, nil
-}
-
-func GitlabApi(method, url string, body []byte) ([]byte, error) {
-	client := http.Client{}
-
-	b := bytes.NewBuffer(body)
-	req, err := http.NewRequest(method, url, b)
-	if err != nil {
-		beego.Error(err.Error())
-		return []byte{}, err
-	}
-
-	req.Header.Set("PRIVATE-TOKEN", accessToken)
-	//req.Header.Set("Authorization", "Bearer " + accessToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		beego.Error(err.Error())
-		return []byte{}, err
-	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		beego.Error(err.Error())
-		return []byte{}, err
-	}
-	defer resp.Body.Close()
-	return respBody, nil
 }

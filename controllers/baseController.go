@@ -2,40 +2,27 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/session"
+
 	"net/http"
 	//"fmt"
 	"fmt"
 	"alertCenter/core/gitlab"
+	"alertCenter/controllers/session"
 )
 
 type BaseController struct {
 	beego.Controller
 }
 
-var globalSessions *session.Manager
-
-const (
-	SESSION_USER = "user"
-	SESSION_USERNAME = "username"
-)
-
-func init() {
-
-	mangeConfig := &session.ManagerConfig{CookieLifeTime:3600, CookieName:"gosessionid", Gclifetime:3600, EnableSetCookie:true}
-
-	globalSessions, _ = session.NewManager("memory", mangeConfig)
-	go globalSessions.GC()
-}
-
 func (this *BaseController) Prepare() {
-	sess, err := globalSessions.SessionStart(this.Ctx.ResponseWriter, this.Ctx.Request)
+
+	sess, err := session.GetSession(this.Ctx)
 	if err != nil {
-		beego.Error("get session error:", err)
+		beego.Error(err)
 		return
 	}
 
-	sessUsername := sess.Get(SESSION_USERNAME)
+	sessUsername := sess.Get(session.SESSION_USERNAME)
 	paramCode := this.GetString("code")
 	fmt.Printf("paramCode: %s,session: %#v\n", paramCode, sess)
 
@@ -56,13 +43,13 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
-		err = sess.Set(SESSION_USER, user)
+		err = sess.Set(session.SESSION_USER, user)
 		if err != nil {
 			beego.Error(err)
 			return
 		}
 		// check if the code is right.
-		err = sess.Set(SESSION_USERNAME, user.Username)
+		err = sess.Set(session.SESSION_USERNAME, user.Username)
 		if err != nil {
 			beego.Error(err)
 			return
@@ -70,8 +57,8 @@ func (this *BaseController) Prepare() {
 		gitlab.Tokens.Add(user.Username, access)
 	} else {
 		fmt.Println("in sessUsername != nil && paramCode != nil")
-		u := sess.Get(SESSION_USER)
-		n := sess.Get(SESSION_USERNAME)
+		u := sess.Get(session.SESSION_USER)
+		n := sess.Get(session.SESSION_USERNAME)
 		fmt.Println("username:", n, "user:", u)
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)

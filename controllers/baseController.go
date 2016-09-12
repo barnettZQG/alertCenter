@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"net/http"
-
 	"github.com/astaxie/beego"
-
 	"alertCenter/controllers/session"
 	"fmt"
 	"alertCenter/core/user"
@@ -18,7 +16,6 @@ type BaseController struct {
 
 func (this *BaseController) Prepare() {
 
-
 	sess, err := session.GetSession(this.Ctx)
 	if err != nil {
 		beego.Error(err)
@@ -30,6 +27,8 @@ func (this *BaseController) Prepare() {
 	fmt.Printf("paramCode: %s,session: %#v\n", paramCode, sess)
 
 	if sessUsername == nil && paramCode == "" {
+
+		sess.Set("redirect", this.Ctx.Request.URL.String())  //为了再次访问的重定向
 		fmt.Println("in sessUsername == nil && paramCode == nil")
 		redirct := gitlab.GetGitlabOAuthUrl()
 		http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, redirct, http.StatusTemporaryRedirect)
@@ -66,11 +65,18 @@ func (this *BaseController) Prepare() {
 		this.Username = username
 		this.Data["user"] = username
 		gitlab.Tokens.Add(username, access)
+
+		redirectUrl := sess.Get("redirect")
+		if redirectUrl != nil {
+			if r, ok := redirectUrl.(string); ok && r != "" {
+				sess.Delete("redirect")
+				http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, r, 301)
+				return
+			}
+
+		}
+
 	} else {
-		fmt.Println("in sessUsername != nil && paramCode != nil")
-		u := sess.Get(session.SESSION_USER)
-		n := sess.Get(session.SESSION_USERNAME)
-		fmt.Println("username:", n, "user:", u)
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}

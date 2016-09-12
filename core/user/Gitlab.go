@@ -154,3 +154,6 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 
 	return users, nil
 }
+
+
+

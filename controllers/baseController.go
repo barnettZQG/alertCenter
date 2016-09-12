@@ -7,6 +7,7 @@ import (
 
 	"alertCenter/controllers/session"
 	"fmt"
+	"alertCenter/core/user"
 	"alertCenter/core/gitlab"
 )
 
@@ -15,6 +16,7 @@ type BaseController struct {
 }
 
 func (this *BaseController) Prepare() {
+
 
 	sess, err := session.GetSession(this.Ctx)
 	if err != nil {
@@ -38,23 +40,29 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
-		user, err := gitlab.GetCurrentUserWithToken(access.AccessToken)
+		u, err := gitlab.GetCurrentUserWithToken(access.AccessToken)
 		if err != nil {
 			beego.Error(err)
 			return
 		}
-		err = sess.Set(session.SESSION_USER, user)
+
+		username := u.Username
+		relation := user.Relation{}
+
+		relationUser := relation.GetUserByName(username)
+
+		err = sess.Set(session.SESSION_USER, relationUser)
 		if err != nil {
 			beego.Error(err)
 			return
 		}
 		// check if the code is right.
-		err = sess.Set(session.SESSION_USERNAME, user.Username)
+		err = sess.Set(session.SESSION_USERNAME, username)
 		if err != nil {
 			beego.Error(err)
 			return
 		}
-		gitlab.Tokens.Add(user.Username, access)
+		gitlab.Tokens.Add(username, access)
 	} else {
 		fmt.Println("in sessUsername != nil && paramCode != nil")
 		u := sess.Get(session.SESSION_USER)

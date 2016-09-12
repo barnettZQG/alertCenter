@@ -15,6 +15,6 @@ API | 说明
 /api/v1/alerts | 接收prometheus报警信息
 /api/alert/handle/?:ID/?:type | 处理报警
 /api/alerts/?:receiver/:pageSize/:page | 获取报警信息带分页
-/api/ignoreRule/:user"｜ 获取忽略规则
-/api/addIgnoreRule" ｜ 添加忽略规则
+/api/ignoreRule/:user"| 获取忽略规则
+/api/addIgnoreRule" | 添加忽略规则
 /api/ignoreAlert/:mark" | 忽略某报警

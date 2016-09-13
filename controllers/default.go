@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"alertCenter/controllers/session"
 	"net/http"
 
 	"github.com/astaxie/beego"
@@ -32,9 +33,12 @@ type Transit struct {
 }
 
 func (c *MainController) Transit() {
-	transit := c.GetSession("transit").(*Transit)
-	if transit != nil {
-		http.Redirect(transit.Response, transit.Request, transit.Redirct, http.StatusTemporaryRedirect)
+	sess, err := session.GetSession(c.Ctx)
+	if err == nil {
+		transit := sess.Get(session.SESSION_TRANSIT)
+		if transit != nil {
+			http.Redirect(transit.(*Transit).Response, transit.(*Transit).Request, transit.(*Transit).Redirct, http.StatusTemporaryRedirect)
+		}
 	}
 	redirct := beego.AppConfig.String("url")
 	http.Redirect(c.Ctx.ResponseWriter, c.Ctx.Request, redirct, http.StatusTemporaryRedirect)

@@ -28,7 +28,7 @@ func init() {
 			NoticeOn = true
 		} else {
 			var config *models.GlobalConfig
-			err := coll.Find(bson.M{"name": "noticeOn"}).One(config)
+			err := coll.Find(bson.M{"name": "noticeOn"}).Select(nil).One(config)
 			if err != nil || config == nil {
 				config = &models.GlobalConfig{}
 				config.Name = "noticeOn"

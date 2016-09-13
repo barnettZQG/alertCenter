@@ -10,11 +10,11 @@ import (
 	"github.com/astaxie/beego"
 )
 
-type TokenController struct {
-	BaseController
+type TokenAPIController struct {
+	APIBaseController
 }
 
-func (e *TokenController) AddToken() {
+func (e *TokenAPIController) GetAllToken() {
 	sess, err := session.GetSession(e.Ctx)
 	if err != nil {
 		beego.Error("get session error:", err)
@@ -26,18 +26,11 @@ func (e *TokenController) AddToken() {
 		e.Data["json"] = util.GetErrorJson("please certification")
 		e.ServeJSON()
 	} else {
-		u := user.(*models.User)
-		projectName := e.GetString("projectName")
-		if projectName == "" {
-			e.Data["json"] = util.GetErrorJson("projectName can't be empty")
-			e.ServeJSON()
-		} else {
-			service := &service.TokenService{
-				Session: db.GetMongoSession(),
-			}
-			token := service.CreateToken(projectName, u.Name)
-			e.Data["json"] = util.GetSuccessReJson(token)
-			e.ServeJSON()
+		service := &service.TokenService{
+			Session: db.GetMongoSession(),
 		}
+		tokens := service.GetAllToken(user.(*models.User).Name)
+		e.Data["json"] = util.GetSuccessReJson(tokens)
+		e.ServeJSON()
 	}
 }

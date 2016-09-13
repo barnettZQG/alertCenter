@@ -84,3 +84,13 @@ func (e *TokenService) GetToken(object string) *models.Token {
 	}
 	return cacheToken[object]
 }
+
+//GetAllToken 获取用户所有token
+func (e *TokenService) GetAllToken(userName string) (result []*models.Token) {
+	for _, v := range cacheToken {
+		if v.UserName == userName {
+			result = append(result, v)
+		}
+	}
+	return
+}

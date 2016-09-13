@@ -7,6 +7,7 @@ import (
 var GlobalSessions *session.Manager
 
 const (
-	SESSION_USER = "user"
+	SESSION_USER     = "user"
 	SESSION_USERNAME = "username"
+	SESSION_TRANSIT  = "transit"
 )

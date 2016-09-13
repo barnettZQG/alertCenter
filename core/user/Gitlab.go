@@ -8,6 +8,7 @@ import (
 
 	"alertCenter/core/gitlab"
 	"github.com/astaxie/beego"
+	"fmt"
 )
 
 type GitlabUser struct {
@@ -37,7 +38,7 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 
 	page := 1
 	for {
-		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion +gitlab.GetGroup + "&page=" + strconv.Itoa(page)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetGroup + "?per_page=100&page=" + strconv.Itoa(page)
 		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
@@ -74,7 +75,8 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 
 	page := 1
 	for {
-		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetUser + "&page=" + strconv.Itoa(page)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetUser + "?per_page=100&page=" + strconv.Itoa(page)
+
 		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
@@ -86,6 +88,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
 		if err != nil {
+			fmt.Println(string(resp))
 			beego.Error(err.Error())
 			break
 		}
@@ -120,7 +123,7 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 
 		guUrl := strings.Replace(gitlab.GetGroupUsers, ":id", id, -1)
 
-		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + guUrl + "&page=" + strconv.Itoa(page)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + guUrl + "?per_page=100&page=" + strconv.Itoa(page)
 		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())

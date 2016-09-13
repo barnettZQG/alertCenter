@@ -10,9 +10,9 @@ import (
 
 const (
 	ApiVersion = "/api/v3"
-	GetUser = "/users?per_page=100"
-	GetGroup = "/groups?per_page=100"
-	GetGroupUsers = "/groups/:id/members?per_page=100"
+	GetUser = "/users"
+	GetGroup = "/groups"
+	GetGroupUsers = "/groups/:id/members"
 	currentUser = "/user"
 )
 

@@ -19,6 +19,7 @@ type IgnoreRuleAPIControll struct {
 func (e *IgnoreRuleAPIControll) AddRule() {
 	data := e.Ctx.Input.RequestBody
 	if data != nil && len(data) > 0 {
+		beego.Debug("ignoreRule:" + string(data))
 		var rule *models.UserIgnoreRule = &models.UserIgnoreRule{}
 		err := json.Unmarshal(data, rule)
 		if err == nil {

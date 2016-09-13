@@ -27,6 +27,8 @@ func (e *UserController) UserHome() {
 		e.Abort("404")
 	} else {
 		e.Data["userInfo"] = user
+		beego.Debug("userInfo", user.Name)
+		beego.Debug("self", self.(*models.User).Name)
 		if self != nil && user.Name == self.(*models.User).Name {
 			e.Data["self"] = true
 		}

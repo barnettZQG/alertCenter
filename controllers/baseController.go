@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"net/http"
-	"github.com/astaxie/beego"
 	"alertCenter/controllers/session"
-	"alertCenter/core/user"
 	"alertCenter/core/gitlab"
+	"alertCenter/core/user"
+	"net/http"
+
+	"github.com/astaxie/beego"
 )
 
 type BaseController struct {
 	beego.Controller
-	Username string
 }
 
 func (this *BaseController) Prepare() {
@@ -27,7 +27,7 @@ func (this *BaseController) Prepare() {
 
 	if sessUsername == nil && paramCode == "" {
 
-		sess.Set("redirect", this.Ctx.Request.URL.String())  //为了再次访问的重定向
+		sess.Set("redirect", this.Ctx.Request.URL.String()) //为了再次访问的重定向
 		//fmt.Println("in sessUsername == nil && paramCode == nil")
 		redirct := gitlab.GetGitlabOAuthUrl()
 		http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, redirct, http.StatusTemporaryRedirect)
@@ -47,7 +47,7 @@ func (this *BaseController) Prepare() {
 
 		username := u.Username
 		relation := user.Relation{}
-
+		beego.Debug(username + " logined ")
 		relationUser := relation.GetUserByName(username)
 
 		err = sess.Set(session.SESSION_USER, relationUser)
@@ -61,11 +61,9 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
-		this.Username = username
-		this.Data["user"] = username
 		gitlab.Tokens.Add(username, access)
 
-		beego.Info("Login ... ", username,"access token:",access.AccessToken)
+		beego.Info("Login ... ", username, "access token:", access.AccessToken)
 		redirectUrl := sess.Get("redirect")
 		if redirectUrl != nil {
 			if r, ok := redirectUrl.(string); ok && r != "" {
@@ -75,6 +73,9 @@ func (this *BaseController) Prepare() {
 			}
 		}
 	} else {
+		//全局模版变量
+		this.Data["userName"] = sessUsername
+		//this.Data["token"] =
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}

@@ -30,7 +30,7 @@ func (e *IgnoreRuleService) FindRuleByMark(mark string) (rule *models.UserIgnore
 	if coll == nil {
 		return nil
 	}
-	coll.Find(bson.M{"mark": mark}).Select(nil).All(&rule)
+	coll.Find(bson.M{"mark": mark}).Select(nil).One(rule)
 	return
 }
 

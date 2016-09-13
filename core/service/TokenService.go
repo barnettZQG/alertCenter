@@ -38,9 +38,9 @@ func (e *TokenService) CreateToken(project string, userName string) *models.Toke
 }
 
 //CheckToken 验证token
-func (e *TokenService) CheckToken(token string) bool {
+func (e *TokenService) CheckToken(token string, user string) bool {
 	for _, v := range cacheToken {
-		if v.Value == token {
+		if v.Value == token && v.UserName == user {
 			return true
 		}
 	}

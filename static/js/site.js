@@ -6,6 +6,9 @@ jQuery.extend({
                 '<strong>'+result.status+'!</strong>  ' + result.message
             '</div>'
             $("#"+dom).html(html)
+             setTimeout(function(){
+                $("#"+dom).html("")
+            },4000)
         }
     },
     alertFail: function (dom, message) {
@@ -14,5 +17,36 @@ jQuery.extend({
                 '<strong>Fail!</strong>  ' + message
             '</div>'
             $("#"+dom).html(html)
+            setTimeout(function(){
+                $("#"+dom).html("")
+            },4000)
+    },
+    get:function(token,user,url,callback){
+     $.ajax({
+                url:url,
+                type:"GET",
+                headers: { 
+                  "token" : token,
+                  "user": user
+                },
+                contentType:"application/json; charset=utf-8",
+                success:callback,
+                error:callback,
+              })
+    },
+    post:function(token,user,url,data,callback){
+      $.ajax({
+                url:url,
+                type:"POST",
+                headers: { 
+                  "token" : token,
+                  "user" : user
+                },
+                contentType:"application/json; charset=utf-8",
+                data:data,
+                dataType:"json",
+                success:callback,
+                error:callback,
+              })
     }
 })

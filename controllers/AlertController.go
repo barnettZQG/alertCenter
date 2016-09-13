@@ -1,6 +1,5 @@
 package controllers
 
-
 type AlertController struct {
 	BaseController
 }

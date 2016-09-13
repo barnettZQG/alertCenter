@@ -15,10 +15,11 @@ type APIBaseController struct {
 
 func (this *APIBaseController) Prepare() {
 	token := this.GetString("token")
+	user := this.GetString("user")
 	tokenService := &service.TokenService{
 		Session: db.GetMongoSession(),
 	}
-	if ok := tokenService.CheckToken(token); !ok {
+	if ok := tokenService.CheckToken(token, user); !ok {
 		this.Data["json"] = util.GetErrorJson("Security verification failed")
 		this.ServeJSON()
 	}

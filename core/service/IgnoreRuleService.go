@@ -15,12 +15,12 @@ type IgnoreRuleService struct {
 }
 
 //FindRuleByUser 获取规则
-func (e *IgnoreRuleService) FindRuleByUser(userID string) (rules []*models.UserIgnoreRule) {
+func (e *IgnoreRuleService) FindRuleByUser(userName string) (rules []*models.UserIgnoreRule) {
 	coll := e.Session.GetCollection("IgnoreRule")
 	if coll == nil {
 		return nil
 	}
-	coll.Find(bson.M{"userid": userID}).Select(nil).All(&rules)
+	coll.Find(bson.M{"username": userName}).Select(nil).All(&rules)
 	return
 }
 

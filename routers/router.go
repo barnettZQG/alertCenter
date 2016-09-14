@@ -24,4 +24,5 @@ func init() {
 	beego.Router("/api/ignoreRules", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")
 	beego.Router("/api/addIgnoreRule", &controllers.IgnoreRuleAPIControll{}, "post:AddRule")
 	beego.Router("/api/ignoreAlert/:mark", &controllers.IgnoreRuleAPIControll{}, "post:AddRuleByAlert")
+	beego.Router("/api/projects", &controllers.TokenAPIController{}, "get:GetAllToken")
 }

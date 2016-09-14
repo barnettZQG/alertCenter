@@ -97,7 +97,7 @@ func (e *TokenService) GetToken(project string, user string) *models.Token {
 //GetAllToken 获取用户所有token
 func (e *TokenService) GetAllToken(userName string) (result []*models.Token) {
 	for _, v := range cacheToken[userName] {
-		if v.UserName == userName {
+		if v.Project != "default" {
 			result = append(result, v)
 		}
 	}

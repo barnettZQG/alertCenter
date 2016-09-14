@@ -1,13 +1,9 @@
 package controllers
 
 import (
-	"alertCenter/controllers/session"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
-	"alertCenter/models"
 	"alertCenter/util"
-
-	"github.com/astaxie/beego"
 )
 
 type TokenAPIController struct {
@@ -15,21 +11,16 @@ type TokenAPIController struct {
 }
 
 func (e *TokenAPIController) GetAllToken() {
-	sess, err := session.GetSession(e.Ctx)
-	if err != nil {
-		beego.Error("get session error:", err)
-		e.Data["json"] = util.GetErrorJson("please certification")
-		e.ServeJSON()
-	}
-	user := sess.Get(session.SESSION_USER)
-	if user == nil {
+
+	user := e.Ctx.Input.Header("user")
+	if user == "" {
 		e.Data["json"] = util.GetErrorJson("please certification")
 		e.ServeJSON()
 	} else {
 		service := &service.TokenService{
 			Session: db.GetMongoSession(),
 		}
-		tokens := service.GetAllToken(user.(*models.User).Name)
+		tokens := service.GetAllToken(user)
 		e.Data["json"] = util.GetSuccessReJson(tokens)
 		e.ServeJSON()
 	}

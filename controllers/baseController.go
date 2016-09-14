@@ -53,7 +53,9 @@ func (this *BaseController) Prepare() {
 			Session: db.GetMongoSession(),
 		}
 		defaultToken := tokenService.GetDefaultToken(username)
-		this.Data["token"] = defaultToken.Value
+		if defaultToken != nil {
+			this.Data["token"] = defaultToken.Value
+		}
 		//查询用户信息
 		relation := user.Relation{}
 		relationUser := relation.GetUserByName(username)
@@ -88,7 +90,9 @@ func (this *BaseController) Prepare() {
 			Session: db.GetMongoSession(),
 		}
 		defaultToken := tokenService.GetDefaultToken(sessUsername.(string))
-		this.Data["token"] = defaultToken.Value
+		if defaultToken != nil {
+			this.Data["token"] = defaultToken.Value
+		}
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}

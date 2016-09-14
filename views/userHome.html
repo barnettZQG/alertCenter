@@ -59,9 +59,14 @@
       padding: .8em;
       margin-bottom:15px; 
     }
+    .rule div{
+    margin: 0px 0px 10px 0px;
+    padding: 0px;
+    }
     .label{
-      background:#ccc;
+      background:#333;
       padding:4px;
+      margin:4px; 
     }
     </style>
     
@@ -97,16 +102,16 @@
           {{if .self}}
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>
-            <li role="presentation"><a href="#project" role="tab" data-toggle="tab">Project</a></li>
+            <!--<li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>-->
+            <li role="presentation" class="active"><a href="#project" role="tab" data-toggle="tab">Project</a></li>
             <li role="presentation"><a href="#ignore" role="tab" data-toggle="tab">Ignore</a></li>
-            <li role="presentation"><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>
+            <!--<li role="presentation"><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>-->
           </ul>
 
           <!-- Tab panes -->
           <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="UserHome">...</div>
-            <div role="tabpanel" class="tab-pane" id="project">
+            <div role="tabpanel" class="tab-pane" id="UserHome">...</div>
+            <div role="tabpanel" class="tab-pane active" id="project">
               <form id="projectForm" >
                 <div class="form-group">
                   <label for="projectName">ProjectName</label>
@@ -114,6 +119,9 @@
                 </div>
                 <button type="submit" class="btn btn-default" id="projectSubmit">创建</button>
               </form>
+              <div class="project-body" style="margin-top:20px ">
+
+              </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="ignore">
                <div class="ignore">
@@ -166,18 +174,6 @@
                   </div><!--end ignoreForm-->
                  <div class="ignore-body" style="margin-top:20px;">
                     
-                    <div class="row rule">
-                      <div class="col-lg-7">
-                        <span class="label">xx = xxx</span>
-                      </div>
-                      <div class="right col-lg-5">
-                        <button class="btn-sm btn btn-info" >From Today at 3:00 PM</button>
-                        <button class="btn-sm btn btn-info" >To Today at 3:00 PM</button>
-                        <button class="btn-sm btn btn-danger"  onclick="delete(id)" >Delete</button>
-                        <button class="btn-sm btn btn-info"  onclick="edit(id)">Edit</button>
-                      </div>
-                    </div>
-                    
                 </div>
                </div><!--end ignore-->
             </div><!--end tabpanel-->
@@ -208,12 +204,28 @@
                 $.alertFail("alert","请求规则api错误")
               }else{
                 if(result.status=="success"){
-                   console.log(result)
+                   $.each(result.data,function(i,item){
+                     addRule(item)
+                   })
                 }else{
                   $.alert("alert",result)
                 }
               }
           })
+          $.get({{.token}},{{.userName}},"/api/projects",function(result,status){
+              if (status!="success"){
+                $.alertFail("alert","请求Token API错误")
+              }else{
+                if(result.status=="success"){
+                   $.each(result.data,function(i,item){
+                     addProject(item)
+                   })
+                }else{
+                  $.alert("alert",result)
+                }
+              }
+          })
+
           $("#projectSubmit").click(function(){
             projectName = $("input[name='projectName']").val()
             if(projectName == ""){
@@ -271,44 +283,21 @@
             })
             labels=labels.substring(0,labels.length-1)
             labels+="}"
-            var postData='{"startsAt":"'+start+'","endsAt":"'+end+'","labels":'+labels+'}'
+            var postData='{"userName":"{{.userName}}","startsAt":"'+start+'","endsAt":"'+end+'","labels":'+labels+'}'
             $.post({{.token}},{{.userName}},"/api/addIgnoreRule",postData,function(result,status){
                if(status!="success"){
                   $.alertFail("alert","异步请求错误")
                }else{
                  if(result.status=="success"){
-                       $("#ignoreForm").slideDown()
-                       $("#showForm").hide()
-                       $("#hideForm").show()
-
+                       $("#ignoreForm").slideUp()
+                       $("#showForm").show()
+                       $("#hideForm").hide()
+                        addRule(result.data)
                     }else{
                       $alert("alert",result)
                     }
                }
             })
-            //  $.ajax({
-            //     url:"/api/addIgnoreRule",
-            //     type:"POST",
-            //     headers: { 
-            //       "token" : "{{.token}}"
-            //     },
-            //     contentType:"application/json; charset=utf-8",
-            //     data:postData,
-            //     dataType:"json",
-            //     success:function(data,status){
-            //        if(data.status=="success"){
-            //           $("#ignoreForm").slideDown()
-            //           $("#showForm").hide()
-            //           $("#hideForm").show()
-
-            //        }else{
-            //          $alert("alert",data)
-            //        }
-            //     },
-            //     error:function(data,status){
-            //       $.alertFail("alert","异步请求错误")
-            //     }
-            //   }) 
              return false
           })
 
@@ -316,6 +305,24 @@
 
        var row = 1
 
+       function addRule(item){
+         var html='<div class="row rule">'+
+                     '<div class="col-lg-6 col-md-6">'
+                        $.each(item.labels.LabelSet,function(k,v){
+                            html+='<span class="label">'+k+' = '+v+'</span>'
+                        })
+                        
+                     html+=' </div>'+
+                     ' <div class="col-lg-4 col-md-4 col-xs-8">'+
+                      '  <button class="btn-sm btn btn-info" >From '+item.startsAt.substring(0,item.startsAt.length-9)+'</button>'+
+                       ' <button class="btn-sm btn btn-info" >To '+item.endsAt.substring(0,item.endsAt.length-9)+'</button>'+
+                        '</div><div class="col-lg-2 col-md-2 col-xs-4 btn-group">'+
+                        '<button type="primary" class="btn-sm btn btn-danger"  onclick="delete(\''+item.ruleID+'\')" >Delete</button>'+
+                        '<button type="secondary" class="btn-sm btn btn-info"  onclick="edit(\''+item.ruleID+'\')">Edit</button>'+
+                     ' </div>'+
+                   ' </div>'
+                    $(".ignore-body").append(html)
+       }
        function addRow(dom){
               row++
               ID="kv"+row.toString()
@@ -338,6 +345,9 @@
                            '</row>'
               $("#"+dom).after(rowHtml)
               return false
+          }
+          function addProject(item){
+            console.log(item)
           }
 
           function removeRow(dom){

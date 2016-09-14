@@ -30,7 +30,7 @@ func (e *IgnoreRuleAPIControll) AddRule() {
 				Session: session,
 			}
 			ruleService.AddRule(rule)
-			e.Data["json"] = util.GetSuccessJson("receive user ignore rule info success")
+			e.Data["json"] = util.GetSuccessReJson(rule)
 		} else {
 			beego.Error("Parse the received user ignore rule faild." + err.Error())
 			e.Data["json"] = util.GetFailJson("Parse the received user ignore rule faild.")

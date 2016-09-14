@@ -38,7 +38,7 @@ type User struct {
 }
 type UserIgnoreRule struct {
 	RuleID   string    `json:"ruleID"`
-	UserID   string    `json:"userId"`
+	UserName string    `json:"userName"`
 	Labels   Label     `json:"labels"`
 	StartsAt time.Time `json:"startsAt"`
 	EndsAt   time.Time `json:"endsAt"`

@@ -2,6 +2,7 @@ package user
 
 import (
 	"alertCenter/core/db"
+	"alertCenter/core/service"
 	"alertCenter/models"
 	"encoding/json"
 	"io/ioutil"
@@ -41,6 +42,23 @@ func (r *Relation) Init() error {
 		cacheTeamUsers = make(map[string][]string, 0)
 	}
 
+	err := initUser()
+	if err != nil {
+		return err
+	}
+	err = checkToken()
+	if err != nil {
+		return err
+	}
+	err = initApp()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//初始化用户及群组数据
+func initUser() error {
 	ts := []*models.Team{}
 	us := []*models.User{}
 	source := beego.AppConfig.String("UserSource")
@@ -97,6 +115,11 @@ func (r *Relation) Init() error {
 			}
 		}
 	}
+	return nil
+}
+
+//初始化app数据
+func initApp() error {
 	as, err := GetAllAppInfo()
 	if err != nil {
 		return err
@@ -105,6 +128,21 @@ func (r *Relation) Init() error {
 	for _, app := range as {
 		if app.ID != "" {
 			cacheApps[app.ID] = app
+		}
+	}
+	return nil
+}
+
+//检查用户默认token是否存在
+func checkToken() error {
+	service := &service.TokenService{
+		Session: db.GetMongoSession(),
+	}
+
+	for _, user := range cacheUsers {
+		token := service.GetDefaultToken(user.Name)
+		if token == nil {
+			service.CreateToken("default", user.Name)
 		}
 	}
 	return nil

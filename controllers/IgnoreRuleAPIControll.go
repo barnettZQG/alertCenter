@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"alertCenter/controllers/session"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
 	"alertCenter/models"
@@ -12,7 +13,7 @@ import (
 )
 
 type IgnoreRuleAPIControll struct {
-	beego.Controller
+	APIBaseController
 }
 
 //AddRule 添加自定义忽略规则
@@ -43,9 +44,10 @@ func (e *IgnoreRuleAPIControll) AddRule() {
 
 //GetRulesByUser 获取用户的规则
 func (e *IgnoreRuleAPIControll) GetRulesByUser() {
-	user := e.GetString(":user")
+	user := e.Ctx.Input.Header("user")
 	if user == "" {
-		e.Data["json"] = util.GetErrorJson("api error,userID is not provided")
+		e.Data["json"] = util.GetErrorJson("please certification")
+		e.ServeJSON()
 	} else {
 		session := db.GetMongoSession()
 		defer session.Close()
@@ -65,7 +67,13 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 //AddRuleByAlert 添加某alert的忽略规则
 func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 	ID := e.GetString(":mark")
-	UserID := "zengqingguo"
+	sess, err := session.GetSession(e.Ctx)
+	if err != nil {
+		beego.Error("get session error:", err)
+		e.Data["json"] = util.GetErrorJson("please certification")
+		e.ServeJSON()
+	}
+	user := sess.Get(session.SESSION_USER)
 	if ID == "" {
 		e.Data["json"] = util.GetErrorJson("api error,mark is not provided")
 	} else {
@@ -81,7 +89,7 @@ func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 			rule := &models.UserIgnoreRule{
 				Labels:   alert.Labels,
 				StartsAt: time.Now(),
-				UserID:   UserID,
+				UserName: user.(*models.User).Name,
 			}
 			ruleService := &service.IgnoreRuleService{
 				Session: session,

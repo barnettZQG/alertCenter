@@ -203,7 +203,17 @@
     <script>
        $(function(){
 
-          
+          $.get({{.token}},{{.userName}},"/api/ignoreRules",function(result,status){
+              if (status!="success"){
+                $.alertFail("alert","请求规则api错误")
+              }else{
+                if(result.status=="success"){
+                   console.log(result)
+                }else{
+                  $.alert("alert",result)
+                }
+              }
+          })
           $("#projectSubmit").click(function(){
             projectName = $("input[name='projectName']").val()
             if(projectName == ""){
@@ -262,29 +272,43 @@
             labels=labels.substring(0,labels.length-1)
             labels+="}"
             var postData='{"startsAt":"'+start+'","endsAt":"'+end+'","labels":'+labels+'}'
-             $.ajax({
-                url:"/api/addIgnoreRule",
-                type:"POST",
-                headers: { 
-                  "token" : "{{.token}}"
-                },
-                contentType:"application/json; charset=utf-8",
-                data:postData,
-                dataType:"json",
-                success:function(data,status){
-                   if(data.status=="success"){
-                      $("#ignoreForm").slideDown()
-                      $("#showForm").hide()
-                      $("#hideForm").show()
-
-                   }else{
-                     $alert("alert",data)
-                   }
-                },
-                error:function(data,status){
+            $.post({{.token}},{{.userName}},"/api/addIgnoreRule",postData,function(result,status){
+               if(status!="success"){
                   $.alertFail("alert","异步请求错误")
-                }
-              }) 
+               }else{
+                 if(result.status=="success"){
+                       $("#ignoreForm").slideDown()
+                       $("#showForm").hide()
+                       $("#hideForm").show()
+
+                    }else{
+                      $alert("alert",result)
+                    }
+               }
+            })
+            //  $.ajax({
+            //     url:"/api/addIgnoreRule",
+            //     type:"POST",
+            //     headers: { 
+            //       "token" : "{{.token}}"
+            //     },
+            //     contentType:"application/json; charset=utf-8",
+            //     data:postData,
+            //     dataType:"json",
+            //     success:function(data,status){
+            //        if(data.status=="success"){
+            //           $("#ignoreForm").slideDown()
+            //           $("#showForm").hide()
+            //           $("#hideForm").show()
+
+            //        }else{
+            //          $alert("alert",data)
+            //        }
+            //     },
+            //     error:function(data,status){
+            //       $.alertFail("alert","异步请求错误")
+            //     }
+            //   }) 
              return false
           })
 

@@ -21,7 +21,7 @@ func init() {
 	//beego.Router("/api/getTag", &controllers.APIController{}, "get:AddTag")
 	beego.Router("/api/alert/handle/:ID/:type", &controllers.APIController{}, "post:HandleAlert")
 	beego.Router("/api/alerts/:receiver/:pageSize/:page", &controllers.APIController{}, "get:GetAlerts")
-	beego.Router("/api/ignoreRule/:user", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")
+	beego.Router("/api/ignoreRules", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")
 	beego.Router("/api/addIgnoreRule", &controllers.IgnoreRuleAPIControll{}, "post:AddRule")
 	beego.Router("/api/ignoreAlert/:mark", &controllers.IgnoreRuleAPIControll{}, "post:AddRuleByAlert")
 }

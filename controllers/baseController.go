@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"alertCenter/controllers/session"
+	"alertCenter/core/db"
 	"alertCenter/core/gitlab"
+	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"net/http"
 
@@ -46,8 +48,14 @@ func (this *BaseController) Prepare() {
 		}
 
 		username := u.Username
+		//加载用户默认token
+		tokenService := &service.TokenService{
+			Session: db.GetMongoSession(),
+		}
+		defaultToken := tokenService.GetDefaultToken(username)
+		this.Data["token"] = defaultToken.Value
+		//查询用户信息
 		relation := user.Relation{}
-		beego.Debug(username + " logined ")
 		relationUser := relation.GetUserByName(username)
 
 		err = sess.Set(session.SESSION_USER, relationUser)
@@ -75,9 +83,13 @@ func (this *BaseController) Prepare() {
 	} else {
 		//全局模版变量
 		this.Data["userName"] = sessUsername
-		//this.Data["token"] =
+		//加载用户默认token
+		tokenService := &service.TokenService{
+			Session: db.GetMongoSession(),
+		}
+		defaultToken := tokenService.GetDefaultToken(sessUsername.(string))
+		this.Data["token"] = defaultToken.Value
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)
 	}
-
 }

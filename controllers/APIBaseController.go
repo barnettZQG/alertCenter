@@ -14,11 +14,12 @@ type APIBaseController struct {
 }
 
 func (this *APIBaseController) Prepare() {
-	token := this.GetString("token")
-	user := this.GetString("user")
+	token := this.Ctx.Input.Header("token")
+	user := this.Ctx.Input.Header("user")
 	tokenService := &service.TokenService{
 		Session: db.GetMongoSession(),
 	}
+	beego.Debug("check token:" + token + ",user:" + user)
 	if ok := tokenService.CheckToken(token, user); !ok {
 		this.Data["json"] = util.GetErrorJson("Security verification failed")
 		this.ServeJSON()

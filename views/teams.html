@@ -104,8 +104,11 @@
     <script src="/static/js/site.js"></script>
     <script>
        $(function(){
-          $.get("/api/teamUsers",function(result){
-            if(result.status="success"){
+          $.get("{{.token}}","{{.userName}}","/api/teamUsers",function(result,status){
+            if(status!="success"){
+              $.alertFail("alert","异步请求错误")
+            }else{
+               if(result.status="success"){
               $("#teams").html('')
               $.each(result.data,function(i,team){
                 var html='<div class="group row">'+
@@ -130,6 +133,7 @@
               })
             }else{
               $.alert("alert",result)
+            }
             }
           })
        })

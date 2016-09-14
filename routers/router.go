@@ -8,6 +8,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/logout",&controllers.MainController{},"post:Logout")
 	beego.Router("/transit", &controllers.MainController{}, "get:Transit")
 	beego.Router("/alerts", &controllers.AlertController{}, "get:AlertList")
 	beego.Router("/teams", &controllers.TeamController{}, "get:GetTeams")

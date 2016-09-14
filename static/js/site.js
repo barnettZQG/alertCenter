@@ -62,4 +62,18 @@ jQuery.extend({
                 error:callback,
               })
     }
+
+})
+
+$('#logout').click(function(){
+    $.post("","","/logout",null,function(result){
+        console.log("result:",result);
+        if(result.status == "success"){
+
+            console.log("debug, logout success.")
+            window.location.href="/"
+        }else{
+          $.alert("alert",result)
+        }
+    })
 })

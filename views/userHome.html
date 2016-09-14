@@ -231,8 +231,16 @@
             if(projectName == ""){
                $.alertFail("alert","项目名不能为空！")
             }else{
-              $.post("/token/addToken",{"projectName":projectName},function(result,status){
-                 $.alert(result)
+              $.post("{{.token}}","{{.userName}}","/token/addToken",'{"Project":"'+projectName+'"}',function(result,status){
+                 if(status!="success"){
+                  $.alertFail("alert","异步请求错误")
+                  }else{
+                    if(result.status=="success"){
+                            addProject(result.data)
+                    }else{
+                      $.alert("alert",result)
+                    }
+                  }
               })
             }
             return false
@@ -306,7 +314,7 @@
        var row = 1
 
        function addRule(item){
-         var html='<div class="row rule">'+
+         var html='<div class="row rule" id="'+item.ruleID+'">'+
                      '<div class="col-lg-6 col-md-6">'
                         $.each(item.labels.LabelSet,function(k,v){
                             html+='<span class="label">'+k+' = '+v+'</span>'
@@ -317,7 +325,7 @@
                       '  <button class="btn-sm btn btn-info" >From '+item.startsAt.substring(0,item.startsAt.length-9)+'</button>'+
                        ' <button class="btn-sm btn btn-info" >To '+item.endsAt.substring(0,item.endsAt.length-9)+'</button>'+
                         '</div><div class="col-lg-2 col-md-2 col-xs-4 btn-group">'+
-                        '<button type="primary" class="btn-sm btn btn-danger"  onclick="delete(\''+item.ruleID+'\')" >Delete</button>'+
+                        '<button type="primary" class="btn-sm btn btn-danger"  onclick="deleteRule(\''+item.ruleID+'\')" >Delete</button>'+
                         '<button type="secondary" class="btn-sm btn btn-info"  onclick="edit(\''+item.ruleID+'\')">Edit</button>'+
                      ' </div>'+
                    ' </div>'
@@ -346,14 +354,51 @@
               $("#"+dom).after(rowHtml)
               return false
           }
-          function addProject(item){
-            console.log(item)
+    function addProject(item){
+            var html='<div class="row rule" id="'+item.Project+'">'+
+                     ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">'+
+                      '  <button class="btn-sm btn btn-info" >Create: '+item.CreateTime.substring(0,19)+'</button>'+
+                      '  <button class="btn-sm btn btn-info" >Project: '+item.Project+'</button>'+
+                      '  <button class="btn-sm btn btn-info" >Token: '+item.Value+'</button>'+
+                        '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">'+
+                        '<button  class="btn-sm btn btn-danger"  onclick="deleteProject(\''+item.Project+'\')" >Delete</button>'+
+                     ' </div>'+
+                   ' </div>'
+            $(".project-body").append(html)       
           }
 
-          function removeRow(dom){
+    function removeRow(dom){
              $("#"+dom).remove()
              return false
           }
+    function deleteProject(project){
+      
+      $.delete("{{.token}}","{{.userName}}","/api/project/"+project,function(result,status){
+        if(status!="success"){
+        $.alertFail("alert","异步请求错误")
+        }else{
+          if(result.status=="success"){
+              $("#"+project).slideUp()
+          }else{
+            $.alert("alert",result)
+          }
+        }
+      })
+    }  
+    function deleteRule(id){
+      
+      $.delete("{{.token}}","{{.userName}}","/api/ignoreRule/"+id,function(result,status){
+        if(status!="success"){
+        $.alertFail("alert","异步请求错误")
+        }else{
+          if(result.status=="success"){
+              $("#"+id).slideUp()
+          }else{
+            $.alert("alert",result)
+          }
+        }
+      })
+    }     
     </script>
   </body>
 </html>

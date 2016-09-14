@@ -100,3 +100,24 @@ func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 	}
 	e.ServeJSON()
 }
+
+//DeleteRule 删除rule
+func (e *IgnoreRuleAPIControll) DeleteRule() {
+	user := e.Ctx.Input.Header("user")
+	ruleID := e.GetString(":ruleID")
+	beego.Debug("delete ignoreRule,user:" + user)
+	if user == "" {
+		e.Data["json"] = util.GetErrorJson("please certification")
+		e.ServeJSON()
+	} else {
+		service := &service.IgnoreRuleService{
+			Session: db.GetMongoSession(),
+		}
+		if ok := service.DeleteRule(ruleID, user); ok {
+			e.Data["json"] = util.GetSuccessJson("Delete rule success")
+		} else {
+			e.Data["json"] = util.GetFailJson("Delete rule faild")
+		}
+		e.ServeJSON()
+	}
+}

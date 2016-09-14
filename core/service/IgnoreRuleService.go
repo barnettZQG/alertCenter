@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/astaxie/beego"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -44,4 +45,19 @@ func (e *IgnoreRuleService) AddRule(rule *models.UserIgnoreRule) {
 		rule.IsLive = true
 		e.Session.Insert("IgnoreRule", rule)
 	}
+}
+
+//DeleteRule 删除规则
+func (e *IgnoreRuleService) DeleteRule(ruleID string, user string) bool {
+	col := e.Session.GetCollection("IgnoreRule")
+	if col == nil {
+		beego.Error("get collection IgnoreRule error ")
+		return false
+	}
+	err := col.Remove(bson.M{"ruleid": ruleID, "username": user})
+	if err != nil {
+		beego.Error("delete IgnoreRule error ,", err.Error())
+		return false
+	}
+	return true
 }

@@ -48,5 +48,18 @@ jQuery.extend({
                 success:callback,
                 error:callback,
               })
+    },
+    delete:function(token,user,url,callback){
+        $.ajax({
+                url:url,
+                type:"DELETE",
+                headers: { 
+                  "token" : token,
+                  "user": user
+                },
+                contentType:"application/json; charset=utf-8",
+                success:callback,
+                error:callback,
+              })
     }
 })

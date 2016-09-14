@@ -6,6 +6,7 @@ import (
 	"alertCenter/core/service"
 	"alertCenter/models"
 	"alertCenter/util"
+	"encoding/json"
 
 	"github.com/astaxie/beego"
 )
@@ -27,17 +28,24 @@ func (e *TokenController) AddToken() {
 		e.ServeJSON()
 	} else {
 		u := user.(*models.User)
-		projectName := e.GetString("projectName")
-		if projectName == "" {
-			e.Data["json"] = util.GetErrorJson("projectName can't be empty")
+		data := e.Ctx.Input.RequestBody
+		var token = &models.Token{}
+		err := json.Unmarshal(data, token)
+		if err != nil {
+			e.Data["json"] = util.GetErrorJson("json data error")
 			e.ServeJSON()
 		} else {
-			service := &service.TokenService{
-				Session: db.GetMongoSession(),
+			if token != nil && token.Project == "" {
+				e.Data["json"] = util.GetErrorJson("projectName can't be empty")
+				e.ServeJSON()
+			} else {
+				service := &service.TokenService{
+					Session: db.GetMongoSession(),
+				}
+				token := service.CreateToken(token.Project, u.Name)
+				e.Data["json"] = util.GetSuccessReJson(token)
+				e.ServeJSON()
 			}
-			token := service.CreateToken(projectName, u.Name)
-			e.Data["json"] = util.GetSuccessReJson(token)
-			e.ServeJSON()
 		}
 	}
 }

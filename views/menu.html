@@ -17,7 +17,8 @@
        
         </ul>
         <ul class="nav navbar-nav navbar-right">
-        <li><a href="/user/{{.userName}}" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" >{{.userName}}</a></li>
+        <li class="hidden-xs"><a href="/user/{{.userName}}" class="top_avatovr" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}"><img src="{{.user.AvatarURL}}"/></a></li>
+         <li class="hidden-sm hidden-md hidden-lg"><a href="/user/{{.userName}}"  onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}">{{.userName}}</a></li>
         </ul>
       </div>
     </div>

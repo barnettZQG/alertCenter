@@ -60,7 +60,7 @@ func (this *BaseController) Prepare() {
 		//查询用户信息
 		relation := user.Relation{}
 		relationUser := relation.GetUserByName(username)
-
+		this.Data["user"] = relationUser
 		err = sess.Set(session.SESSION_USER, relationUser)
 		if err != nil {
 			beego.Error(err)
@@ -86,6 +86,9 @@ func (this *BaseController) Prepare() {
 	} else {
 		//全局模版变量
 		this.Data["userName"] = sessUsername
+		relation := user.Relation{}
+		relationUser := relation.GetUserByName(sessUsername.(string))
+		this.Data["user"] = relationUser
 		//加载用户默认token
 		tokenService := &service.TokenService{
 			Session: db.GetMongoSession(),

@@ -13,6 +13,7 @@ import (
 
 type BaseController struct {
 	beego.Controller
+	Username string
 }
 
 func (this *BaseController) Prepare() {
@@ -92,6 +93,9 @@ func (this *BaseController) Prepare() {
 		defaultToken := tokenService.GetDefaultToken(sessUsername.(string))
 		if defaultToken != nil {
 			this.Data["token"] = defaultToken.Value
+		}
+		if name, ok := sessUsername.(string); ok {
+			this.Username = name
 		}
 		// Already login
 		//beego.Debug("Have code.", "sessCode",sessCode,"paramCode",paramCode)

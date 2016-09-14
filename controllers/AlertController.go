@@ -13,3 +13,5 @@ func (e *AlertController) AlertList() {
 		e.TplName = "alertListAll.html"
 	}
 }
+
+

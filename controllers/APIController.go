@@ -12,10 +12,12 @@ import (
 	"alertCenter/util"
 
 	"github.com/astaxie/beego"
+	"alertCenter/core/gitlab"
 )
 
 type APIController struct {
-	beego.Controller
+	//beego.Controller
+	APIBaseController
 	session      *db.MongoSession
 	alertService *service.AlertService
 	teamServcie  *service.TeamService
@@ -96,17 +98,28 @@ func (e *APIController) HandleAlert() {
 }
 
 func (e *APIController) GetAlerts() {
-	receiver := e.GetString(":receiver")
-	pageSize, err := e.GetInt(":pageSize")
-	page, perr := e.GetInt(":page")
+	pageSizeStr := e.Ctx.Request.FormValue("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil {
-		e.Data["json"] = util.GetErrorJson("api use error,the type of pageSize is not int")
-		goto over
+		pageSize = 20
 	}
-	if perr != nil {
-		e.Data["json"] = util.GetErrorJson("api use error,the type of page is not int")
-		goto over
+
+	pageStr := e.Ctx.Request.FormValue("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
 	}
+
+	receiver := e.APIBaseController.Username
+
+	// if admin. Should show all the alerts.
+	user, err := gitlab.GetUserByUsername(receiver)
+	if err != nil {
+		beego.Error(err)
+	} else if user.IsAdmin {
+		receiver = "all"
+	}
+
 	e.session = db.GetMongoSession()
 	if e.session == nil {
 		e.Data["json"] = util.GetFailJson("get database session faild.")
@@ -116,7 +129,7 @@ func (e *APIController) GetAlerts() {
 		defer e.session.Close()
 		if len(receiver) != 0 && receiver != "all" {
 			alerts := e.alertService.FindByUser(receiver, pageSize, page)
-			beego.Info("Get" + strconv.Itoa(len(alerts)) + " alerts")
+			beego.Info("Get", len(alerts), " alerts")
 			if alerts == nil {
 				e.Data["json"] = util.GetFailJson("get database collection faild or receiver is error ")
 				goto over
@@ -138,6 +151,6 @@ func (e *APIController) GetAlerts() {
 			goto over
 		}
 	}
-over:
+	over:
 	e.ServeJSON()
 }

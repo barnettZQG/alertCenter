@@ -11,6 +11,7 @@ import (
 
 type APIBaseController struct {
 	beego.Controller
+	Username string
 }
 
 func (this *APIBaseController) Prepare() {
@@ -24,4 +25,5 @@ func (this *APIBaseController) Prepare() {
 		this.Data["json"] = util.GetErrorJson("Security verification failed")
 		this.ServeJSON()
 	}
+	this.Username = user
 }

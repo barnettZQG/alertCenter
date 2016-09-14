@@ -149,7 +149,7 @@
        })
 
        function load(){
-         $.get("/api/alerts/all/"+pageSize+"/"+page,function(result){
+         $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
            $("#alerts").html("")
            if(result.status == "success"){
              $.each(result.data,function(i,alert){

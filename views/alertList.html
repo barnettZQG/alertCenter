@@ -148,7 +148,7 @@
        })
 
        function load(){
-         $.get("/api/alerts/{{.receiver}}/"+pageSize+"/"+page,function(result){
+         $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
             if(result.status=="success"){
               $("#alerts").html('')
               $.each(result.data,function(i,alert){

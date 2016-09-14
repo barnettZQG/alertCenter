@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"bytes"
 	"io/ioutil"
+	"strings"
+	"fmt"
 )
 
 const (
@@ -14,6 +16,7 @@ const (
 	GetGroup = "/groups"
 	GetGroupUsers = "/groups/:id/members"
 	currentUser = "/user"
+	SearchUserByName = "/users?username=:username"
 )
 
 func GitlabApi(method, url string, body []byte) ([]byte, error) {
@@ -43,7 +46,6 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 	return respBody, nil
 }
 
-
 func GetCurrentUserWithToken(token string) (*GitlabUser, error) {
 	url := GetGitlabUrl() + ApiVersion + currentUser
 	body, err := RequestGitlabWithToken(token, url, "GET", nil)
@@ -59,4 +61,29 @@ func GetCurrentUserWithToken(token string) (*GitlabUser, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func GetUserByUsername(username string) (*GitlabUser, error) {
+	userUrl := strings.Replace(SearchUserByName, ":username", username, -1)
+
+	url := GetGitlabUrl() + ApiVersion + userUrl
+	fmt.Println("url:", url)
+	body, err := GitlabApi("GET", url, nil)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+
+	user := []*GitlabUser{}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		beego.Debug("Unmarshal:", string(body))
+		beego.Error(err)
+		return nil, err
+	}
+	if len(user) == 1 {
+		return user[0], nil
+	}else{
+		return nil,fmt.Errorf("Search more then one user.")
+	}
 }

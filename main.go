@@ -4,15 +4,16 @@ import (
 	"alertCenter/core/notice"
 	"alertCenter/core/user"
 	_ "alertCenter/routers"
-
+	_ "net/http/pprof"
 	"github.com/astaxie/beego"
+	"log"
+	"net/http"
 )
 
-func init() {
-
-}
-
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	re := user.Relation{}
 	beego.AddAPPStartHook(func() error {

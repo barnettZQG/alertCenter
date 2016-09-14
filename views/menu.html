@@ -14,10 +14,20 @@
         <ul class="nav navbar-nav">
           <li class=""><a href="/alerts" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">报警信息</a></li>
          <li class=""><a href="/teams" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">团队信息</a></li>
-       
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
-        <li><a href="/user/{{.userName}}" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" >{{.userName}}</a></li>
+            <li><a href="/user/{{.userName}}" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" >{{.userName}}</a></li>
+            <li>
+                <span class="pull-right">
+                    <a href="#">
+                     <img style="padding-top:5px;border-radius:50%;width:32px;height;32px;box-shadow:0 0 0 2px rgba(0,0,0,0.1);display:block;" src="/static/img/nav1.png" alt="Profile Picture">
+                    </a>
+                </span>
+            </li>
+            <li>
+                <button type="button" id="logout" class="btn btn-primary" style="margin-left:10px;margin-top:5px;">登出</button>
+            </li>
         </ul>
       </div>
     </div>

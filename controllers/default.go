@@ -5,10 +5,29 @@ import (
 	"net/http"
 
 	"github.com/astaxie/beego"
+	"alertCenter/util"
 )
 
 type MainController struct {
 	BaseController
+}
+
+
+func (c *MainController) Logout(){
+	sess, err := session.GetSession(c.Ctx)
+	if err!=nil{
+		beego.Error(err)
+		return
+	}
+	defer sess.SessionRelease(c.Ctx.ResponseWriter)
+
+	sess.Delete(session.SESSION_USERNAME)
+	sess.Delete(session.SESSION_USER)
+
+	c.Data["json"] = util.GetSuccessJson("Logout success.")
+	c.ServeJSON()
+
+	return
 }
 
 func (c *MainController) Get() {

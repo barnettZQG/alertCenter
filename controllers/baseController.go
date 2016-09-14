@@ -23,6 +23,7 @@ func (this *BaseController) Prepare() {
 		beego.Error(err)
 		return
 	}
+	defer sess.SessionRelease(this.Ctx.ResponseWriter)
 
 	sessUsername := sess.Get(session.SESSION_USERNAME)
 	paramCode := this.GetString("code")

@@ -102,11 +102,13 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/site.js"></script>
     <script>
        var page=1
        var pageSize=15
        $(function(){
           $("#alerts").html('加载中。。。')
+                    console.log("in start");
           load()
          $("#page").on('click','.previous a',function(){
             if ($('.previous').attr("class")!="previous disabled"){
@@ -148,6 +150,7 @@
        })
 
        function load(){
+                 console.log("in /alerts?receiver=root");
          $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
             if(result.status=="success"){
               $("#alerts").html('')

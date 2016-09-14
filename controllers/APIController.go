@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-
 	"alertCenter/core"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
 	"alertCenter/models"
 	"alertCenter/util"
-
 	"github.com/astaxie/beego"
 	"alertCenter/core/gitlab"
 )

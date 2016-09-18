@@ -1,16 +1,18 @@
 package controllers
 
 import (
-	"encoding/json"
-	"strconv"
-	"time"
 	"alertCenter/core"
 	"alertCenter/core/db"
+	"alertCenter/core/gitlab"
 	"alertCenter/core/service"
 	"alertCenter/models"
 	"alertCenter/util"
+	"encoding/json"
+	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/astaxie/beego"
-	"alertCenter/core/gitlab"
 )
 
 type APIController struct {
@@ -39,6 +41,8 @@ func (e *APIController) ReceiveAlert() {
 	e.ServeJSON()
 }
 func (e *APIController) Receive() {
+	start := time.Now()
+	defer fmt.Println("receiver time:", time.Now().Sub(start))
 	data := e.Ctx.Input.RequestBody
 	if data != nil && len(data) > 0 {
 		var Alerts []*models.Alert = make([]*models.Alert, 0)
@@ -149,6 +153,36 @@ func (e *APIController) GetAlerts() {
 			goto over
 		}
 	}
-	over:
+over:
+	e.ServeJSON()
+}
+
+//SetNoticeMode 控制是否发送邮件
+func (e *APIController) SetNoticeMode() {
+	user := e.Ctx.Input.Header("user")
+	if user != "root" {
+		e.Data["json"] = util.GetFailJson("Do not allow the operation")
+	} else {
+		session := db.GetMongoSession()
+		if session == nil {
+			e.Data["json"] = util.GetErrorJson("get mongo session error when init NoticeOn ")
+		} else {
+			service := &service.GlobalConfigService{
+				Session: session,
+			}
+			config := service.GetConfig("noticeOn")
+			if config == nil {
+				config = &models.GlobalConfig{}
+				config.Name = "noticeOn"
+				config.Value = true
+				config.AddTime = time.Now()
+				session.Insert("GlobalConfig", config)
+			} else {
+				config.Value = !config.Value.(bool)
+				service.Update(config)
+			}
+			e.Data["json"] = util.GetSuccessJson("noticeon update success")
+		}
+	}
 	e.ServeJSON()
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"alertCenter/core/db"
 	"alertCenter/models"
+	"fmt"
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
@@ -15,11 +16,11 @@ type TokenService struct {
 	Session *db.MongoSession
 }
 
-var cacheToken map[string]map[string]*models.Token
+var cacheToken map[string][]*models.Token
 
 func init() {
 	if cacheToken == nil {
-		cacheToken = make(map[string]map[string]*models.Token, 0)
+		cacheToken = make(map[string][]*models.Token, 0)
 		Session := db.GetMongoSession()
 		col := Session.GetCollection("Token")
 		if col == nil {
@@ -33,9 +34,10 @@ func init() {
 		for _, item := range result {
 			items := cacheToken[item.UserName]
 			if items == nil {
-				cacheToken[item.UserName] = make(map[string]*models.Token, 0)
+				items = make([]*models.Token, 0)
 			}
-			cacheToken[item.UserName][item.Project] = item
+			items = append(items, item)
+			cacheToken[item.UserName] = items
 		}
 	}
 
@@ -43,7 +45,14 @@ func init() {
 
 //GetDefaultToken 获取默认token
 func (e *TokenService) GetDefaultToken(user string) *models.Token {
-	return cacheToken[user]["default"]
+
+	tokens := cacheToken[user]
+	for _, token := range tokens {
+		if token.Project == "default" {
+			return token
+		}
+	}
+	return nil
 }
 
 //CreateToken 创建token
@@ -57,15 +66,18 @@ func (e *TokenService) CreateToken(project string, userName string) *models.Toke
 	}
 	items := cacheToken[userName]
 	if items == nil {
-		cacheToken[userName] = make(map[string]*models.Token, 0)
+		items = make([]*models.Token, 0)
 	}
-	cacheToken[userName][project] = token
+	items = append(items, token)
+	cacheToken[userName] = items
 	e.Session.Insert("Token", token)
 	return token
 }
 
 //CheckToken 验证token
 func (e *TokenService) CheckToken(token string, user string) bool {
+	start := time.Now()
+	defer fmt.Println("checkToken time:", time.Now().Sub(start))
 	for _, v := range cacheToken[user] {
 		if v.Value == token {
 			return true
@@ -86,13 +98,26 @@ func (e *TokenService) DeleteToken(project string, user string) bool {
 		beego.Error("delete token error ,", err.Error())
 		return false
 	}
-	delete(cacheToken[user], project)
+	//删除slice成员
+	var items []*models.Token
+	for _, v := range cacheToken[user] {
+		if v.Project != project {
+			items = append(items, v)
+		}
+	}
+	cacheToken[user] = items
 	return true
 }
 
 //GetToken 获取token
 func (e *TokenService) GetToken(project string, user string) *models.Token {
-	return cacheToken[user][project]
+	tokens := cacheToken[user]
+	for _, token := range tokens {
+		if token.Project == project {
+			return token
+		}
+	}
+	return nil
 }
 
 //GetAllToken 获取用户所有token

@@ -8,7 +8,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	beego.Router("/logout",&controllers.MainController{},"post:Logout")
+	beego.Router("/logout", &controllers.MainController{}, "post:Logout")
 	beego.Router("/transit", &controllers.MainController{}, "get:Transit")
 	beego.Router("/alerts", &controllers.AlertController{}, "get:AlertList")
 	beego.Router("/teams", &controllers.TeamController{}, "get:GetTeams")
@@ -29,4 +29,6 @@ func init() {
 	beego.Router("/api/ignoreAlert/:mark", &controllers.IgnoreRuleAPIControll{}, "post:AddRuleByAlert")
 	beego.Router("/api/projects", &controllers.TokenAPIController{}, "get:GetAllToken")
 	beego.Router("/api/project/:project", &controllers.TokenAPIController{}, "delete:DeleteToken")
+
+	beego.Router("/api/noticeOn", &controllers.APIController{}, "post:SetNoticeMode")
 }

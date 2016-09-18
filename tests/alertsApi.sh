@@ -50,6 +50,6 @@ alerts1='[
     }
 
 ]'
-curl -XPOST -d"$alerts1" http://localhost:8888/api/v1/alerts
+curl -XPOST -d"$alerts1"  http://localhost:8888/api/v1/alerts
 curl -XPOST -d"$alerts1" http://localhost:8888/api/v1/alerts
 curl -XPOST -d"$alerts1" http://localhost:8888/api/v1/alerts

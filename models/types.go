@@ -1,8 +1,11 @@
 package models
 
+import "time"
+
 type GlobalConfig struct {
-	Name  string
-	Value interface{}
+	Name    string
+	Value   interface{}
+	AddTime time.Time
 }
 type AlertReceive struct {
 	Version           string            `json:"version"`

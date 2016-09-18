@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"alertCenter/core/db"
 	"alertCenter/core/service"
+	"fmt"
+	"time"
 
 	"alertCenter/util"
 
@@ -15,10 +16,13 @@ type APIBaseController struct {
 }
 
 func (this *APIBaseController) Prepare() {
+	start := time.Now()
+	defer fmt.Println("check token time:", time.Now().Sub(start))
+
 	token := this.Ctx.Input.Header("token")
 	user := this.Ctx.Input.Header("user")
 	tokenService := &service.TokenService{
-		Session: db.GetMongoSession(),
+		Session: nil,
 	}
 	beego.Debug("check token:" + token + ",user:" + user)
 	if ok := tokenService.CheckToken(token, user); !ok {

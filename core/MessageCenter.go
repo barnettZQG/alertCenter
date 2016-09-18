@@ -3,8 +3,6 @@ package core
 import (
 	"time"
 
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/astaxie/beego"
 
 	"alertCenter/core/db"
@@ -22,22 +20,19 @@ func init() {
 		beego.Error("get mongo session error when init NoticeOn ")
 		NoticeOn = true
 	} else {
-		coll := session.GetCollection("GlobalConfig")
-		if coll == nil {
-			beego.Error("get GlobalConfig collection error when init NoticeOn ")
+		service := &service.GlobalConfigService{
+			Session: session,
+		}
+		config := service.GetConfig("noticeOn")
+		if config == nil {
+			config = &models.GlobalConfig{}
+			config.Name = "noticeOn"
+			config.Value = true
+			config.AddTime = time.Now()
+			session.Insert("GlobalConfig", config)
 			NoticeOn = true
 		} else {
-			var config *models.GlobalConfig
-			err := coll.Find(bson.M{"name": "noticeOn"}).Select(nil).One(config)
-			if err != nil || config == nil {
-				config = &models.GlobalConfig{}
-				config.Name = "noticeOn"
-				config.Value = true
-				coll.Insert(config)
-				NoticeOn = true
-			} else {
-				NoticeOn = config.Value.(bool)
-			}
+			NoticeOn = config.Value.(bool)
 		}
 	}
 }
@@ -138,6 +133,7 @@ func HandleAlerts(alerts []*models.Alert) {
 func Notice(alert *models.Alert) {
 	//全局通知开关关闭
 	if !NoticeOn {
+		beego.Debug("notice center closed.")
 		return
 	}
 	if users, ok := CheckRules(alert); ok {

@@ -13,31 +13,6 @@ import (
 	"fmt"
 )
 
-var NoticeOn bool
-
-func init() {
-	session := db.GetMongoSession()
-	if session == nil {
-		beego.Error("get mongo session error when init NoticeOn ")
-		NoticeOn = true
-	} else {
-		service := &service.GlobalConfigService{
-			Session: session,
-		}
-		config := service.GetConfig("noticeOn")
-		if config == nil {
-			config = &models.GlobalConfig{}
-			config.Name = "noticeOn"
-			config.Value = true
-			config.AddTime = time.Now()
-			session.Insert("GlobalConfig", config)
-			NoticeOn = true
-		} else {
-			NoticeOn = config.Value.(bool)
-		}
-	}
-}
-
 //HandleMessage 处理alertmanager回来的数据
 func HandleMessage(message *models.AlertReceive) {
 	session := db.GetMongoSession()
@@ -136,7 +111,10 @@ func HandleAlerts(alerts []*models.Alert) {
 //Notice 发送报警通知信息
 func Notice(alert *models.Alert) {
 	//全局通知开关关闭
-	if !NoticeOn {
+	noticeOn := (&service.GlobalConfigService{
+		Session: db.GetMongoSession(),
+	}).GetConfig("noticeOn")
+	if noticeOn != nil && !noticeOn.Value.(bool) {
 		beego.Debug("notice center closed.")
 		return
 	}

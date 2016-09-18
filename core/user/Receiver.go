@@ -336,14 +336,37 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 
 }
 
+//GetReceiverByUser 通过user name 获取receiver
+func GetReceiverByUser(user string) (receiver *models.Receiver) {
+	re := cacheReceivers["user_"+user]
+	if re != nil {
+		return re
+	}
+	t := cacheUsers[user]
+	if t != nil {
+		receiver = &models.Receiver{
+			ID:        uuid.NewV4().String(),
+			Name:      "user_" + user,
+			UserNames: []string{user},
+		}
+		cacheReceivers["user_"+user] = receiver
+		return
+	}
+	return nil
+
+}
+
 //GetReceiver 获取receiver
 func GetReceiver(labels models.Label) (receiver *models.Receiver) {
 
-	if v, ok := labels.LabelSet["team"]; ok {
-		return GetReceiverByTeam(string(v))
+	if v, ok := labels.LabelSet["user"]; ok {
+		return GetReceiverByUser(string(v))
 	}
 	if v, ok := labels.LabelSet["container_label_app_id"]; ok {
 		return GetReceiverByAPPID(string(v))
+	}
+	if v, ok := labels.LabelSet["team"]; ok {
+		return GetReceiverByTeam(string(v))
 	}
 	return nil
 }

@@ -2,10 +2,17 @@ package notice
 
 import (
 	"crypto/tls"
+	"path/filepath"
 	"time"
 
 	"alertCenter/core/user"
 	"alertCenter/models"
+
+	"io/ioutil"
+
+	"strings"
+
+	"strconv"
 
 	"github.com/astaxie/beego"
 	"gopkg.in/gomail.v2"
@@ -142,7 +149,7 @@ func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) (messages []*M
 	for _, userName := range userNames {
 		user := relation.GetUserByName(userName)
 		if user != nil && user.Mail != "" {
-			m := e.GetMessage("xxxx", "xxxxxx", user.Mail)
+			m := e.GetMessage(e.GetBody(alert, userName), string(alert.Labels.LabelSet["alertname"])+"("+strconv.Itoa(alert.AlertCount)+")", user.Mail)
 			m.alert = alert
 			messages = append(messages, m)
 		} else {
@@ -150,6 +157,20 @@ func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) (messages []*M
 		}
 	}
 	return
+}
+
+//GetBody 创建邮件内容
+func (e *MailNoticeServer) GetBody(alert *models.Alert, userName string) string {
+	path, _ := filepath.Abs("views/mail.html")
+	buffer, err := ioutil.ReadFile(path)
+	if err != nil {
+		beego.Error("get mail template file error." + err.Error())
+	}
+	mail := string(buffer)
+	mail = strings.Replace(mail, "{{TITLE}}", string(alert.Labels.LabelSet["alertname"]), -1)
+	mail = strings.Replace(mail, "{{URL}}", beego.AppConfig.String("url")+"/alerts?receiver="+userName, -1)
+	mail = strings.Replace(mail, "{{DESCRIPTION}}", string(alert.Annotations.LabelSet["description"]), -1)
+	return mail
 }
 
 //SendAlert 发送报警邮件实现

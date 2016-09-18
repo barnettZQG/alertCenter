@@ -19,7 +19,7 @@ func init() {
 	beego.Router("/api/teams", &controllers.TeamAPIController{}, "get:GetTeams")
 	beego.Router("/api/addTeam", &controllers.TeamAPIController{}, "post:AddTeam")
 	beego.Router("/api/receive", &controllers.APIController{}, "post:Receive")
-	beego.Router("/api/v1/alerts", &controllers.APIController{}, "post:Receive")
+	beego.Router("/api/v1/alerts", &controllers.PrometheusAPI{}, "post:ReceivePrometheus")
 	//beego.Router("/api/getTag", &controllers.APIController{}, "get:AddTag")
 	beego.Router("/api/alert/handle/:ID/:type", &controllers.APIController{}, "post:HandleAlert")
 	beego.Router("/api/ignoreRules", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")

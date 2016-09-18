@@ -8,7 +8,6 @@ import (
 	"alertCenter/models"
 	"alertCenter/util"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -23,26 +22,7 @@ type APIController struct {
 	teamServcie  *service.TeamService
 }
 
-func (e *APIController) ReceiveAlert() {
-
-	data := e.Ctx.Input.RequestBody
-	if data != nil && len(data) > 0 {
-		var AlertMessage *models.AlertReceive = &models.AlertReceive{}
-		err := json.Unmarshal(data, AlertMessage)
-		if err == nil {
-			beego.Info("get a alert message,receiver:" + AlertMessage.Receiver)
-			go core.HandleMessage(AlertMessage)
-			e.Data["json"] = util.GetSuccessJson("receive alert success")
-		} else {
-			beego.Error("receive a unknow data")
-			//util.Info(string(data))
-		}
-	}
-	e.ServeJSON()
-}
 func (e *APIController) Receive() {
-	start := time.Now()
-	defer fmt.Println("receiver time:", time.Now().Sub(start))
 	data := e.Ctx.Input.RequestBody
 	if data != nil && len(data) > 0 {
 		var Alerts []*models.Alert = make([]*models.Alert, 0)

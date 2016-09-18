@@ -1,13 +1,17 @@
 package main
 
 import (
+	"alertCenter/core/db"
 	"alertCenter/core/notice"
 	"alertCenter/core/user"
 	_ "alertCenter/routers"
-	_ "net/http/pprof"
-	"github.com/astaxie/beego"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
+
+	"alertCenter/core/service"
+
+	"github.com/astaxie/beego"
 )
 
 func main() {
@@ -21,6 +25,12 @@ func main() {
 	})
 	beego.AddAPPStartHook(func() error {
 		return notice.StartCenter()
+	})
+	//初始化检查全局配置
+	beego.AddAPPStartHook(func() error {
+		return (&service.GlobalConfigService{
+			Session: db.GetMongoSession(),
+		}).Init()
 	})
 	beego.Info("mongo:", beego.AppConfig.String("mongoURI"))
 	beego.Run()

@@ -1,15 +1,13 @@
-FROM alpine:3.4
+FROM dhub.yunpro.cn/barnett/alpinessl:3.4
 MAINTAINER Barnett <zengqingguo@goyoo.com>
 
+RUN mkdir /alert
 COPY ./conf /alert/conf
 COPY ./static /alert/static
 COPY ./views /alert/views
 COPY ./alertCenter /alert/alertCenter
 
-RUN chmod 655 /alert/alertCenter && apk --update upgrade && \
-    apk add curl ca-certificates && \
-    update-ca-certificates && \
-    rm -rf /var/cache/apk/*
+RUN chmod 655 /alert/alertCenter
 
 EXPOSE 8888
 

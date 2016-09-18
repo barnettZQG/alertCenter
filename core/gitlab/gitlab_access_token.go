@@ -1,13 +1,14 @@
 package gitlab
 
 import (
-	"net/url"
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/astaxie/beego"
 )
 
 var Tokens GitlabTokens
@@ -19,10 +20,8 @@ func init() {
 	Tokens = make(map[string]Token)
 }
 
-
-
 func (t GitlabTokens) Add(username string, at *GitlabAccessToken) {
-	token := Token{AccessToken: at.AccessToken, Username:username}
+	token := Token{AccessToken: at.AccessToken, Username: username}
 	token.Expire = time.Unix(at.CreatedAt, 0).Add(time.Hour * 2)
 	t[username] = token
 }
@@ -49,7 +48,6 @@ func (t GitlabTokens) Update(username string, at *GitlabAccessToken) {
 	t.Add(username, at)
 }
 
-
 // get access token
 func GetGitlabAccessToken(code string) (*GitlabAccessToken, error) {
 	u, err := url.Parse("/oauth/token")
@@ -62,7 +60,7 @@ func GetGitlabAccessToken(code string) (*GitlabAccessToken, error) {
 	query.Add("client_secret", GetGitlabSercetId())
 	query.Add("code", code)
 	query.Add("grant_type", "authorization_code")
-	query.Add("redirect_uri", "http://localhost:8888")
+	query.Add("redirect_uri", GetCallBackUrl())
 
 	q := query.Encode()
 	uri := u.Path + "?" + q
@@ -92,4 +90,3 @@ func GetGitlabAccessToken(code string) (*GitlabAccessToken, error) {
 
 	return accToken, nil
 }
-

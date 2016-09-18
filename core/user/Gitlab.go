@@ -11,22 +11,22 @@ import (
 	"fmt"
 )
 
-type GitlabUser struct {
-	Id       int
-	Username string
-	Email    string
-	Name     string
-	State    string
-	Is_admin bool
-	Bio      string
-}
-
-type GitlabGroup struct {
-	Id          int
-	Name        string
-	Path        string
-	Description string
-}
+//type GitlabUser struct {
+//	Id       int
+//	Username string
+//	Email    string
+//	Name     string
+//	State    string
+//	Is_admin bool
+//	Bio      string
+//}
+//
+//type GitlabGroup struct {
+//	Id          int
+//	Name        string
+//	Path        string
+//	Description string
+//}
 
 type GitlabServer struct {
 }
@@ -38,14 +38,15 @@ func (e *GitlabServer) SearchTeams() ([]*models.Team, error) {
 
 	page := 1
 	for {
-		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetGroup + "?per_page=100&page=" + strconv.Itoa(page)
+		url := gitlab.GetGitlabUrl() + gitlab.ApiVersion + gitlab.GetGroups + "?per_page=100&page=" + strconv.Itoa(page)
 		resp, err := gitlab.GitlabApi("GET", url, nil)
 		if err != nil {
 			beego.Error(err.Error())
 			return nil, err
 		}
 
-		gitlabGroup := []GitlabGroup{}
+		//gitlabGroup := []GitlabGroup{}
+		gitlabGroup := []gitlab.GitlabGroup{}
 		//fmt.Println("debug:", string(resp))
 
 		err = json.Unmarshal(resp, &gitlabGroup)
@@ -83,7 +84,8 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 			return nil, err
 		}
 
-		gitlabusers := []GitlabUser{}
+		//gitlabusers := [] GitlabUser{}
+		gitlabusers := []gitlab.GitlabUser{}
 
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
@@ -105,6 +107,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 			tmp.ID = strconv.Itoa(u.Id)
 			tmp.Name = u.Username
 			tmp.Mail = u.Email
+			tmp.AvatarURL = u.AvatarUrl
 			users = append(users, tmp)
 		}
 		page = page + 1
@@ -130,7 +133,9 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 			return nil, err
 		}
 
-		gitlabusers := []GitlabUser{}
+		//gitlabusers := []GitlabUser{}
+		gitlabusers := []gitlab.GitlabUser{}
+
 
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
@@ -146,6 +151,7 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 			tmp := &models.User{}
 			tmp.ID = strconv.Itoa(u.Id)
 			tmp.Name = u.Username
+			tmp.AvatarURL = u.AvatarUrl
 			users = append(users, tmp)
 		}
 		page = page + 1

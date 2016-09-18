@@ -51,32 +51,32 @@ func (e *TeamAPIController) AddTeam() {
 	e.ServeJSON()
 }
 
-type TeamUser struct {
-	Team *models.Team
-	User []*models.User
-}
-
-func (e *TeamAPIController) GetTeamUsers() {
-	e.session = db.GetMongoSession()
-	if e.session == nil {
-		e.Data["json"] = util.GetFailJson("get database session faild.")
-	} else {
-		relation := &user.Relation{}
-		teams := relation.GetAllTeam()
-		if teams == nil {
-			e.Data["json"] = util.GetFailJson("There is no info of team")
-		} else {
-			var result []*TeamUser
-			for _, team := range teams {
-				users := relation.GetUsersByTeam(team.Name)
-				teamUser := &TeamUser{
-					Team: team,
-					User: users,
-				}
-				result = append(result, teamUser)
-			}
-			e.Data["json"] = util.GetSuccessReJson(result)
-		}
-	}
-	e.ServeJSON()
-}
+//type TeamUser struct {
+//	Team *models.Team
+//	User []*models.User
+//}
+//
+//func (e *TeamAPIController) GetTeamUsers() {
+//	e.session = db.GetMongoSession()
+//	if e.session == nil {
+//		e.Data["json"] = util.GetFailJson("get database session faild.")
+//	} else {
+//		relation := &user.Relation{}
+//		teams := relation.GetAllTeam()
+//		if teams == nil {
+//			e.Data["json"] = util.GetFailJson("There is no info of team")
+//		} else {
+//			var result []*TeamUser
+//			for _, team := range teams {
+//				users := relation.GetUsersByTeam(team.Name)
+//				teamUser := &TeamUser{
+//					Team: team,
+//					User: users,
+//				}
+//				result = append(result, teamUser)
+//			}
+//			e.Data["json"] = util.GetSuccessReJson(result)
+//		}
+//	}
+//	e.ServeJSON()
+//}

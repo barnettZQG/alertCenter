@@ -16,6 +16,7 @@ func init() {
 		panic("mongodb init error!")
 	}
 	Session = session
+	Open()
 }
 
 // func createSession() *mgo.Session {
@@ -52,6 +53,8 @@ func Open() (*mgo.Session, error) {
 	}
 	return Session, nil
 }
+
+
 func GetSession() (*mgo.Session, error) {
 	if Session == nil {
 		return Open()

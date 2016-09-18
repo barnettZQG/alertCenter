@@ -23,6 +23,7 @@ type GitlabUser struct {
 	Username         string
 	State            string
 	CreatedAt        time.Time `json:"created_at"`
+	AvatarUrl	 string `json:"avatar_url"`
 	IsAdmin          bool `json:"is_admin"`
 	Bio              interface{}
 	Email            string

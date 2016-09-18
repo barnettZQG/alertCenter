@@ -24,6 +24,7 @@ type APP struct {
 	IDC          string   `json:"idc"`
 	Domain       string   `json:"domain"`
 	BusinessLine string   `json:"business_line"`
+	AvatarUrl    string   `json:"avatar_url"`
 }
 
 type User struct {

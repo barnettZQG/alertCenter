@@ -3,10 +3,9 @@ package gitlab
 import (
 	"github.com/astaxie/beego"
 	"net/url"
-	"net/http"
-	"io/ioutil"
-	"bytes"
 	"strings"
+	"alertCenter/models"
+	"strconv"
 )
 
 func GetGitlabUrl() string {
@@ -43,40 +42,28 @@ func GetGitlabOAuthUrl() string {
 	return GetGitlabUrl() + "/oauth/authorize?response_type=code&client_id=" + GetGitlabClientId() + "&redirect_uri=" + GetCallBackUrlEncode()
 }
 
-func RequestGitlab(username, url, method string, body []byte) ([]byte, error) {
-	token, err := Tokens.Get(username)
-	if err != nil {
-		beego.Error(err)
-		return nil, err
-	}
-	return RequestGitlabWithToken(token.AccessToken, url, method, body)
+func ConvertGitlabGroupToAlertModel(gitlab GitlabGroup) ( *models.Team) {
+	team := &models.Team{}
+	team.ID = strconv.Itoa(gitlab.Id)
+	team.Name = gitlab.Name
+	return team
 }
 
-func RequestGitlabWithToken(token, url, method string, body []byte) ([]byte, error) {
-	client := http.Client{}
-
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
-	if err != nil {
-		beego.Error(err)
-		return nil, nil
-	}
-	req.Header.Add("Authorization", "Bearer " + token)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		beego.Error(err)
-		return nil, err
-	}
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		beego.Error(err)
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	return b, nil
+func ConvertGitlabUserToAlertModel(gitlab GitlabUser) ( *models.User) {
+	user := &models.User{}
+	user.ID = strconv.Itoa(gitlab.Id)
+	user.Name = gitlab.Username
+	user.AvatarURL = gitlab.AvatarUrl
+	user.Mail = gitlab.Email
+	//user.Phone = gitlab.
+	user.RealName = gitlab.Name
+	return user
 }
 
-
+func ConvertGitlabUsers(gitlab []*GitlabUser) ([]*models.User) {
+	users := make([]*models.User,len(gitlab))
+	for i, u := range gitlab {
+		users[i] = ConvertGitlabUserToAlertModel(*u)
+	}
+	return users
+}

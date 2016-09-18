@@ -12,6 +12,7 @@ import (
 
 var Tokens GitlabTokens
 
+//统一用username作为key,因为gitlab username是唯一的,name是可以重复的
 type GitlabTokens map[string]Token
 
 func init() {
@@ -19,7 +20,7 @@ func init() {
 }
 
 
-//统一用username作为key,因为gitlab username是唯一的,name是可以重复的
+
 func (t GitlabTokens) Add(username string, at *GitlabAccessToken) {
 	token := Token{AccessToken: at.AccessToken, Username:username}
 	token.Expire = time.Unix(at.CreatedAt, 0).Add(time.Hour * 2)

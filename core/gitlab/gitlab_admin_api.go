@@ -13,7 +13,7 @@ import (
 const (
 	ApiVersion = "/api/v3"
 	GetUser = "/users"
-	GetGroup = "/groups"
+	GetGroups = "/groups"
 	GetGroupUsers = "/groups/:id/members"
 	currentUser = "/user"
 	SearchUserByName = "/users?username=:username"
@@ -29,6 +29,7 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 		return []byte{}, err
 	}
 
+	//if way == ""
 	req.Header.Set("PRIVATE-TOKEN", GetAdminAccessToken())
 	//req.Header.Set("Authorization", "Bearer " + accessToken)
 	resp, err := client.Do(req)
@@ -86,4 +87,25 @@ func GetUserByUsername(username string) (*GitlabUser, error) {
 	}else{
 		return nil,fmt.Errorf("Search more then one user.")
 	}
+}
+
+
+func SearchUserByUsername(username string) (*GitlabUser, error) {
+	url := GetGitlabUrl() + GetUser + "?username=" + username
+
+	token := GetAdminAccessToken()
+	resp, err := RequestGitlabWithToken(token, url, "GET", nil)
+	if err != nil {
+		beego.Error(err)
+
+		return nil, err
+	}
+
+	user := &GitlabUser{}
+	err = json.Unmarshal(resp, &user)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	return user, nil
 }

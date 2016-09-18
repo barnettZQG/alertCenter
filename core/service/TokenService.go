@@ -40,7 +40,6 @@ func init() {
 			cacheToken[item.UserName] = items
 		}
 	}
-
 }
 
 //GetDefaultToken 获取默认token

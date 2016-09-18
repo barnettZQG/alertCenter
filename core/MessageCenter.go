@@ -10,6 +10,7 @@ import (
 	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"alertCenter/models"
+	"fmt"
 )
 
 var NoticeOn bool
@@ -88,7 +89,9 @@ func HandleAlerts(alerts []*models.Alert) {
 		Session: session,
 	}
 	for _, alert := range alerts {
+		start := time.Now()
 		old := alertService.GetAlertByLabels(alert)
+		fmt.Println("get label:",time.Now().Sub(start))
 		if old != nil && old.EndsAt.IsZero() {
 			old.AlertCount = old.AlertCount + 1
 			alert.UpdatedAt = time.Now()
@@ -126,6 +129,7 @@ func HandleAlerts(alerts []*models.Alert) {
 			//曾经没出现过的报警
 			SaveAlert(alertService, alert)
 		}
+		fmt.Println("alert cost:", time.Now().Sub(start))
 	}
 }
 

@@ -56,7 +56,9 @@ func (e *APIController) HandleAlert() {
 		e.Data["json"] = util.GetErrorJson("参数格式错误")
 	} else {
 		session := db.GetMongoSession()
-		defer session.Close()
+		if session != nil {
+			defer session.Close()
+		}
 		alertService := service.GetAlertService(session)
 		alert := alertService.FindByID(ID)
 		if alert == nil {
@@ -103,12 +105,15 @@ func (e *APIController) GetAlerts() {
 	}
 
 	e.session = db.GetMongoSession()
+	if e.session != nil {
+		defer e.session.Close()
+	}
+
 	if e.session == nil {
 		e.Data["json"] = util.GetFailJson("get database session faild.")
 		goto over
 	} else {
 		e.alertService = service.GetAlertService(e.session)
-		defer e.session.Close()
 		if len(receiver) != 0 && receiver != "all" {
 			alerts := e.alertService.FindByUser(receiver, pageSize, page)
 			beego.Info("Get", len(alerts), " alerts")
@@ -144,6 +149,9 @@ func (e *APIController) SetNoticeMode() {
 		e.Data["json"] = util.GetFailJson("Do not allow the operation")
 	} else {
 		session := db.GetMongoSession()
+		if session != nil {
+			defer session.Close()
+		}
 		if session == nil {
 			e.Data["json"] = util.GetErrorJson("get mongo session error when init NoticeOn ")
 		} else {

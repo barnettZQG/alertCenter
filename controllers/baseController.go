@@ -48,12 +48,16 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
+		beego.Debug("access token:", access, "user:", u)
 
 		username := u.Username
 		beego.Info("user login username:", username)
 		//加载用户默认token
 		tokenService := &service.TokenService{
 			Session: db.GetMongoSession(),
+		}
+		if tokenService.Session != nil {
+			defer tokenService.Session.Close()
 		}
 		defaultToken := tokenService.GetDefaultToken(username)
 		if defaultToken != nil {
@@ -99,10 +103,15 @@ func (this *BaseController) Prepare() {
 		tokenService := &service.TokenService{
 			Session: db.GetMongoSession(),
 		}
+		if tokenService.Session != nil {
+			defer tokenService.Session.Close()
+		}
 		defaultToken := tokenService.GetDefaultToken(sessUsername.(string))
 		if defaultToken != nil {
 			this.Data["token"] = defaultToken.Value
 		}
+
+		beego.Debug("redirect in else user:", relationUser, "username:", sessUsername, "token:", defaultToken.Value)
 		if name, ok := sessUsername.(string); ok {
 			this.Username = name
 		}

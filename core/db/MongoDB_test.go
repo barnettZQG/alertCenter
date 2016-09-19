@@ -1,10 +1,6 @@
 package db
 
-import (
-	"testing"
-
-	"alertCenter/util"
-)
+import "testing"
 
 type Person struct {
 	NAME  string
@@ -13,9 +9,11 @@ type Person struct {
 
 func Test_Insert(t *testing.T) {
 	session := GetMongoSession()
+	if session != nil {
+		defer session.Close()
+	}
 	if ok := session.Insert("Person", &Person{PHONE: "18811577546",
 		NAME: "barnett"}); ok {
-		util.Info("insert success")
 	}
 
 	session.Close()

@@ -138,7 +138,7 @@ func checkToken() error {
 	service := &service.TokenService{
 		Session: db.GetMongoSession(),
 	}
-
+	defer service.Session.Close()
 	for _, user := range cacheUsers {
 		token := service.GetDefaultToken(user.Name)
 		if token == nil {
@@ -215,7 +215,9 @@ func (r *Relation) SetTeam(team *models.Team) {
 	// }
 	cacheTeams[team.Name] = team
 	r.session = db.GetMongoSession()
-	defer r.session.Close()
+	if r.session != nil {
+		defer r.session.Close()
+	}
 	r.session.Insert("team", team)
 }
 

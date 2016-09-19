@@ -42,6 +42,9 @@ func (e *TokenController) AddToken() {
 				service := &service.TokenService{
 					Session: db.GetMongoSession(),
 				}
+				if service.Session != nil {
+					defer service.Session.Close()
+				}
 				token := service.CreateToken(token.Project, u.Name)
 				e.Data["json"] = util.GetSuccessReJson(token)
 				e.ServeJSON()

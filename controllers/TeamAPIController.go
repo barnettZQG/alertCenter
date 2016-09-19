@@ -17,6 +17,9 @@ type TeamAPIController struct {
 
 func (e *TeamAPIController) GetTeams() {
 	e.session = db.GetMongoSession()
+	if e.session != nil {
+		defer e.session.Close()
+	}
 	if e.session == nil {
 		e.Data["json"] = util.GetFailJson("get database session faild.")
 	} else {

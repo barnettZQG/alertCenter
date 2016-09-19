@@ -22,6 +22,9 @@ func (e *TokenAPIController) GetAllToken() {
 		service := &service.TokenService{
 			Session: db.GetMongoSession(),
 		}
+		if service.Session != nil {
+			defer service.Session.Close()
+		}
 		tokens := service.GetAllToken(user)
 		e.Data["json"] = util.GetSuccessReJson(tokens)
 		e.ServeJSON()
@@ -38,6 +41,9 @@ func (e *TokenAPIController) DeleteToken() {
 	} else {
 		service := &service.TokenService{
 			Session: db.GetMongoSession(),
+		}
+		if service.Session != nil {
+			defer service.Session.Close()
 		}
 		if ok := service.DeleteToken(project, user); ok {
 			e.Data["json"] = util.GetSuccessJson("Delete project success")

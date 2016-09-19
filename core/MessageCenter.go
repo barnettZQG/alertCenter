@@ -16,7 +16,9 @@ import (
 //HandleMessage 处理alertmanager回来的数据
 func HandleMessage(message *models.AlertReceive) {
 	session := db.GetMongoSession()
-	defer session.Close()
+	if session != nil {
+		defer session.Close()
+	}
 	alertService := &service.AlertService{
 		Session: session,
 	}
@@ -59,14 +61,16 @@ func HandleMessage(message *models.AlertReceive) {
 //HandleAlerts 处理prometheus回来的数据
 func HandleAlerts(alerts []*models.Alert) {
 	session := db.GetMongoSession()
-	defer session.Close()
+	if session != nil {
+		defer session.Close()
+	}
 	alertService := &service.AlertService{
 		Session: session,
 	}
 	for _, alert := range alerts {
 		start := time.Now()
 		old := alertService.GetAlertByLabels(alert)
-		fmt.Println("get label:",time.Now().Sub(start))
+		fmt.Println("get label:", time.Now().Sub(start))
 		if old != nil && old.EndsAt.IsZero() {
 			old.AlertCount = old.AlertCount + 1
 			alert.UpdatedAt = time.Now()
@@ -111,9 +115,14 @@ func HandleAlerts(alerts []*models.Alert) {
 //Notice 发送报警通知信息
 func Notice(alert *models.Alert) {
 	//全局通知开关关闭
-	noticeOn := (&service.GlobalConfigService{
+	service := &service.GlobalConfigService{
 		Session: db.GetMongoSession(),
-	}).GetConfig("noticeOn")
+	}
+	if service.Session != nil {
+		defer service.Session.Close()
+	}
+	noticeOn := service.GetConfig("noticeOn")
+
 	if noticeOn != nil && !noticeOn.Value.(bool) {
 		beego.Debug("notice center closed.")
 		return
@@ -146,7 +155,9 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 		relation := user.Relation{}
 		var users []string
 		session := db.GetMongoSession()
-		defer session.Close()
+		if session != nil {
+			defer session.Close()
+		}
 		ruleService := &service.IgnoreRuleService{
 			Session: session,
 		}

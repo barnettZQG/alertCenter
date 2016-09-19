@@ -28,9 +28,13 @@ func main() {
 	})
 	//初始化检查全局配置
 	beego.AddAPPStartHook(func() error {
-		return (&service.GlobalConfigService{
+		service := &service.GlobalConfigService{
 			Session: db.GetMongoSession(),
-		}).Init()
+		}
+		if service.Session != nil {
+			defer service.Session.Close()
+		}
+		return service.Init()
 	})
 	beego.Info("mongo:", beego.AppConfig.String("mongoURI"))
 	beego.Run()

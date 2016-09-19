@@ -7,6 +7,8 @@ COPY ./static /alert/static
 COPY ./views /alert/views
 COPY ./alertCenter /alert/alertCenter
 
+WORKDIR /alert
+
 RUN chmod 655 /alert/alertCenter
 
 EXPOSE 8888

@@ -22,6 +22,9 @@ func init() {
 	if cacheToken == nil {
 		cacheToken = make(map[string][]*models.Token, 0)
 		Session := db.GetMongoSession()
+		if Session != nil {
+			defer Session.Close()
+		}
 		col := Session.GetCollection("Token")
 		if col == nil {
 			beego.Error("get collection token error ")

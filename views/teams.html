@@ -121,7 +121,7 @@
                            ' <div class="members">'
                               $.each(team.User,function(i,user){
                                 html+='<div class="member col-lg-3 col-md-3 col-sm-6 col-xs-12" data-guid="'+user.id+'" data-team-guid="'+team.Team.id+'">'+
-                                      '<a href="" title="'+user.Name+'" class="member-link" >'+
+                                      '<a href="/user/'+user.Name+'" title="'+user.Name+'" class="member-link" >'+
                                           '<img class="avatar" src="'+user.avatar_url+'" alt="'+user.Name+'">'+
                                           '<span class="name">'+user.Name+'</span>'+
                                           '<span class="role">'+user.mail+'</span>'+

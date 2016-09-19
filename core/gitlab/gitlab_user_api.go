@@ -1,16 +1,16 @@
 package gitlab
 
 import (
-	"fmt"
-	"encoding/json"
-	"net/http"
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
-	"github.com/astaxie/beego"
+	"net/http"
 	"strings"
+
+	"github.com/astaxie/beego"
 )
 
-func RequestGitlab(username,  method,url string, body []byte) ([]byte, error) {
+func RequestGitlab(username, method, url string, body []byte) ([]byte, error) {
 	token, err := Tokens.Get(username)
 	if err != nil {
 		beego.Error(err)
@@ -27,7 +27,7 @@ func RequestGitlabWithToken(token, url, method string, body []byte) ([]byte, err
 		beego.Error(err)
 		return nil, nil
 	}
-	req.Header.Add("Authorization", "Bearer " + token)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -48,7 +48,7 @@ func RequestGitlabWithToken(token, url, method string, body []byte) ([]byte, err
 
 func GetGroupsByUsername(username string) ([]GitlabGroup, error) {
 	url := GetGitlabUrl() + ApiVersion + GetGroups
-	fmt.Println("url:", url)
+	//fmt.Println("url:", url)
 	body, err := RequestGitlab(username, "GET", url, nil)
 	if err != nil {
 		beego.Error(err)
@@ -69,7 +69,7 @@ func GetGroupsByUsername(username string) ([]GitlabGroup, error) {
 func GetUsersByTeam(username, groupid string) ([]*GitlabUser, error) {
 	gurl := strings.Replace(GetGroupUsers, ":id", groupid, -1)
 	url := GetGitlabUrl() + ApiVersion + gurl
-	fmt.Println("url:", url)
+	//fmt.Println("url:", url)
 	body, err := RequestGitlab(username, "GET", url, nil)
 	if err != nil {
 		beego.Error(err)

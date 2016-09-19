@@ -10,7 +10,6 @@ import (
 	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"alertCenter/models"
-	"fmt"
 )
 
 //HandleMessage 处理alertmanager回来的数据
@@ -68,9 +67,9 @@ func HandleAlerts(alerts []*models.Alert) {
 		Session: session,
 	}
 	for _, alert := range alerts {
-		start := time.Now()
+		//start := time.Now()
 		old := alertService.GetAlertByLabels(alert)
-		fmt.Println("get label:", time.Now().Sub(start))
+		//fmt.Println("get label:", time.Now().Sub(start))
 		if old != nil && old.EndsAt.IsZero() {
 			old.AlertCount = old.AlertCount + 1
 			alert.UpdatedAt = time.Now()
@@ -108,7 +107,7 @@ func HandleAlerts(alerts []*models.Alert) {
 			//曾经没出现过的报警
 			SaveAlert(alertService, alert)
 		}
-		fmt.Println("alert cost:", time.Now().Sub(start))
+		//fmt.Println("alert cost:", time.Now().Sub(start))
 	}
 }
 
@@ -168,13 +167,16 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 				rules := ruleService.FindRuleByUser(user.ID)
 				if rules != nil && len(rules) > 0 {
 					for _, rule := range rules {
-						if alert.Labels.Contains(rule.Labels) {
-							ignore = true
+						//判断是否已过期
+						if rule.EndsAt.After(time.Now()) && rule.StartsAt.Before(time.Now()) {
+							if alert.Labels.Contains(rule.Labels) {
+								ignore = true
+							}
 						}
 					}
 				}
 			} else {
-
+				ignore = true
 			}
 			if !ignore {
 				users = append(users, user.Name)

@@ -174,3 +174,35 @@ func (e *APIController) SetNoticeMode() {
 	}
 	e.ServeJSON()
 }
+func (e *APIController) AddTrustIP() {
+	user := e.Ctx.Input.Header("user")
+	if user != "root" {
+		e.Data["json"] = util.GetFailJson("Do not allow the operation")
+	} else {
+		ip := e.GetString("trustIP")
+		if ip == "" {
+			e.Data["json"] = util.GetErrorJson("trustIP is not empty")
+
+		}
+		session := db.GetMongoSession()
+		if session != nil {
+			defer session.Close()
+		}
+		if session == nil {
+			e.Data["json"] = util.GetErrorJson("get mongo session error when add trust ip ")
+		} else {
+			service := &service.GlobalConfigService{
+				Session: session,
+			}
+			if ok := service.CheckExist("TrustIP", ip); !ok {
+				service.Session.Insert("GlobalConfig", &models.GlobalConfig{
+					Name:    "TrustIP",
+					Value:   ip,
+					AddTime: time.Now(),
+				})
+			}
+			e.Data["json"] = util.GetSuccessJson("add trustIP " + ip + "  success")
+		}
+	}
+	e.ServeJSON()
+}

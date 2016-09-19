@@ -7,8 +7,6 @@ import (
 	"github.com/astaxie/beego"
 
 	"gopkg.in/mgo.v2/bson"
-	"time"
-	"fmt"
 )
 
 type AlertService struct {
@@ -24,8 +22,8 @@ func GetAlertService(session *db.MongoSession) *AlertService {
 
 //GetAlertByLabels 获取报警根据labels
 func (e *AlertService) GetAlertByLabels(alert *models.Alert) (result *models.Alert) {
-	start := time.Now()
-	defer fmt.Println("cost:",time.Now().Sub(start))
+	//start := time.Now()
+	//defer fmt.Println("cost:",time.Now().Sub(start))
 	mark := alert.Fingerprint().String()
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {

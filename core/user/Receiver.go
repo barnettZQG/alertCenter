@@ -344,18 +344,21 @@ func GetReceiverByUser(user string) (receiver *models.Receiver) {
 	if re != nil {
 		return re
 	}
-	t := cacheUsers[user]
-	if t != nil {
-		receiver = &models.Receiver{
-			ID:        uuid.NewV4().String(),
-			Name:      "user_" + user,
-			UserNames: []string{user},
+	users := strings.Split(user, ",")
+	var us []string
+	for _, u := range users {
+		t := cacheUsers[u]
+		if t != nil {
+			us = append(us, t.Name)
 		}
-		cacheReceivers["user_"+user] = receiver
-		return
 	}
-	return nil
-
+	receiver = &models.Receiver{
+		ID:        uuid.NewV4().String(),
+		Name:      "user_" + user,
+		UserNames: us,
+	}
+	cacheReceivers["user_"+user] = receiver
+	return
 }
 
 //GetReceiver 获取receiver

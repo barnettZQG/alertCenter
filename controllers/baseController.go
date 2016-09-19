@@ -6,6 +6,7 @@ import (
 	"alertCenter/core/gitlab"
 	"alertCenter/core/service"
 	"alertCenter/core/user"
+	"fmt"
 	"net/http"
 
 	"github.com/astaxie/beego"
@@ -37,7 +38,7 @@ func (this *BaseController) Prepare() {
 		http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, redirct, http.StatusTemporaryRedirect)
 		return
 	} else if sessUsername == nil && paramCode != "" {
-		//fmt.Println("in sessUsername == nil && paramCode != nil")
+		fmt.Println("in sessUsername == nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
 		access, err := gitlab.GetGitlabAccessToken(paramCode)
 		if err != nil {
 			beego.Error(err)
@@ -67,6 +68,7 @@ func (this *BaseController) Prepare() {
 		relation := user.Relation{}
 		relationUser := relation.GetUserByName(username)
 		if relationUser == nil {
+			beego.Error("relationUser is nil.")
 			return
 		}
 		this.Data["user"] = relationUser
@@ -93,6 +95,7 @@ func (this *BaseController) Prepare() {
 			}
 		}
 	} else {
+		fmt.Println("in sessUsername != nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
 		//全局模版变量
 		this.Data["userName"] = sessUsername
 		relation := user.Relation{}

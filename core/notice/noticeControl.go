@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-var DefaultTimeout = 10 * time.Second
+var IgnoreSend = 10 * time.Second
 
 var SendMsgInterval_0 = time.Hour * 1
 var SendMsgInterval_1 = time.Minute * 30
@@ -41,6 +41,13 @@ func init() {
 		beego.Error(err)
 	}
 
+	ignoreSend ,err := time.ParseDuration(beego.AppConfig.String("ignoreSend"))
+	if err == nil{
+		IgnoreSend = ignoreSend
+	}else{
+		beego.Error(err)
+	}
+
 }
 
 func NoticControl(alert *models.Alert) {
@@ -54,7 +61,7 @@ func NoticControl(alert *models.Alert) {
 	}
 	defer DeleteChanByMark(alert.Fingerprint().String())
 
-	var timeout = time.NewTimer(DefaultTimeout)
+	var timeout = time.NewTimer(IgnoreSend)
 	noNeedFlag := false
 
 	NoNeedSend:

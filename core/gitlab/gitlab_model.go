@@ -7,7 +7,7 @@ type GitlabAccessToken struct {
 	TokenType    string `json:"token_type"`
 	RefreshToken string `json:"refresh_token"`
 	Scope        string `json:"scope"`
-	CreatedAt    int64 `json:"created_at"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 // save this in map
@@ -22,17 +22,15 @@ type GitlabUser struct {
 	Name             string
 	Username         string
 	State            string
-	CreatedAt        time.Time `json:"created_at"`
-	AvatarUrl	 string `json:"avatar_url"`
-	IsAdmin          bool `json:"is_admin"`
+	AvatarUrl        string `json:"avatar_url"`
+	IsAdmin          bool   `json:"is_admin"`
 	Bio              interface{}
 	Email            string
-	ProjectsLimit    int `json:"projects_limit"`
-	CurrentSignInAt  time.Time `json:"current_sign_in_at"`
+	ProjectsLimit    int           `json:"projects_limit"`
 	Identities       []interface{} `json:"identities"`
-	CanCreateGroup   bool `json:"can_create_group"`
-	CanCreateProject bool `json:"can_create_project"`
-	Private_token    string `json:"private_token"`
+	CanCreateGroup   bool          `json:"can_create_group"`
+	CanCreateProject bool          `json:"can_create_project"`
+	Private_token    string        `json:"private_token"`
 }
 
 type GitlabGroup struct {
@@ -41,4 +39,3 @@ type GitlabGroup struct {
 	Path        string
 	Description string
 }
-

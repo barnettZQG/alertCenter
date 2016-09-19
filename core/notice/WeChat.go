@@ -165,7 +165,10 @@ func (e *WeNoticeServer) GetWeAlertByUser(WeID string) string {
 //GetTagIDByTag 通过tag name获取tag id
 func (e *WeNoticeServer) GetTagIDByTag(tag string) (int, error) {
 	session := db.GetMongoSession()
-	defer session.Close()
+	if session != nil {
+		defer session.Close()
+	}
+
 	coll := session.GetCollection("WeiTag")
 	if coll == nil {
 		return 0, errors.New("get collection WeiTag faild")
@@ -211,7 +214,9 @@ func (e *WeNoticeServer) GetAllTags() bool {
 	}
 
 	session := db.GetMongoSession()
-	defer session.Close()
+	if session != nil {
+		defer session.Close()
+	}
 	if ok := session.RemoveAll("WeTag"); ok {
 
 		var data []interface{}

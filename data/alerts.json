@@ -7,7 +7,7 @@
             "job": "node",
             "monitor": "codelab-monitor",
             "app_id":"xxx",
-            "user":"xxx",
+            "user":"xxx,yyy",
             "team":"cloud",
             "prometheus":"10.12.1.129"
             

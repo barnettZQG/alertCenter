@@ -21,6 +21,9 @@ func (e *PrometheusAPI) ReceivePrometheus() {
 	configService := &service.GlobalConfigService{
 		Session: db.GetMongoSession(),
 	}
+	if configService.Session != nil {
+		defer configService.Session.Close()
+	}
 	if ok := configService.CheckExist("TrustIP", ip); ok {
 		data := e.Ctx.Input.RequestBody
 		if data != nil && len(data) > 0 {
@@ -35,6 +38,7 @@ func (e *PrometheusAPI) ReceivePrometheus() {
 			}
 		}
 	} else {
+		beego.Debug(ip + " is not trust ip")
 		e.Data["json"] = util.GetFailJson("Have no right to access")
 	}
 	e.ServeJSON()

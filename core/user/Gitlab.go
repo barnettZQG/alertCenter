@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"alertCenter/core/gitlab"
+
 	"github.com/astaxie/beego"
-	"fmt"
 )
 
 //type GitlabUser struct {
@@ -90,7 +90,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
 		if err != nil {
-			fmt.Println(string(resp))
+			//fmt.Println(string(resp))
 			beego.Error(err.Error())
 			break
 		}
@@ -136,7 +136,6 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 		//gitlabusers := []GitlabUser{}
 		gitlabusers := []gitlab.GitlabUser{}
 
-
 		//fmt.Println("debug:", string(resp))
 		err = json.Unmarshal(resp, &gitlabusers)
 		if err != nil {
@@ -163,6 +162,3 @@ func (e *GitlabServer) GetUserByTeam(id string) ([]*models.User, error) {
 
 	return users, nil
 }
-
-
-

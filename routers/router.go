@@ -31,4 +31,6 @@ func init() {
 	beego.Router("/api/project/:project", &controllers.TokenAPIController{}, "delete:DeleteToken")
 
 	beego.Router("/api/noticeOn", &controllers.APIController{}, "post:SetNoticeMode")
+	beego.Router("/api/addTrustIP", &controllers.APIController{}, "post:AddTrustIP")
+
 }

@@ -25,7 +25,10 @@ func (e *IgnoreRuleAPIControll) AddRule() {
 		err := json.Unmarshal(data, rule)
 		if err == nil {
 			session := db.GetMongoSession()
-			defer session.Close()
+			if session != nil {
+				defer session.Close()
+			}
+
 			ruleService := &service.IgnoreRuleService{
 				Session: session,
 			}
@@ -50,7 +53,9 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 		e.ServeJSON()
 	} else {
 		session := db.GetMongoSession()
-		defer session.Close()
+		if session != nil {
+			defer session.Close()
+		}
 		ruleService := &service.IgnoreRuleService{
 			Session: session,
 		}
@@ -78,7 +83,9 @@ func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 		e.Data["json"] = util.GetErrorJson("api error,mark is not provided")
 	} else {
 		session := db.GetMongoSession()
-		defer session.Close()
+		if session != nil {
+			defer session.Close()
+		}
 		alertService := &service.AlertService{
 			Session: session,
 		}
@@ -113,6 +120,10 @@ func (e *IgnoreRuleAPIControll) DeleteRule() {
 		service := &service.IgnoreRuleService{
 			Session: db.GetMongoSession(),
 		}
+		if service.Session != nil {
+			defer service.Session.Close()
+		}
+
 		if ok := service.DeleteRule(ruleID, user); ok {
 			e.Data["json"] = util.GetSuccessJson("Delete rule success")
 		} else {

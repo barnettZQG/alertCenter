@@ -135,7 +135,7 @@ func (e *MailNoticeServer) GetMessage(body string, subject string, receiver ...s
 	m.SetHeader("From", beego.AppConfig.String("mailFrom"))
 	m.SetHeader("To", receiver...)
 	m.SetHeader("Subject", subject)
-	m.SetBody("text/plain", body)
+	m.SetBody("text/html", body)
 	return &MailMessage{
 		message:  m,
 		errCount: 0,
@@ -167,9 +167,9 @@ func (e *MailNoticeServer) GetBody(alert *models.Alert, userName string) string 
 		beego.Error("get mail template file error." + err.Error())
 	}
 	mail := string(buffer)
-	mail = strings.Replace(mail, "{{TITLE}}", string(alert.Labels.LabelSet["alertname"]), -1)
-	mail = strings.Replace(mail, "{{URL}}", beego.AppConfig.String("url")+"/alerts?receiver="+userName, -1)
-	mail = strings.Replace(mail, "{{DESCRIPTION}}", string(alert.Annotations.LabelSet["description"]), -1)
+	mail = strings.Replace(mail, "[TITLE]", string(alert.Labels.LabelSet["alertname"]), -1)
+	mail = strings.Replace(mail, "[URL]", beego.AppConfig.String("url")+"/alerts?receiver="+userName, -1)
+	mail = strings.Replace(mail, "[DESCRIPTION]", string(alert.Annotations.LabelSet["description"]), -1)
 	return mail
 }
 

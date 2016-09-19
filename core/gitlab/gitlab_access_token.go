@@ -70,6 +70,7 @@ func GetGitlabAccessToken(code string) (*GitlabAccessToken, error) {
 
 	resp, err := http.Post(targetUrl, "application/json", nil)
 	if err != nil {
+		beego.Error(err)
 		return nil, err
 	}
 

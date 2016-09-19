@@ -1,21 +1,22 @@
 package gitlab
 
 import (
-	"github.com/astaxie/beego"
-	"encoding/json"
-	"net/http"
 	"bytes"
-	"io/ioutil"
-	"strings"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
+	"github.com/astaxie/beego"
 )
 
 const (
-	ApiVersion = "/api/v3"
-	GetUser = "/users"
-	GetGroups = "/groups"
-	GetGroupUsers = "/groups/:id/members"
-	currentUser = "/user"
+	ApiVersion       = "/api/v3"
+	GetUser          = "/users"
+	GetGroups        = "/groups"
+	GetGroupUsers    = "/groups/:id/members"
+	currentUser      = "/user"
 	SearchUserByName = "/users?username=:username"
 )
 
@@ -31,6 +32,7 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 
 	//if way == ""
 	req.Header.Set("PRIVATE-TOKEN", GetAdminAccessToken())
+	fmt.Println("debug:", "private token:", GetAdminAccessToken(), "url:", url)
 	//req.Header.Set("Authorization", "Bearer " + accessToken)
 	resp, err := client.Do(req)
 	if err != nil {
@@ -68,7 +70,7 @@ func GetUserByUsername(username string) (*GitlabUser, error) {
 	userUrl := strings.Replace(SearchUserByName, ":username", username, -1)
 
 	url := GetGitlabUrl() + ApiVersion + userUrl
-	fmt.Println("url:", url)
+	//fmt.Println("url:", url)
 	body, err := GitlabApi("GET", url, nil)
 	if err != nil {
 		beego.Error(err)
@@ -84,11 +86,10 @@ func GetUserByUsername(username string) (*GitlabUser, error) {
 	}
 	if len(user) == 1 {
 		return user[0], nil
-	}else{
-		return nil,fmt.Errorf("Search more then one user.")
+	} else {
+		return nil, fmt.Errorf("Search more then one user.")
 	}
 }
-
 
 func SearchUserByUsername(username string) (*GitlabUser, error) {
 	url := GetGitlabUrl() + GetUser + "?username=" + username

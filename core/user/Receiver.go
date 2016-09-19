@@ -138,7 +138,7 @@ func checkToken() error {
 	service := &service.TokenService{
 		Session: db.GetMongoSession(),
 	}
-
+	defer service.Session.Close()
 	for _, user := range cacheUsers {
 		token := service.GetDefaultToken(user.Name)
 		if token == nil {
@@ -215,7 +215,9 @@ func (r *Relation) SetTeam(team *models.Team) {
 	// }
 	cacheTeams[team.Name] = team
 	r.session = db.GetMongoSession()
-	defer r.session.Close()
+	if r.session != nil {
+		defer r.session.Close()
+	}
 	r.session.Insert("team", team)
 }
 
@@ -342,18 +344,21 @@ func GetReceiverByUser(user string) (receiver *models.Receiver) {
 	if re != nil {
 		return re
 	}
-	t := cacheUsers[user]
-	if t != nil {
-		receiver = &models.Receiver{
-			ID:        uuid.NewV4().String(),
-			Name:      "user_" + user,
-			UserNames: []string{user},
+	users := strings.Split(user, ",")
+	var us []string
+	for _, u := range users {
+		t := cacheUsers[u]
+		if t != nil {
+			us = append(us, t.Name)
 		}
-		cacheReceivers["user_"+user] = receiver
-		return
 	}
-	return nil
-
+	receiver = &models.Receiver{
+		ID:        uuid.NewV4().String(),
+		Name:      "user_" + user,
+		UserNames: us,
+	}
+	cacheReceivers["user_"+user] = receiver
+	return
 }
 
 //GetReceiver 获取receiver

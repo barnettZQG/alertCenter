@@ -14,6 +14,7 @@
     <!-- Site CSS -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/site.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-switch.css" rel="stylesheet">
     <style> 
      .content{
        margin-bottom: 20px;
@@ -32,7 +33,7 @@
           box-shadow: 0 5px 15px rgba(0,0,0,0.05);
      }
      .member-info {
-    padding: 20px;
+    padding: 15px 30px;
     }
     .member-info .avatar {
     float: left;
@@ -63,11 +64,19 @@
     margin: 0px 0px 10px 0px;
     padding: 0px;
     }
-    .label{
+    .lbl{
       background:#333;
-      padding:4px;
-      margin:4px; 
+      display: inline-block;
+      font-size: 0.7em;
+      padding: 3px 6px;
+      margin: 0 2px 2px 0;
+      font-family: Menlo, Monaco, Consolas, sans-serif;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      background: #555;
+      color: #fff;
     }
+
     </style>
     
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -90,22 +99,36 @@
       <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
       <div id="alert"></div>
       <div id="home">
-          <div class="member-info">
+         <div class="row">
+          <div class="member-info col-lg-6 col-md-6">
               <img class="avatar" alt="{{.userInfo.Name}}" src="{{.userInfo.AvatarURL}}">
               <div class="info">
                   <h2>{{.userInfo.Name}}</h2>
                   <p><a class="link email" href="mailto:{{.userInfo.Mail}}" target="_blank">{{.userInfo.Mail}}</a></p>
               </div>
-              <div class="member-control">
+          </div>
+          {{if .isAdmin}}
+           <div class="col-lg-6 col-md-6" style="padding:15px 30px;">
+             <div style="float:right">
+              <label>更新缓存：</label>
+              <button class="btn btn-info refreshCache" type="button"  data-loading-text="更新中...">更新缓存</button>
+              </div>
+              <div style="float:right;margin-right: 10px">
+              <label>外部通知：</label>  
+              <input id="switch-onColor" type="checkbox" checked data-on-color="info">
               </div>
           </div>
+          {{end}}
+         </div> 
           {{if .self}}
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist">
             <!--<li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>-->
-            <li role="presentation" class="active"><a href="#project" role="tab" data-toggle="tab">Project</a></li>
-            <li role="presentation"><a href="#ignore" role="tab" data-toggle="tab">Ignore</a></li>
-            <!--<li role="presentation"><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>-->
+            <li role="presentation" class="active"><a href="#project" data="project" role="tab" data-toggle="tab">Project</a></li>
+            <li role="presentation"><a href="#ignore" data="ignore" role="tab" data-toggle="tab">Ignore</a></li>
+            {{if .isAdmin}}
+            <li role="presentation"><a href="#trustIP" data="trustIP" role="tab" data-toggle="tab">TrustIP</a></li>
+            {{end}}
           </ul>
 
           <!-- Tab panes -->
@@ -177,7 +200,20 @@
                 </div>
                </div><!--end ignore-->
             </div><!--end tabpanel-->
-            <div role="tabpanel" class="tab-pane" id="settings">...</div>
+             {{if .isAdmin}}
+            <div role="tabpanel" class="tab-pane" id="trustIP">
+               <form id="ipForm" >
+                <div class="form-group">
+                  <label for="projectName">TrustIP</label>
+                  <input type="text" class="form-control" id="trustIP" name="trustIP" placeholder="Enter trustIP">
+                </div>
+                <button type="submit" class="btn btn-default" id="ipSubmit">添加</button>
+              </form>
+              <div class="ip-body" style="margin-top:20px ">
+                
+              </div>
+            </div>
+              {{end}}
           </div>
           {{end}}
       </div>
@@ -196,8 +232,79 @@
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/site.js"></script>
+    <script src="/static/js/bootstrap-switch.js"></script>
     <script>
        $(function(){
+          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
+          {{if .isAdmin}}
+          $.get({{.token}},{{.userName}},"/api/noticeOn",function(result,status){
+             if (status!="success"){
+                $.alertFail("alert","请求noticeON API错误")
+              }else{
+                if(result.status=="success"){
+                  $('input[id="switch-onColor"]').bootstrapSwitch('state', result.data.value, true);
+                }else{
+                  $.alert("alert",result)
+                }
+              }
+          })
+          $('input[id="switch-onColor"]').on('switchChange.bootstrapSwitch', function(event, state) {
+            // console.log(this); // DOM element
+            // console.log(event); // jQuery event
+            // console.log(state); // true | false
+            $.post({{.token}},{{.userName}},"/api/noticeOn/"+state,"",function(result,status){
+              if (status!="success"){
+                  $.alertFail("alert","请求noticeON API错误")
+                }else{
+                    $.alert("alert",result)
+                }
+            })   
+          });
+          $.get({{.token}},{{.userName}},"/api/trustIP",function(result,status){
+              if (status!="success"){
+                $.alertFail("alert","请求Trust API错误")
+              }else{
+                if(result.status=="success"){
+                   $.each(result.data,function(i,item){
+                     addIP(item)
+                   })
+                }else{
+                  $.alert("alert",result)
+                }
+              }
+          })
+          $("#ipSubmit").click(function(){
+            ip = $("input[name='trustIP']").val()
+            console.log(ip)
+            if(!verify(ip,"ip")){
+               $.alertFail("alert","IP格式不正确")
+            }else{
+              $.post("{{.token}}","{{.userName}}","/api/trustIP",'{"Value":"'+ip+'","Name":"TrustIP"}',function(result,status){
+                 if(status!="success"){
+                  $.alertFail("alert","异步请求错误")
+                  }else{
+                    if(result.status=="success"){
+                      addIP(result.data)
+                      $.alert("alert",result)
+                    }else{
+                      $.alert("alert",result)
+                    }
+                  }
+              })
+            }
+            return false
+          })
+          $(".refreshCache").click(function(){
+             var b=$(this)
+             b.button("loading")
+             $.post({{.token}},{{.userName}},"/api/refreshCache",'',function(result,status){
+                if(status=="success"){
+                  b.button('reset')
+                  $.alert("alert",result)
+                }
+             })
+          })
+          {{end}}
 
           $.get({{.token}},{{.userName}},"/api/ignoreRules",function(result,status){
               if (status!="success"){
@@ -237,6 +344,7 @@
                   }else{
                     if(result.status=="success"){
                             addProject(result.data)
+                            $.alert("alert",result)
                     }else{
                       $.alert("alert",result)
                     }
@@ -301,6 +409,7 @@
                        $("#showForm").show()
                        $("#hideForm").hide()
                         addRule(result.data)
+                        $.alert("alert",result)
                     }else{
                       $alert("alert",result)
                     }
@@ -317,7 +426,7 @@
          var html='<div class="row rule" id="'+item.ruleID+'">'+
                      '<div class="col-lg-6 col-md-6">'
                         $.each(item.labels.LabelSet,function(k,v){
-                            html+='<span class="label">'+k+' = '+v+'</span>'
+                            html+='<span class="lbl">'+k+' = '+v+'</span>'
                         })
                         
                      html+=' </div>'+
@@ -366,6 +475,16 @@
                    ' </div>'
             $(".project-body").append(html)       
           }
+          function addIP(item){
+            var html='<div class="row rule" id="'+item.ID+'">'+
+                     ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">'+
+                      '  <button class="btn-sm btn btn-info" >TrustIP: '+item.Value+'</button>'+
+                      '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">'+
+                        '<button  class="btn-sm btn btn-danger"  onclick="deleteTrustIP(\''+item.ID+'\')" >Delete</button>'+
+                     ' </div>'+
+                   ' </div>'
+            $(".ip-body").append(html)       
+          }
 
     function removeRow(dom){
              $("#"+dom).remove()
@@ -379,6 +498,7 @@
         }else{
           if(result.status=="success"){
               $("#"+project).slideUp()
+              $.alert("alert",result)
           }else{
             $.alert("alert",result)
           }
@@ -393,6 +513,22 @@
         }else{
           if(result.status=="success"){
               $("#"+id).slideUp()
+              $.alert("alert",result)
+          }else{
+            $.alert("alert",result)
+          }
+        }
+      })
+    }     
+    function deleteTrustIP(id){
+      
+      $.delete("{{.token}}","{{.userName}}","/api/trustIP/"+id,function(result,status){
+        if(status!="success"){
+        $.alertFail("alert","异步请求错误")
+        }else{
+          if(result.status=="success"){
+              $("#"+id).slideUp()
+               $.alert("alert",result)
           }else{
             $.alert("alert",result)
           }

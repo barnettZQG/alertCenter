@@ -149,7 +149,7 @@ func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) (messages []*M
 	for _, userName := range userNames {
 		user := relation.GetUserByName(userName)
 		if user != nil && user.Mail != "" {
-			m := e.GetMessage(e.GetBody(alert, userName), string(alert.Labels.LabelSet["alertname"])+"("+strconv.Itoa(alert.AlertCount)+")", user.Mail)
+			m := e.GetMessage(e.GetBody(alert), string(alert.Labels.LabelSet["alertname"])+"("+strconv.Itoa(alert.AlertCount)+")", user.Mail)
 			m.alert = alert
 			messages = append(messages, m)
 		} else {
@@ -160,7 +160,7 @@ func (e *MailNoticeServer) GetMessageByAlert(alert *models.Alert) (messages []*M
 }
 
 //GetBody 创建邮件内容
-func (e *MailNoticeServer) GetBody(alert *models.Alert, userName string) string {
+func (e *MailNoticeServer) GetBody(alert *models.Alert) string {
 	path, _ := filepath.Abs("views/mail.html")
 	buffer, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -168,7 +168,7 @@ func (e *MailNoticeServer) GetBody(alert *models.Alert, userName string) string 
 	}
 	mail := string(buffer)
 	mail = strings.Replace(mail, "[TITLE]", string(alert.Labels.LabelSet["alertname"]), -1)
-	mail = strings.Replace(mail, "[URL]", beego.AppConfig.String("url")+"/alerts?receiver="+userName, -1)
+	mail = strings.Replace(mail, "[URL]", beego.AppConfig.String("url")+"/alertsCurrent", -1)
 	mail = strings.Replace(mail, "[DESCRIPTION]", string(alert.Annotations.LabelSet["description"]), -1)
 	return mail
 }

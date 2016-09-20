@@ -6,9 +6,23 @@ jQuery.extend({
                 '<strong>'+result.status+'!</strong>  ' + result.message
             '</div>'
             $("#"+dom).html(html)
+            //  setTimeout(function(){
+            //     $("#"+dom).slideUp()
+            //     $("#"+dom).html("")
+            //     $("#"+dom).slideDown()
+            // },5000)
+        }else{
+            console.log("alert success")
+            html = '<div class="alert alert-success">' +
+                ' <a class="close" data-dismiss="alert">×</a> ' +
+                '<strong>'+result.status+'!</strong>  ' + result.message
+            '</div>'
+            $("#"+dom).html(html)
              setTimeout(function(){
+                $("#"+dom).slideUp()
                 $("#"+dom).html("")
-            },4000)
+                $("#"+dom).slideDown()
+            },5000)
         }
     },
     alertFail: function (dom, message) {
@@ -17,9 +31,11 @@ jQuery.extend({
                 '<strong>Fail!</strong>  ' + message
             '</div>'
             $("#"+dom).html(html)
-            setTimeout(function(){
-                $("#"+dom).html("")
-            },4000)
+            // setTimeout(function(){
+            //     $("#"+dom).slideUp()
+                // $("#"+dom).html("")
+                // $("#"+dom).slideDown()
+            // },5000)
     },
     get:function(token,user,url,callback){
      $.ajax({
@@ -77,3 +93,34 @@ $('#logout').click(function(){
         }
     })
 })
+    var patterns = new Object();
+
+    //匹配ip地址
+    patterns.ip = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
+
+    //匹配邮件地址
+    patterns.email = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+
+    //匹配日期格式2008-01-31，但不匹配2008-13-00
+    patterns.date = /^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2]\d|3[0-1])$/;
+    
+    /*匹配时间格式00:15:39，但不匹配24:60:00，下面使用RegExp对象的构造方法
+    来创建RegExp对象实例，注意正则表达式模式文本中的“\”要写成“\\”*/
+    patterns.time = new RegExp("^([0-1]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$");
+        
+    /*verify – 校验一个字符串是否符合某种模式
+     *str – 要进行校验的字符串
+     *pat – 与patterns中的某个正则表达式模式对应的属性名称
+     */
+    function verify(str,pat)
+    {        
+        thePat = patterns[pat];
+        if(thePat.test(str))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }

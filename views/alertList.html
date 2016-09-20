@@ -69,8 +69,15 @@
        .caption{
          height: auto!important;
        }
-       .caption p{
-         border-bottom: 1px solid #ddd;
+       .labels_show{
+         height:300px;
+         overflow-y:scroll;
+       }
+       table{
+         table-layout: fixed;
+       }
+       td{
+         word-break: break-all;
        }
     </style>
   </head>
@@ -135,9 +142,7 @@
               }else{
                  var url="/api/alert/handle/"+alertID+"/"+handleType
               }
-             $.post(url,{
-               message:"已处理"
-             },function(data,status){
+             $.post({{.token}},{{.userName}},url,'{"message":"用户主动操作"}',function(data,status){
                 if(status=="success"){
                   if(data.status=="success"){
                      $("#"+alertID).fadeOut(1000)
@@ -161,10 +166,10 @@
                       '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
                       '</div>'+
                       '<div class="caption">'+
-                       ' <p><b>'+alert.annotations.LabelSet.description+'</b></p>'+
-                        '<table class="table table-bordered">'+
-                         ' <tr><td><b>开始时间</b></td><td>'+alert.startsAt+'</td></tr>'+
-                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt+'</td></tr>'
+                       ' <table class="table table-bordered"><tbody><td><b>'+alert.annotations.LabelSet.description+'</b></td></tbody></table>'+
+                        '<div class="labels_show"><table class="table table-bordered">'+
+                         ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">'+alert.startsAt.substring(0,19)+'</td></tr>'+
+                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt.substring(0,19)+'</td></tr>'
 
                         $.each(alert.labels.LabelSet,function(k,v){
                                if (k.length<10){
@@ -172,7 +177,7 @@
                                }
                         }) 
 
-                        html+='</table>'+
+                        html+='</table></div>'+
                         '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.mark+'" data-loading-text="处理中...">忽略报警</button>'+
                         //'<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.mark+'" data-loading-text="处理中...">我已解决</button>'+
                       '</div>'+

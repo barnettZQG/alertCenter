@@ -11,6 +11,7 @@ func init() {
 	beego.Router("/logout", &controllers.MainController{}, "post:Logout")
 	beego.Router("/transit", &controllers.MainController{}, "get:Transit")
 	beego.Router("/alerts", &controllers.AlertController{}, "get:AlertList")
+	beego.Router("/alertsCurrent", &controllers.AlertController{}, "get:AlertsCurrent")
 	beego.Router("/teams", &controllers.TeamController{}, "get:GetTeams")
 	beego.Router("teamUsers", &controllers.TeamController{}, "get:GetTeamUsers")
 	beego.Router("/user/:userName", &controllers.UserController{}, "get:UserHome")
@@ -29,8 +30,13 @@ func init() {
 	beego.Router("/api/ignoreAlert/:mark", &controllers.IgnoreRuleAPIControll{}, "post:AddRuleByAlert")
 	beego.Router("/api/projects", &controllers.TokenAPIController{}, "get:GetAllToken")
 	beego.Router("/api/project/:project", &controllers.TokenAPIController{}, "delete:DeleteToken")
+	//外部通知开关控制
+	beego.Router("/api/noticeOn/:status", &controllers.APIController{}, "post:SetNoticeMode")
+	beego.Router("/api/noticeOn", &controllers.APIController{}, "get:GetNoticeMode")
+	//白名单ip控制
+	beego.Router("/api/trustIP", &controllers.APIController{}, "post:AddTrustIP")
+	beego.Router("/api/trustIP", &controllers.APIController{}, "get:GetTrustIP")
+	beego.Router("/api/trustIP/:ID", &controllers.APIController{}, "delete:DeleteTrustIP")
 
-	beego.Router("/api/noticeOn", &controllers.APIController{}, "post:SetNoticeMode")
-	beego.Router("/api/addTrustIP", &controllers.APIController{}, "post:AddTrustIP")
-
+	beego.Router("/api/refreshCache", &controllers.APIController{}, "post:RefreshCache")
 }

@@ -32,7 +32,7 @@ func GitlabApi(method, url string, body []byte) ([]byte, error) {
 
 	//if way == ""
 	req.Header.Set("PRIVATE-TOKEN", GetAdminAccessToken())
-	fmt.Println("debug:", "private token:", GetAdminAccessToken(), "url:", url)
+	//fmt.Println("debug:", "private token:", GetAdminAccessToken(), "url:", url)
 	//req.Header.Set("Authorization", "Bearer " + accessToken)
 	resp, err := client.Do(req)
 	if err != nil {

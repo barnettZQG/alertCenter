@@ -1,8 +1,10 @@
 package models
 
 import "time"
+import "gopkg.in/mgo.v2/bson"
 
 type GlobalConfig struct {
+	ID      bson.ObjectId `bson:"_id"`
 	Name    string
 	Value   interface{}
 	AddTime time.Time

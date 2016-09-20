@@ -36,6 +36,7 @@ type User struct {
 	Mail      string `json:"mail"`
 	WeID      string `json:"weId"`
 	AvatarURL string `json:"avatar_url"`
+	IsAdmin   bool   `json:"isAdmin"`
 }
 type UserIgnoreRule struct {
 	RuleID   string    `json:"ruleID"`

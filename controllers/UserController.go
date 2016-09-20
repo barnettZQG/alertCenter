@@ -30,6 +30,7 @@ func (e *UserController) UserHome() {
 		if self != nil && user.Name == self.(*models.User).Name {
 			e.Data["self"] = true
 		}
+		e.Data["isAdmin"] = user.IsAdmin
 		e.TplName = "userHome.html"
 	}
 }

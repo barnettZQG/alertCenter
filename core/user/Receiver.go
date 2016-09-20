@@ -1,5 +1,7 @@
 package user
 
+// 2016.9.20去除了receiver缓存，添加缓存自动刷新线程
+
 import (
 	"alertCenter/core/db"
 	"alertCenter/core/service"
@@ -9,39 +11,24 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/astaxie/beego"
 	uuid "github.com/satori/go.uuid"
 )
 
 var (
-	cacheTeams     map[string]*models.Team
-	cacheApps      map[string]*models.APP
-	cacheReceivers map[string]*models.Receiver
-	cacheUsers     map[string]*models.User
-	cacheTeamUsers map[string][]string
+	cacheTeams      map[string]*models.Team
+	cacheApps       map[string]*models.APP
+	cacheUsers      map[string]*models.User
+	cacheTeamUsers  map[string][]string
+	autoRefreshDura time.Duration
 )
 
 //Init 初始化用户关系缓存
 func (r *Relation) Init() error {
 	beego.Info("Relation init begin")
 	defer beego.Info("Relation init over")
-	if cacheTeams == nil {
-		cacheTeams = make(map[string]*models.Team, 0)
-	}
-	if cacheApps == nil {
-		cacheApps = make(map[string]*models.APP, 0)
-	}
-	if cacheReceivers == nil {
-		cacheReceivers = make(map[string]*models.Receiver, 0)
-	}
-	if cacheUsers == nil {
-		cacheUsers = make(map[string]*models.User, 0)
-	}
-	if cacheTeamUsers == nil {
-		cacheTeamUsers = make(map[string][]string, 0)
-	}
-
 	err := initUser()
 	if err != nil {
 		return err
@@ -54,7 +41,31 @@ func (r *Relation) Init() error {
 	if err != nil {
 		return err
 	}
+	autoRefreshTime, err := time.ParseDuration(beego.AppConfig.String("autoRefreshTime"))
+	if err == nil {
+		autoRefreshDura = autoRefreshTime
+	} else {
+		beego.Error(err)
+		return err
+	}
+	go autoRefresh()
 	return nil
+}
+
+func autoRefresh() {
+	beego.Debug("open auto refresh users and teams work")
+	var ticker = time.NewTicker(autoRefreshDura)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			beego.Debug("start auto refresh users and teams")
+			initUser()
+			checkToken()
+			initApp()
+			beego.Debug("end auto refresh users and teams")
+		}
+	}
 }
 
 //初始化用户及群组数据
@@ -74,11 +85,13 @@ func initUser() error {
 		}
 		tmpTS, err := userServer.SearchTeams()
 		if err != nil {
+			beego.Error(err.Error())
 			return err
 		}
 
 		tmpUS, err := userServer.SearchUsers()
 		if err != nil {
+			beego.Error(err.Error())
 			return err
 		}
 
@@ -88,22 +101,38 @@ func initUser() error {
 	beego.Info("load users number is " + strconv.Itoa(len(us)))
 	beego.Info("load teams number is " + strconv.Itoa(len(ts)))
 	if us != nil {
+		cacheUsersTmp := make(map[string]*models.User, 0)
+
 		for _, user := range us {
 			if user.AvatarURL == "" {
 				user.AvatarURL = "/static/img/default.jpg"
 			}
 			if user.Name != "" {
-				cacheUsers[user.Name] = user
+				globalConfigService := service.GlobalConfigService{
+					Session: db.GetMongoSession(),
+				}
+				if globalConfigService.Session != nil {
+					defer globalConfigService.Session.Close()
+				}
+				if ok := globalConfigService.CheckExist("IsAdmin", user.Name); ok {
+					user.IsAdmin = true
+				}
+				cacheUsersTmp[user.Name] = user
 			}
 		}
+		cacheUsers = cacheUsersTmp
 	}
 	if ts != nil {
+
+		cacheTeamsTmp := make(map[string]*models.Team, 0)
+		cacheTeamUsersTmp := make(map[string][]string, 0)
 		for _, team := range ts {
-			beego.Debug("load team " + team.Name)
+			//beego.Debug("load team " + team.Name)
 			if team.Name != "" {
-				cacheTeams[team.Name] = team
+				cacheTeamsTmp[team.Name] = team
 				users, err := userServer.GetUserByTeam(team.ID)
 				if err != nil {
+					beego.Error(err.Error())
 					return err
 				}
 				var completeUsers []string
@@ -111,9 +140,11 @@ func initUser() error {
 					completeUsers = append(completeUsers, user.Name)
 					beego.Debug("load user " + user.Name + " in team " + team.Name)
 				}
-				cacheTeamUsers[team.Name] = completeUsers
+				cacheTeamUsersTmp[team.Name] = completeUsers
 			}
 		}
+		cacheTeams = cacheTeamsTmp
+		cacheTeamUsers = cacheTeamUsersTmp
 	}
 	return nil
 }
@@ -125,11 +156,15 @@ func initApp() error {
 		return err
 	}
 	beego.Info("load apps number is " + strconv.Itoa(len(as)))
+
+	cacheAppsTmp := make(map[string]*models.APP, 0)
+
 	for _, app := range as {
 		if app.ID != "" {
-			cacheApps[app.ID] = app
+			cacheAppsTmp[app.ID] = app
 		}
 	}
+	cacheApps = cacheAppsTmp
 	return nil
 }
 
@@ -138,7 +173,9 @@ func checkToken() error {
 	service := &service.TokenService{
 		Session: db.GetMongoSession(),
 	}
-	defer service.Session.Close()
+	if service.Session != nil {
+		defer service.Session.Close()
+	}
 	for _, user := range cacheUsers {
 		token := service.GetDefaultToken(user.Name)
 		if token == nil {
@@ -208,6 +245,16 @@ type Relation struct {
 	session *db.MongoSession
 }
 
+//RefreshCache 更新缓存
+func (r *Relation) RefreshCache() {
+	beego.Debug("start refresh users and teams")
+	initUser()
+	checkToken()
+	initApp()
+	beego.Debug("end  refresh users and teams")
+}
+
+//SetTeam 老方法添加team
 func (r *Relation) SetTeam(team *models.Team) {
 	team.ID = uuid.NewV4().String()
 	// if team.WeTag == nil || team.WeTag.TagName == "" {
@@ -265,6 +312,9 @@ func (r *Relation) GetUserByName(name string) *models.User {
 		return user
 	} else {
 		//暂时不实现
+		// return &models.User{
+		// 	Name: name,
+		// }
 		return nil
 	}
 }
@@ -289,10 +339,6 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 	if appID == "" {
 		return
 	}
-	receiver = cacheReceivers[appID]
-	if receiver != nil {
-		return
-	}
 	app := cacheApps[appID]
 	if app == nil {
 		var err error
@@ -312,17 +358,13 @@ func GetReceiverByAPPID(appID string) (receiver *models.Receiver) {
 			Name:      appID,
 			UserNames: us,
 		}
-		cacheReceivers[appID] = receiver
+
 	}
 	return
 }
 
 //GetReceiverByTeam 通过team name 获取receiver
 func GetReceiverByTeam(team string) (receiver *models.Receiver) {
-	re := cacheReceivers[team]
-	if re != nil {
-		return re
-	}
 	t := cacheTeams[team]
 	if t != nil {
 		us := cacheTeamUsers[t.Name]
@@ -331,7 +373,6 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 			Name:      team,
 			UserNames: us,
 		}
-		cacheReceivers[team] = receiver
 		return
 	}
 	return nil
@@ -340,10 +381,7 @@ func GetReceiverByTeam(team string) (receiver *models.Receiver) {
 
 //GetReceiverByUser 通过user name 获取receiver
 func GetReceiverByUser(user string) (receiver *models.Receiver) {
-	re := cacheReceivers["user_"+user]
-	if re != nil {
-		return re
-	}
+
 	users := strings.Split(user, ",")
 	var us []string
 	for _, u := range users {
@@ -357,7 +395,6 @@ func GetReceiverByUser(user string) (receiver *models.Receiver) {
 		Name:      "user_" + user,
 		UserNames: us,
 	}
-	cacheReceivers["user_"+user] = receiver
 	return
 }
 

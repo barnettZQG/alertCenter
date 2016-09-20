@@ -149,6 +149,7 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 		userNames := alert.Receiver.UserNames
 		//没有接收对象，不需要发送
 		if userNames == nil || len(userNames) < 1 {
+			beego.Debug("no receiver")
 			return nil, false
 		}
 		relation := user.Relation{}
@@ -164,7 +165,7 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 			user := relation.GetUserByName(userName)
 			var ignore bool
 			if user != nil {
-				rules := ruleService.FindRuleByUser(user.ID)
+				rules := ruleService.FindRuleByUser(user.Name)
 				if rules != nil && len(rules) > 0 {
 					for _, rule := range rules {
 						//判断是否已过期
@@ -183,10 +184,12 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 			}
 		}
 		if len(users) == 0 {
+			//beego.Debug("no receiver after check rule")
 			return nil, false
 		}
 		return users, true
 	}
+	beego.Debug("alert is nil")
 	return nil, false
 }
 

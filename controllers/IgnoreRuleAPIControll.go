@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"alertCenter/controllers/session"
 	"alertCenter/core/db"
 	"alertCenter/core/service"
 	"alertCenter/models"
@@ -72,13 +71,7 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 //AddRuleByAlert 添加某alert的忽略规则
 func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 	ID := e.GetString(":mark")
-	sess, err := session.GetSession(e.Ctx)
-	if err != nil {
-		beego.Error("get session error:", err)
-		e.Data["json"] = util.GetErrorJson("please certification")
-		e.ServeJSON()
-	}
-	user := sess.Get(session.SESSION_USER)
+	user := e.Ctx.Input.Header("user")
 	if ID == "" {
 		e.Data["json"] = util.GetErrorJson("api error,mark is not provided")
 	} else {
@@ -96,7 +89,7 @@ func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 			rule := &models.UserIgnoreRule{
 				Labels:   alert.Labels,
 				StartsAt: time.Now(),
-				UserName: user.(*models.User).Name,
+				UserName: user,
 			}
 			ruleService := &service.IgnoreRuleService{
 				Session: session,

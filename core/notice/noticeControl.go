@@ -9,6 +9,7 @@ import (
 )
 
 var IgnoreSend = 10 * time.Second
+var StopSend = 30 * time.Minute
 
 var SendMsgInterval_0 = time.Hour * 1
 var SendMsgInterval_1 = time.Minute * 30
@@ -41,10 +42,17 @@ func init() {
 		beego.Error(err)
 	}
 
-	ignoreSend ,err := time.ParseDuration(beego.AppConfig.String("ignoreSend"))
-	if err == nil{
+	ignoreSend, err := time.ParseDuration(beego.AppConfig.String("ignoreSend"))
+	if err == nil {
 		IgnoreSend = ignoreSend
-	}else{
+	} else {
+		beego.Error(err)
+	}
+
+	stopSend, err := time.ParseDuration(beego.AppConfig.String("stopSend"))
+	if err == nil {
+		StopSend = stopSend
+	} else {
 		beego.Error(err)
 	}
 
@@ -82,6 +90,7 @@ func NoticControl(alert *models.Alert) {
 	}
 
 	var timer = time.NewTimer(0 * time.Second)
+	var stopSend = time.NewTimer(StopSend)
 
 	for {
 
@@ -92,14 +101,18 @@ func NoticControl(alert *models.Alert) {
 				beego.Info("Alert has been fix")
 				return
 			}
+			stopSend.Reset(StopSend)
+		case <-stopSend:
+			beego.Info("Have not get this alert for long time. Stop sending email.")
+			return
 		case <-timer.C:
-			//if beego.AppConfig.String("runmode") != "dev" {
-				for _, server := range cacheServer {
-					if server != nil {
-						server.SendAlert(alert)
-					}
+		//if beego.AppConfig.String("runmode") != "dev" {
+			for _, server := range cacheServer {
+				if server != nil {
+					server.SendAlert(alert)
 				}
-			//}
+			}
+		//}
 
 			timer.Reset(GetSendMsgInterval(alert.Level))
 		}

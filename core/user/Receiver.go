@@ -114,7 +114,7 @@ func initUser() error {
 				if globalConfigService.Session != nil {
 					defer globalConfigService.Session.Close()
 				}
-				if ok := globalConfigService.CheckExist("IsAdmin", user.Name); ok {
+				if ok, _ := globalConfigService.CheckExist("IsAdmin", user.Name); ok {
 					user.IsAdmin = true
 				}
 				cacheUsersTmp[user.Name] = user

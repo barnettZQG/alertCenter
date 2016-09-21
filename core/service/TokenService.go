@@ -60,6 +60,10 @@ func (e *TokenService) GetDefaultToken(user string) *models.Token {
 //CreateToken 创建token
 func (e *TokenService) CreateToken(project string, userName string) *models.Token {
 	beego.Debug("create token project:" + project + " ,user:" + userName)
+	old := e.GetToken(project, userName)
+	if old != nil {
+		return old
+	}
 	token := &models.Token{
 		Value:      uuid.NewV4().String(),
 		CreateTime: time.Now(),

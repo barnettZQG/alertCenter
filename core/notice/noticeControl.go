@@ -72,7 +72,7 @@ func NoticControl(alert *models.Alert) {
 	var timeout = time.NewTimer(IgnoreSend)
 	noNeedFlag := false
 
-	NoNeedSend:
+NoNeedSend:
 	for {
 		select {
 		case tmp := <-ch:
@@ -102,17 +102,17 @@ func NoticControl(alert *models.Alert) {
 				return
 			}
 			stopSend.Reset(StopSend)
-		case <-stopSend:
+		case <-stopSend.C:
 			beego.Info("Have not get this alert for long time. Stop sending email.")
 			return
 		case <-timer.C:
-		//if beego.AppConfig.String("runmode") != "dev" {
+			//if beego.AppConfig.String("runmode") != "dev" {
 			for _, server := range cacheServer {
 				if server != nil {
 					server.SendAlert(alert)
 				}
 			}
-		//}
+			//}
 
 			timer.Reset(GetSendMsgInterval(alert.Level))
 		}

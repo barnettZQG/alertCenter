@@ -24,7 +24,7 @@ func (e *PrometheusAPI) ReceivePrometheus() {
 	if configService.Session != nil {
 		defer configService.Session.Close()
 	}
-	if ok := configService.CheckExist("TrustIP", ip); ok {
+	if ok, _ := configService.CheckExist("TrustIP", ip); ok {
 		data := e.Ctx.Input.RequestBody
 		if data != nil && len(data) > 0 {
 			var Alerts []*models.Alert = make([]*models.Alert, 0)

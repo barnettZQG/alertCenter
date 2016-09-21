@@ -22,7 +22,7 @@ func init() {
 	beego.Router("/api/receive", &controllers.APIController{}, "post:Receive")
 	beego.Router("/api/v1/alerts", &controllers.PrometheusAPI{}, "post:ReceivePrometheus")
 	//beego.Router("/api/getTag", &controllers.APIController{}, "get:AddTag")
-	beego.Router("/api/alert/handle/:ID/:type", &controllers.APIController{}, "post:HandleAlert")
+
 	beego.Router("/api/ignoreRules", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")
 	beego.Router("/api/ignoreRule/:ruleID", &controllers.IgnoreRuleAPIControll{}, "delete:DeleteRule")
 	beego.Router("/api/alerts", &controllers.APIController{}, "get:GetAlerts")

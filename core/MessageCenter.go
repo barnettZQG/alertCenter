@@ -10,52 +10,54 @@ import (
 	"alertCenter/core/service"
 	"alertCenter/core/user"
 	"alertCenter/models"
+
+	mgo "gopkg.in/mgo.v2"
 )
 
 //HandleMessage 处理alertmanager回来的数据
-func HandleMessage(message *models.AlertReceive) {
-	session := db.GetMongoSession()
-	if session != nil {
-		defer session.Close()
-	}
-	alertService := &service.AlertService{
-		Session: session,
-	}
-	ok := SaveMessage(message, session)
-	if !ok {
-		beego.Error("save a message fail,message receiver:" + message.Receiver)
-	}
-	for _, alert := range message.Alerts {
-		old := alertService.GetAlertByLabels(&alert)
-		if old != nil {
-			old.AlertCount = old.AlertCount + 1
-			old = old.Merge(&alert)
-			if !old.EndsAt.IsZero() {
-				old.IsHandle = 2
-				old.HandleDate = time.Now()
-				old.HandleMessage = "报警已自动恢复"
-			}
-			alertService.Update(old)
-		} else {
-			alert.AlertCount = 1
-			alert.IsHandle = 0
-			alert.Mark = alert.Fingerprint().String()
-			alert.Receiver = user.GetReceiverByTeam(message.Receiver)
-			now := time.Now()
-			// Ensure StartsAt is set.
-			if alert.StartsAt.IsZero() {
-				alert.StartsAt = now
-			}
-			if !alert.EndsAt.IsZero() {
-				alert.IsHandle = 2
-				alert.HandleDate = time.Now()
-				alert.HandleMessage = "报警已自动恢复"
-			}
-			alertService.Save(&alert)
-		}
-	}
+// func HandleMessage(message *models.AlertReceive) {
+// 	session := db.GetMongoSession()
+// 	if session != nil {
+// 		defer session.Close()
+// 	}
+// 	alertService := &service.AlertService{
+// 		Session: session,
+// 	}
+// 	ok := SaveMessage(message, session)
+// 	if !ok {
+// 		beego.Error("save a message fail,message receiver:" + message.Receiver)
+// 	}
+// 	for _, alert := range message.Alerts {
+// 		old := alertService.GetAlertByLabels(&alert)
+// 		if old != nil {
+// 			old.AlertCount = old.AlertCount + 1
+// 			old = old.Merge(&alert)
+// 			if !old.EndsAt.IsZero() {
+// 				old.IsHandle = 2
+// 				old.HandleDate = time.Now()
+// 				old.HandleMessage = "报警已自动恢复"
+// 			}
+// 			alertService.Update(old)
+// 		} else {
+// 			alert.AlertCount = 1
+// 			alert.IsHandle = 0
+// 			alert.Mark = alert.Fingerprint().String()
+// 			alert.Receiver = user.GetReceiverByTeam(message.Receiver)
+// 			now := time.Now()
+// 			// Ensure StartsAt is set.
+// 			if alert.StartsAt.IsZero() {
+// 				alert.StartsAt = now
+// 			}
+// 			if !alert.EndsAt.IsZero() {
+// 				alert.IsHandle = 2
+// 				alert.HandleDate = time.Now()
+// 				alert.HandleMessage = "报警已自动恢复"
+// 			}
+// 			alertService.Save(&alert)
+// 		}
+// 	}
 
-}
+// }
 
 //HandleAlerts 处理prometheus回来的数据
 func HandleAlerts(alerts []*models.Alert) {
@@ -68,45 +70,53 @@ func HandleAlerts(alerts []*models.Alert) {
 	}
 	for _, alert := range alerts {
 		//start := time.Now()
-		old := alertService.GetAlertByLabels(alert)
-		//fmt.Println("get label:", time.Now().Sub(start))
-		if old != nil && old.EndsAt.IsZero() {
-			old.AlertCount = old.AlertCount + 1
-			alert.UpdatedAt = time.Now()
-			old = old.Merge(alert)
-			//old已更新时间信息
-			if !old.EndsAt.IsZero() {
-				old.IsHandle = 2
-				old.HandleDate = time.Now()
-				old.HandleMessage = "报警已自动恢复"
-				SaveHistory(alertService, old)
-			}
-			old.UpdatedAt = time.Now()
-			Notice(old)
-			alertService.Update(old)
-		} else if old != nil && !old.EndsAt.IsZero() {
-			//此报警曾出现过并已结束
-			if alert.StartsAt.After(old.EndsAt) {
-				//报警开始时间在原报警之后，我们认为这是新报警
-				//old更新状态信息
-				old = old.Reset(alert)
-				if old.IsHandle == 2 {
-					SaveHistory(alertService, old)
-				}
-				Notice(old)
-				alertService.Update(old)
-			} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) {
-				// 新的结束时间
-				history := alertService.FindHistory(old)
-				old.EndsAt = alert.EndsAt
-				history.EndsAt = alert.EndsAt
-				alertService.Update(old)
-				alertService.UpdateHistory(history)
+		old, err := alertService.GetAlertByLabels(alert)
+		if err != nil {
+			if err.Error() == mgo.ErrNotFound.Error() {
+				SaveAlert(alertService, alert)
+			} else {
+				continue
 			}
 		} else {
-			//曾经没出现过的报警
-			SaveAlert(alertService, alert)
+			//fmt.Println("get label:", time.Now().Sub(start))
+			if old != nil && old.EndsAt.IsZero() {
+				old.AlertCount = old.AlertCount + 1
+				alert.UpdatedAt = time.Now()
+				old = old.Merge(alert)
+				//old已更新时间信息
+				if !old.EndsAt.IsZero() {
+					old.IsHandle = 2
+					old.HandleDate = time.Now()
+					old.HandleMessage = "报警已自动恢复"
+					SaveHistory(alertService, old)
+				}
+				old.UpdatedAt = time.Now()
+				Notice(old)
+				alertService.Update(old)
+			} else if old != nil && !old.EndsAt.IsZero() {
+				//此报警曾出现过并已结束
+				if alert.StartsAt.After(old.EndsAt) {
+					//报警开始时间在原报警之后，我们认为这是新报警
+					//old更新状态信息
+					old = old.Reset(alert)
+					if old.IsHandle == 2 {
+						SaveHistory(alertService, old)
+					}
+					Notice(old)
+					alertService.Update(old)
+				} else if alert.StartsAt.Before(old.EndsAt) && alert.EndsAt.After(old.EndsAt) {
+					// 新的结束时间
+					history, err := alertService.FindHistory(old)
+					if history != nil && err == nil {
+						old.EndsAt = alert.EndsAt
+						history.EndsAt = alert.EndsAt
+						alertService.Update(old)
+						alertService.UpdateHistory(history)
+					}
+				}
+			}
 		}
+
 		//fmt.Println("alert cost:", time.Now().Sub(start))
 	}
 }
@@ -120,8 +130,11 @@ func Notice(alert *models.Alert) {
 	if service.Session != nil {
 		defer service.Session.Close()
 	}
-	noticeOn := service.GetConfig("noticeOn")
-
+	noticeOn, err := service.GetConfig("noticeOn")
+	if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+		beego.Debug("get noticeOn from database error." + err.Error())
+		return
+	}
 	if noticeOn != nil && !noticeOn.Value.(bool) {
 		beego.Debug("notice center closed.")
 		return
@@ -165,7 +178,10 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 			user := relation.GetUserByName(userName)
 			var ignore bool
 			if user != nil {
-				rules := ruleService.FindRuleByUser(user.Name)
+				rules, err := ruleService.FindRuleByUser(user.Name)
+				if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+					continue
+				}
 				if rules != nil && len(rules) > 0 {
 					for _, rule := range rules {
 						//判断是否已过期

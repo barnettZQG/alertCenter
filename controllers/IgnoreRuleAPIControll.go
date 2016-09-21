@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
+	mgo "gopkg.in/mgo.v2"
 )
 
 type IgnoreRuleAPIControll struct {
@@ -58,8 +59,8 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 		ruleService := &service.IgnoreRuleService{
 			Session: session,
 		}
-		rules := ruleService.FindRuleByUser(user)
-		if rules != nil {
+		rules, err := ruleService.FindRuleByUser(user)
+		if rules != nil || err.Error() == mgo.ErrNotFound.Error() {
 			e.Data["json"] = util.GetSuccessReJson(rules)
 		} else {
 			e.Data["json"] = util.GetFailJson("userID is not exit or this user have not rules")
@@ -82,8 +83,8 @@ func (e *IgnoreRuleAPIControll) AddRuleByAlert() {
 		alertService := &service.AlertService{
 			Session: session,
 		}
-		alert := alertService.FindByID(ID)
-		if alert == nil {
+		alert, err := alertService.FindByID(ID)
+		if alert == nil || err != nil {
 			e.Data["json"] = util.GetErrorJson("alertID is not exit")
 		} else {
 			rule := &models.UserIgnoreRule{

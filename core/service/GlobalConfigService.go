@@ -3,9 +3,11 @@ package service
 import (
 	"alertCenter/core/db"
 	"alertCenter/models"
+	"fmt"
 	"time"
 
 	"github.com/astaxie/beego"
+	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -13,25 +15,61 @@ type GlobalConfigService struct {
 	Session *db.MongoSession
 }
 
-func (e *GlobalConfigService) Init() error {
-	if config := e.GetConfig("noticeOn"); config == nil {
-		e.Session.Insert("GlobalConfig", &models.GlobalConfig{
-			Name:    "noticeOn",
-			Value:   true,
-			AddTime: time.Now(),
-		})
-	}
-	return nil
-}
+var globalConfig map[string]*models.GlobalConfig
+var globalConfigs []*models.GlobalConfig
 
-//GetConfig 获取全局配置
-func (e *GlobalConfigService) GetConfig(name string) (config *models.GlobalConfig) {
+//RefreshGlobalCnfig 更新全局配置缓存
+func (e *GlobalConfigService) RefreshGlobalCnfig() {
+	beego.Debug("Start refresh global configs.")
+	if e.Session == nil {
+		return
+	}
 	coll := e.Session.GetCollection("GlobalConfig")
 	if coll == nil {
 		beego.Error("get GlobalConfig collection error when init NoticeOn ")
 	} else {
+		var configs []*models.GlobalConfig
+		err := coll.Find(nil).Select(nil).All(&configs)
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+			beego.Error("get GlobalConfigs error " + err.Error())
+		}
+		if configs != nil {
+			globalConfigs = configs
+			globalConfigTmp := make(map[string]*models.GlobalConfig, 0)
+			for _, config := range configs {
+				globalConfigTmp[config.Name] = config
+			}
+			globalConfig = globalConfigTmp
+			beego.Debug("refresh global configs success.size:", len(globalConfig))
+		}
+	}
+
+}
+func (e *GlobalConfigService) Init() error {
+
+	if config, _ := e.GetConfig("noticeOn"); config == nil {
+		e.Insert(&models.GlobalConfig{
+			Name:    "noticeOn",
+			Value:   false,
+			AddTime: time.Now(),
+		})
+	}
+	e.RefreshGlobalCnfig()
+	return nil
+}
+
+//GetConfig 获取全局配置,重复名称的配置不适合此方法
+func (e *GlobalConfigService) GetConfig(name string) (config *models.GlobalConfig, err error) {
+	if config := globalConfig[name]; config != nil {
+		return config, nil
+	}
+	coll := e.Session.GetCollection("GlobalConfig")
+	if coll == nil {
+		beego.Error("get GlobalConfig collection error when init NoticeOn ")
+		err = fmt.Errorf("get GlobalConfig collection error")
+	} else {
 		err := coll.Find(bson.M{"name": name}).Select(nil).One(&config)
-		if err != nil {
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 			beego.Error("get GlobalConfig with name " + name + " error " + err.Error())
 		}
 	}
@@ -39,13 +77,21 @@ func (e *GlobalConfigService) GetConfig(name string) (config *models.GlobalConfi
 }
 
 //GetConfigA 获取全局配置
-func (e *GlobalConfigService) GetConfigA(name string, value interface{}) (config *models.GlobalConfig) {
+func (e *GlobalConfigService) GetConfigA(name string, value interface{}) (config *models.GlobalConfig, err error) {
+	if globalConfigs != nil {
+		for _, config := range globalConfigs {
+			if config.Name == name && config.Value == value {
+				return config, nil
+			}
+		}
+	}
 	coll := e.Session.GetCollection("GlobalConfig")
 	if coll == nil {
 		beego.Error("get GlobalConfig collection error when init NoticeOn ")
+		err = fmt.Errorf("get GlobalConfig collection error")
 	} else {
-		err := coll.Find(bson.M{"name": name, "value": value}).Select(nil).One(&config)
-		if err != nil {
+		err = coll.Find(bson.M{"name": name, "value": value}).Select(nil).One(&config)
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 			beego.Error("get GlobalConfig with name " + name + " error " + err.Error())
 		}
 	}
@@ -53,13 +99,22 @@ func (e *GlobalConfigService) GetConfigA(name string, value interface{}) (config
 }
 
 //GetAllConfig 获取同名全部配置
-func (e *GlobalConfigService) GetAllConfig(name string) (configs []*models.GlobalConfig) {
+func (e *GlobalConfigService) GetAllConfig(name string) (configs []*models.GlobalConfig, err error) {
+	if globalConfigs != nil {
+		for _, config := range globalConfigs {
+			if config.Name == name {
+				configs = append(configs, config)
+			}
+		}
+		return
+	}
 	coll := e.Session.GetCollection("GlobalConfig")
 	if coll == nil {
 		beego.Error("get GlobalConfig collection error when init NoticeOn ")
+		err = fmt.Errorf("get GlobalConfig collection error")
 	} else {
-		err := coll.Find(bson.M{"name": name}).Select(nil).All(&configs)
-		if err != nil {
+		err = coll.Find(bson.M{"name": name}).Select(nil).All(&configs)
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 			beego.Error("get GlobalConfig with name " + name + " error " + err.Error())
 		}
 	}
@@ -67,18 +122,32 @@ func (e *GlobalConfigService) GetAllConfig(name string) (configs []*models.Globa
 }
 
 //CheckExist 判断指定变量是否存在
-func (e *GlobalConfigService) CheckExist(name string, value interface{}) bool {
+func (e *GlobalConfigService) CheckExist(name string, value interface{}) (bool, error) {
+	if globalConfigs != nil {
+		for _, config := range globalConfigs {
+			if config.Name == name && config.Value == value {
+				return true, nil
+			}
+		}
+		return false, nil
+	}
 	coll := e.Session.GetCollection("GlobalConfig")
+	var err error
 	if coll == nil {
 		beego.Error("get GlobalConfig collection error when init NoticeOn ")
+		err = fmt.Errorf("get GlobalConfig collection error")
 	} else {
 		var config models.GlobalConfig
-		err := coll.Find(bson.M{"name": name, "value": value}).Select(nil).One(&config)
-		if err == nil && &config != nil {
-			return true
+		err = coll.Find(bson.M{"name": name, "value": value}).Select(nil).One(&config)
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+			beego.Error("get config error," + err.Error())
+			return false, err
+		}
+		if &config != nil {
+			return true, nil
 		}
 	}
-	return false
+	return false, err
 }
 
 //Update 更新全局配置
@@ -94,6 +163,16 @@ func (e *GlobalConfigService) Update(config *models.GlobalConfig) bool {
 		if err != nil {
 			beego.Error("update GlobalConfig with name " + config.Name + " error " + err.Error())
 			return false
+		}
+		if globalConfig != nil {
+			globalConfig[config.Name] = config
+		}
+		if globalConfigs != nil {
+			for _, c := range globalConfigs {
+				if c.Name == config.Name {
+					c.Value = config.Value
+				}
+			}
 		}
 		return true
 	}
@@ -111,6 +190,34 @@ func (e *GlobalConfigService) DeleteByID(id string) bool {
 			beego.Error("remove GlobalConfig by ID(" + id + ") error ." + err.Error())
 			return false
 		}
+		var co *models.GlobalConfig
+		var cos []*models.GlobalConfig
+		if globalConfigs != nil {
+			for _, c := range globalConfigs {
+				if c.ID.String() == id {
+					co = c
+				} else {
+					cos = append(cos, c)
+				}
+			}
+			globalConfigs = cos
+		}
+		if globalConfig != nil {
+			delete(globalConfig, co.Name)
+		}
+		return true
+	}
+	return false
+}
+
+//Insert 添加全局配置
+func (e *GlobalConfigService) Insert(config *models.GlobalConfig) bool {
+	if e.Session == nil || config == nil {
+		return false
+	}
+	if ok := e.Session.Insert("GlobalConfig", config); ok {
+		globalConfig[config.Name] = config
+		globalConfigs = append(globalConfigs, config)
 		return true
 	}
 	return false

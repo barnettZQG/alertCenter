@@ -235,14 +235,14 @@
     <script src="/static/js/bootstrap-switch.js"></script>
     <script>
        $(function(){
-          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
           {{if .isAdmin}}
+          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
           $.get({{.token}},{{.userName}},"/api/noticeOn",function(result,status){
              if (status!="success"){
                 $.alertFail("alert","请求noticeON API错误")
               }else{
                 if(result.status=="success"){
-                  $('input[id="switch-onColor"]').bootstrapSwitch('state', result.data.value, true);
+                  $('input[id="switch-onColor"]').bootstrapSwitch('state', result.data.Value, true);
                 }else{
                   $.alert("alert",result)
                 }

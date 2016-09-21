@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
+	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -38,49 +39,6 @@ func (e *APIController) Receive() {
 		e.Data["json"] = util.GetErrorJson("receive a unknow data")
 	}
 
-	e.ServeJSON()
-}
-
-// func (e *APIController) AddTag() {
-// 	we := &core.notice.WeAlertSend{}
-// 	if ok := we.GetAllTags(); ok {
-// 		e.Data["json"] = util.GetSuccessJson("get weiTag success")
-// 	} else {
-// 		e.Data["json"] = util.GetFailJson("get weiTag faild")
-// 	}
-// 	e.ServeJSON()
-// }
-
-func (e *APIController) HandleAlert() {
-	ID := e.GetString(":ID")
-	Type := e.GetString(":type")
-	message := e.GetString("message")
-	if len(ID) == 0 || len(Type) == 0 {
-		e.Data["json"] = util.GetErrorJson("参数格式错误")
-	} else {
-		session := db.GetMongoSession()
-		if session != nil {
-			defer session.Close()
-		}
-		alertService := service.GetAlertService(session)
-		alert := alertService.FindByID(ID)
-		if alert == nil {
-			e.Data["json"] = util.GetFailJson("报警信息不存在，id信息错误")
-		} else {
-			if Type == "handle" {
-				alert.IsHandle = 1
-			} else if Type == "miss" {
-				alert.IsHandle = -1
-			}
-			alert.HandleDate = time.Now()
-			alert.HandleMessage = message
-			if ok := alertService.Update(alert); ok {
-				e.Data["json"] = util.GetSuccessJson("登记成功")
-			} else {
-				e.Data["json"] = util.GetFailJson("登记失败")
-			}
-		}
-	}
 	e.ServeJSON()
 }
 
@@ -120,19 +78,19 @@ func (e *APIController) GetAlerts() {
 	} else {
 		e.alertService = service.GetAlertService(e.session)
 		if len(receiver) != 0 && receiver != "all" {
-			alerts := e.alertService.FindByUser(receiver, pageSize, page)
+			alerts, err := e.alertService.FindByUser(receiver, pageSize, page)
 			beego.Info("Get", len(alerts), " alerts")
-			if alerts == nil {
-				e.Data["json"] = util.GetFailJson("get database collection faild or receiver is error ")
+			if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+				e.Data["json"] = util.GetFailJson("get alerts error.")
 				goto over
 			} else {
 				e.Data["json"] = util.GetSuccessReJson(alerts)
 				goto over
 			}
 		} else if receiver == "all" {
-			alerts := e.alertService.FindAll(pageSize, page)
-			if alerts == nil {
-				e.Data["json"] = util.GetFailJson("get database collection faild")
+			alerts, err := e.alertService.FindAll(pageSize, page)
+			if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+				e.Data["json"] = util.GetFailJson("get alerts error.")
 				goto over
 			} else {
 				e.Data["json"] = util.GetSuccessReJson(alerts)
@@ -169,13 +127,13 @@ func (e *APIController) SetNoticeMode() {
 				service := &service.GlobalConfigService{
 					Session: session,
 				}
-				config := service.GetConfig("noticeOn")
-				if config == nil {
+				config, err := service.GetConfig("noticeOn")
+				if config == nil && err.Error() == mgo.ErrNotFound.Error() {
 					config = &models.GlobalConfig{}
 					config.Name = "noticeOn"
 					config.Value = status
 					config.AddTime = time.Now()
-					session.Insert("GlobalConfig", config)
+					service.Insert(config)
 				} else {
 					config.Value = status
 					service.Update(config)
@@ -204,8 +162,8 @@ func (e *APIController) GetNoticeMode() {
 			service := &service.GlobalConfigService{
 				Session: session,
 			}
-			config := service.GetConfig("noticeOn")
-			if config == nil {
+			config, err := service.GetConfig("noticeOn")
+			if config == nil && err.Error() == mgo.ErrNotFound.Error() {
 				config = &models.GlobalConfig{}
 				config.Name = "noticeOn"
 				config.Value = true
@@ -243,19 +201,21 @@ func (e *APIController) AddTrustIP() {
 				service := &service.GlobalConfigService{
 					Session: session,
 				}
-				if ok := service.CheckExist("TrustIP", config.Value); !ok {
-					service.Session.Insert("GlobalConfig", &models.GlobalConfig{
+				if ok, err := service.CheckExist("TrustIP", config.Value); !ok && err.Error() == mgo.ErrNotFound.Error() {
+					service.Insert(&models.GlobalConfig{
 						Name:    "TrustIP",
 						Value:   config.Value,
 						AddTime: time.Now(),
 						ID:      bson.NewObjectId(),
 					})
 				}
-				re := service.GetConfigA("TrustIP", config.Value)
+				re, err := service.GetConfigA("TrustIP", config.Value)
 				if re != nil {
 					e.Data["json"] = util.GetSuccessReJson(re)
-				} else {
+				} else if err.Error() == mgo.ErrNotFound.Error() {
 					e.Data["json"] = util.GetFailJson("insert trust ip faild")
+				} else {
+					e.Data["json"] = util.GetFailJson("An unknown error when get trust ip")
 				}
 
 			}
@@ -282,11 +242,11 @@ func (e *APIController) GetTrustIP() {
 				Session: session,
 			}
 
-			re := service.GetAllConfig("TrustIP")
-			if re != nil {
-				e.Data["json"] = util.GetSuccessReJson(re)
+			re, err := service.GetAllConfig("TrustIP")
+			if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+				e.Data["json"] = util.GetFailJson("get trust ip error")
 			} else {
-				e.Data["json"] = util.GetFailJson("there is not trust ip.")
+				e.Data["json"] = util.GetSuccessReJson(re)
 			}
 
 		}
@@ -334,6 +294,14 @@ func (e *APIController) RefreshCache() {
 	user := relation.GetUserByName(userName)
 	if user != nil && user.IsAdmin {
 		relation.RefreshCache()
+		globalServcie := &service.GlobalConfigService{
+			Session: db.GetMongoSession(),
+		}
+		if globalServcie.Session != nil {
+			defer globalServcie.Session.Close()
+		}
+		//更新全局配置缓存
+		globalServcie.RefreshGlobalCnfig()
 		e.Data["json"] = util.GetSuccessJson("fresh cache success")
 	} else {
 		e.Data["json"] = util.GetFailJson("Do not allow the operation")

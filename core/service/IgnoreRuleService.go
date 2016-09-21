@@ -3,8 +3,10 @@ package service
 import (
 	"alertCenter/core/db"
 	"alertCenter/models"
+	"fmt"
 	"time"
 
+	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/astaxie/beego"
@@ -16,30 +18,30 @@ type IgnoreRuleService struct {
 }
 
 //FindRuleByUser 获取规则
-func (e *IgnoreRuleService) FindRuleByUser(userName string) (rules []*models.UserIgnoreRule) {
+func (e *IgnoreRuleService) FindRuleByUser(userName string) (rules []*models.UserIgnoreRule, err error) {
 	coll := e.Session.GetCollection("IgnoreRule")
 	if coll == nil {
-		return nil
+		return nil, fmt.Errorf("get IgnoreRule collection error")
 	}
-	coll.Find(bson.M{"username": userName}).Select(nil).All(&rules)
+	err = coll.Find(bson.M{"username": userName}).Select(nil).All(&rules)
 	return
 }
 
 //FindRuleByMark 通过mark获取规则
-func (e *IgnoreRuleService) FindRuleByMark(mark string) (rule *models.UserIgnoreRule) {
+func (e *IgnoreRuleService) FindRuleByMark(mark string) (rule *models.UserIgnoreRule, err error) {
 	coll := e.Session.GetCollection("IgnoreRule")
 	if coll == nil {
-		return nil
+		return nil, fmt.Errorf("get IgnoreRule collection error")
 	}
-	coll.Find(bson.M{"mark": mark}).Select(nil).One(rule)
+	err = coll.Find(bson.M{"mark": mark}).Select(nil).One(rule)
 	return
 }
 
 //AddRule 添加规则
 func (e *IgnoreRuleService) AddRule(rule *models.UserIgnoreRule) {
 	rule.Mark = rule.Labels.FastFingerprint().String()
-	old := e.FindRuleByMark(rule.Mark)
-	if old == nil {
+	_, err := e.FindRuleByMark(rule.Mark)
+	if err != nil && err.Error() == mgo.ErrNotFound.Error() {
 		rule.AddTime = time.Now()
 		rule.RuleID = uuid.NewV4().String()
 		rule.IsLive = true

@@ -60,10 +60,10 @@ func (e *IgnoreRuleAPIControll) GetRulesByUser() {
 			Session: session,
 		}
 		rules, err := ruleService.FindRuleByUser(user)
-		if rules != nil || err.Error() == mgo.ErrNotFound.Error() {
+		if rules != nil || err == nil || (err != nil && err == mgo.ErrNotFound) {
 			e.Data["json"] = util.GetSuccessReJson(rules)
-		} else {
-			e.Data["json"] = util.GetFailJson("userID is not exit or this user have not rules")
+		} else if err != nil {
+			e.Data["json"] = util.GetFailJson("get rules error." + err.Error())
 		}
 	}
 	e.ServeJSON()

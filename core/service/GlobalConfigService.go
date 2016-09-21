@@ -46,9 +46,11 @@ func (e *GlobalConfigService) RefreshGlobalCnfig() {
 
 }
 func (e *GlobalConfigService) Init() error {
-
+	globalConfig = make(map[string]*models.GlobalConfig, 0)
+	globalConfigs = make([]*models.GlobalConfig, 0)
 	if config, _ := e.GetConfig("noticeOn"); config == nil {
 		e.Insert(&models.GlobalConfig{
+			ID:      bson.NewObjectId(),
 			Name:    "noticeOn",
 			Value:   false,
 			AddTime: time.Now(),

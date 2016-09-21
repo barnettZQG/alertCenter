@@ -13,25 +13,10 @@ var Session *mgo.Session
 func init() {
 	session, err := Open()
 	if err != nil || session == nil {
-		panic("mongodb init error!")
+		panic("mongodb init error!" + err.Error())
 	}
-	Session = session
-	Open()
+	defer session.Close()
 }
-
-// func createSession() *mgo.Session {
-// 	URL := beego.AppConfig.String("mongoURI")
-// 	fmt.Println("Url:", URL)
-// 	//URL := "10.12.1.129:27017"
-// 	session, err := mgo.Dial(URL) //连接数据库
-// 	if err != nil {
-// 		beego.Error("Get mongo session error." + err.Error())
-// 		return nil
-// 	}
-// 	//defer session.Close()
-// 	session.SetMode(mgo.Monotonic, true)
-// 	return session
-// }
 func Open() (*mgo.Session, error) {
 	if Session == nil {
 		login := &mgo.DialInfo{
@@ -49,7 +34,7 @@ func Open() (*mgo.Session, error) {
 			return nil, err
 		}
 		Session = session
-		return session, err
+		return session.Clone(), err
 	}
 	return Session, nil
 }

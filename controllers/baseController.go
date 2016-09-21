@@ -38,7 +38,7 @@ func (this *BaseController) Prepare() {
 		http.Redirect(this.Ctx.ResponseWriter, this.Ctx.Request, redirct, http.StatusTemporaryRedirect)
 		return
 	} else if sessUsername == nil && paramCode != "" {
-		fmt.Println("in sessUsername == nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
+		beego.Debug("in sessUsername == nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
 		access, err := gitlab.GetGitlabAccessToken(paramCode)
 		if err != nil {
 			beego.Error(err)
@@ -72,6 +72,7 @@ func (this *BaseController) Prepare() {
 			return
 		}
 		this.Data["user"] = relationUser
+		this.Data["userName"] = username
 		err = sess.Set(session.SESSION_USER, relationUser)
 		if err != nil {
 			beego.Error(err)

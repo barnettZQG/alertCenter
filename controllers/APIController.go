@@ -201,7 +201,7 @@ func (e *APIController) AddTrustIP() {
 				service := &service.GlobalConfigService{
 					Session: session,
 				}
-				if ok, err := service.CheckExist("TrustIP", config.Value); !ok && err.Error() == mgo.ErrNotFound.Error() {
+				if ok, err := service.CheckExist("TrustIP", config.Value); !ok && (err == nil || err.Error() == mgo.ErrNotFound.Error()) {
 					service.Insert(&models.GlobalConfig{
 						Name:    "TrustIP",
 						Value:   config.Value,

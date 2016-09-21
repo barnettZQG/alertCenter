@@ -293,7 +293,6 @@ func (e *APIController) RefreshCache() {
 	relation := user.Relation{}
 	user := relation.GetUserByName(userName)
 	if user != nil && user.IsAdmin {
-		relation.RefreshCache()
 		globalServcie := &service.GlobalConfigService{
 			Session: db.GetMongoSession(),
 		}
@@ -302,6 +301,8 @@ func (e *APIController) RefreshCache() {
 		}
 		//更新全局配置缓存
 		globalServcie.RefreshGlobalCnfig()
+		//更新用户信息，必须在全局配置以后更新
+		relation.RefreshCache()
 		e.Data["json"] = util.GetSuccessJson("fresh cache success")
 	} else {
 		e.Data["json"] = util.GetFailJson("Do not allow the operation")

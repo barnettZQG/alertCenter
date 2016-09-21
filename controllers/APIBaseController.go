@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"alertCenter/core/service"
-	"fmt"
-	"time"
 
 	"alertCenter/util"
 
@@ -16,8 +14,8 @@ type APIBaseController struct {
 }
 
 func (this *APIBaseController) Prepare() {
-	start := time.Now()
-	defer fmt.Println("check token time:", time.Now().Sub(start))
+	// start := time.Now()
+	// defer fmt.Println("check token time:", time.Now().Sub(start))
 
 	token := this.Ctx.Input.Header("token")
 	user := this.Ctx.Input.Header("user")

@@ -66,7 +66,7 @@ func GetGitlabAccessToken(code string) (*GitlabAccessToken, error) {
 	uri := u.Path + "?" + q
 
 	targetUrl := beego.AppConfig.String("Gitlab") + uri
-	beego.Debug("GetGitlabAccessToken url:", targetUrl, "gitlab:", beego.AppConfig.String("Gitlab"))
+	//beego.Debug("GetGitlabAccessToken url:", targetUrl, "gitlab:", beego.AppConfig.String("Gitlab"))
 
 	resp, err := http.Post(targetUrl, "application/json", nil)
 	if err != nil {

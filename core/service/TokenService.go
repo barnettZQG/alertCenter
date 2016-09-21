@@ -3,7 +3,6 @@ package service
 import (
 	"alertCenter/core/db"
 	"alertCenter/models"
-	"fmt"
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
@@ -82,8 +81,8 @@ func (e *TokenService) CreateToken(project string, userName string) *models.Toke
 
 //CheckToken 验证token
 func (e *TokenService) CheckToken(token string, user string) bool {
-	start := time.Now()
-	defer fmt.Println("checkToken time:", time.Now().Sub(start))
+	// start := time.Now()
+	// defer fmt.Println("checkToken time:", time.Now().Sub(start))
 	for _, v := range cacheToken[user] {
 		if v.Value == token {
 			return true

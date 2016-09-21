@@ -6,7 +6,6 @@ import (
 	"alertCenter/core/gitlab"
 	"alertCenter/core/service"
 	"alertCenter/core/user"
-	"fmt"
 	"net/http"
 
 	"github.com/astaxie/beego"
@@ -49,7 +48,7 @@ func (this *BaseController) Prepare() {
 			beego.Error(err)
 			return
 		}
-		beego.Debug("access token:", access, "user:", u)
+		//beego.Debug("access token:", access, "user:", u)
 
 		username := u.Username
 		beego.Info("user login username:", username)
@@ -96,7 +95,7 @@ func (this *BaseController) Prepare() {
 			}
 		}
 	} else {
-		fmt.Println("in sessUsername != nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
+		//fmt.Println("in sessUsername != nil && paramCode != nil, paramCode:", paramCode, "session:", sessUsername)
 		//全局模版变量
 		this.Data["userName"] = sessUsername
 		relation := user.Relation{}
@@ -115,7 +114,7 @@ func (this *BaseController) Prepare() {
 			this.Data["token"] = defaultToken.Value
 		}
 
-		beego.Debug("redirect in else user:", relationUser, "username:", sessUsername, "token:", defaultToken.Value)
+		//beego.Debug("redirect in else user:", relationUser, "username:", sessUsername, "token:", defaultToken.Value)
 		if name, ok := sessUsername.(string); ok {
 			this.Username = name
 		}

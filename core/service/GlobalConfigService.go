@@ -15,7 +15,7 @@ type GlobalConfigService struct {
 	Session *db.MongoSession
 }
 
-var globalConfig map[string]*models.GlobalConfig
+var globalConfigMap map[string]*models.GlobalConfig
 var globalConfigs []*models.GlobalConfig
 
 //RefreshGlobalCnfig 更新全局配置缓存
@@ -39,14 +39,14 @@ func (e *GlobalConfigService) RefreshGlobalCnfig() {
 			for _, config := range configs {
 				globalConfigTmp[config.Name] = config
 			}
-			globalConfig = globalConfigTmp
-			beego.Debug("refresh global configs success.size:", len(globalConfig))
+			globalConfigMap = globalConfigTmp
+			beego.Debug("refresh global configs success.size:", len(globalConfigMap))
 		}
 	}
 
 }
 func (e *GlobalConfigService) Init() error {
-	globalConfig = make(map[string]*models.GlobalConfig, 0)
+	globalConfigMap = make(map[string]*models.GlobalConfig, 0)
 	globalConfigs = make([]*models.GlobalConfig, 0)
 	if config, _ := e.GetConfig("noticeOn"); config == nil {
 		e.Insert(&models.GlobalConfig{
@@ -62,7 +62,7 @@ func (e *GlobalConfigService) Init() error {
 
 //GetConfig 获取全局配置,重复名称的配置不适合此方法
 func (e *GlobalConfigService) GetConfig(name string) (config *models.GlobalConfig, err error) {
-	if config := globalConfig[name]; config != nil {
+	if config := globalConfigMap[name]; config != nil {
 		return config, nil
 	}
 	coll := e.Session.GetCollection("GlobalConfig")
@@ -123,11 +123,12 @@ func (e *GlobalConfigService) GetAllConfig(name string) (configs []*models.Globa
 	return
 }
 
-//CheckExist 判断指定变量是否存在
+//CheckExist 判断指定变量是否存在, 适用于value类型为string的
 func (e *GlobalConfigService) CheckExist(name string, value interface{}) (bool, error) {
 	if globalConfigs != nil {
 		for _, config := range globalConfigs {
-			if config.Name == name && config.Value == value {
+			beego.Debug(config.Name, name, config.Value, value)
+			if config.Name == name && config.Value.(string) == value.(string) {
 				return true, nil
 			}
 		}
@@ -139,11 +140,14 @@ func (e *GlobalConfigService) CheckExist(name string, value interface{}) (bool, 
 		beego.Error("get GlobalConfig collection error when init NoticeOn ")
 		err = fmt.Errorf("get GlobalConfig collection error")
 	} else {
-		var config models.GlobalConfig
+		var config *models.GlobalConfig
 		err = coll.Find(bson.M{"name": name, "value": value}).Select(nil).One(&config)
 		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 			beego.Error("get config error," + err.Error())
 			return false, err
+		}
+		if err != nil && err.Error() == mgo.ErrNotFound.Error() {
+			return false, nil
 		}
 		if &config != nil {
 			return true, nil
@@ -166,8 +170,8 @@ func (e *GlobalConfigService) Update(config *models.GlobalConfig) bool {
 			beego.Error("update GlobalConfig with name " + config.Name + " error " + err.Error())
 			return false
 		}
-		if globalConfig != nil {
-			globalConfig[config.Name] = config
+		if globalConfigMap != nil {
+			globalConfigMap[config.Name] = config
 		}
 		if globalConfigs != nil {
 			for _, c := range globalConfigs {
@@ -196,16 +200,17 @@ func (e *GlobalConfigService) DeleteByID(id string) bool {
 		var cos []*models.GlobalConfig
 		if globalConfigs != nil {
 			for _, c := range globalConfigs {
-				if c.ID.String() == id {
+				if c.ID.Hex() == id {
 					co = c
 				} else {
 					cos = append(cos, c)
 				}
 			}
 			globalConfigs = cos
+			beego.Debug("delete config id:", id, "globalConfigs length :", len(globalConfigs))
 		}
-		if globalConfig != nil {
-			delete(globalConfig, co.Name)
+		if globalConfigMap != nil && co != nil {
+			delete(globalConfigMap, co.Name)
 		}
 		return true
 	}
@@ -218,7 +223,7 @@ func (e *GlobalConfigService) Insert(config *models.GlobalConfig) bool {
 		return false
 	}
 	if ok := e.Session.Insert("GlobalConfig", config); ok {
-		globalConfig[config.Name] = config
+		globalConfigMap[config.Name] = config
 		globalConfigs = append(globalConfigs, config)
 		return true
 	}

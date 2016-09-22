@@ -40,6 +40,22 @@ func (e *AlertService) GetAlertByLabels(alert *models.Alert) (result *models.Ale
 	return
 }
 
+//GetAlertByMark 获取报警根据mark
+func (e *AlertService) GetAlertByMark(mark string) (result *models.Alert, err error) {
+	//start := time.Now()
+	//defer fmt.Println("cost:",time.Now().Sub(start))
+	coll := e.Session.GetCollection("Alert")
+	if coll == nil {
+		return nil, fmt.Errorf("get alert collection error")
+	}
+	err = coll.Find(bson.M{"mark": mark}).Select(nil).One(&result)
+	if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+		beego.Error("Get alert by Mark " + mark + " error." + err.Error())
+		return nil, err
+	}
+	return
+}
+
 //Update 更新可变信息
 func (e *AlertService) Update(alert *models.Alert) bool {
 	coll := e.Session.GetCollection("Alert")
@@ -55,6 +71,7 @@ func (e *AlertService) Update(alert *models.Alert) bool {
 			"endsat":        alert.EndsAt,
 			"startsat":      alert.StartsAt,
 			"updatedat":     alert.UpdatedAt,
+			"annotations":   alert.Annotations,
 		},
 	})
 	if err != nil {
@@ -118,7 +135,7 @@ func (e *AlertService) FindHistory(alert *models.Alert) (history *models.AlertHi
 		return nil, fmt.Errorf("get AlertHistory collection error")
 	}
 	err = coll.Find(bson.M{"mark": alert.Fingerprint().String(), "startsat": alert.StartsAt}).One(&history)
-	if err != nil {
+	if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 		beego.Error("find alerthistory by mark and startsAt faild." + err.Error())
 	}
 	return
@@ -130,13 +147,21 @@ func (e *AlertService) UpdateHistory(history *models.AlertHistory) {
 	if coll == nil {
 		return
 	}
-	err := coll.Update(bson.M{"mark": history.Mark, "startsat": history.StartsAt}, bson.M{
-		"$set": bson.M{
-			"endsat":   history.EndsAt,
-			"startsat": history.StartsAt,
-		},
-	})
+	err := coll.UpdateId(history.ID, history)
 	if err != nil {
 		beego.Error("update alerthistory by mark and startsAt faild." + err.Error())
 	}
+}
+
+//GetHistoryByMark 获取报警历史
+func (e *AlertService) GetHistoryByMark(mark string, pageSize int, page int) (historys []*models.AlertHistory, err error) {
+	coll := e.Session.GetCollection("AlertHistory")
+	if coll == nil {
+		return nil, fmt.Errorf("get AlertHistory collection error")
+	}
+	err = coll.Find(bson.M{"mark": mark}).Skip(pageSize * (page - 1)).Limit(pageSize).All(&historys)
+	if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+		beego.Error("find alerthistory by mark and startsAt faild." + err.Error())
+	}
+	return
 }

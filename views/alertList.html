@@ -70,7 +70,7 @@
          height: auto!important;
        }
        .labels_show{
-         height:300px;
+         height:350px;
          overflow-y:scroll;
        }
        table{
@@ -112,10 +112,8 @@
     <script src="/static/js/site.js"></script>
     <script>
        var page=1
-       var pageSize=15
+       var pageSize=12
        $(function(){
-          $("#alerts").html('加载中。。。')
-                    console.log("in start");
           load()
          $("#page").on('click','.previous a',function(){
             if ($('.previous').attr("class")!="previous disabled"){
@@ -140,7 +138,7 @@
               if (handleType=="miss"){
                 var url="/api/ignoreAlert/"+alertID
               }else{
-                 var url="/api/alert/handle/"+alertID+"/"+handleType
+                window.location.href='/history/'+alertID;  
               }
              $.post({{.token}},{{.userName}},url,'{"message":"用户主动操作"}',function(data,status){
                 if(status=="success"){
@@ -155,10 +153,17 @@
        })
 
        function load(){
-                 console.log("in /alerts?receiver=root");
          $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
             if(result.status=="success"){
+               if (result.data == null){
+                 //还原
+                 page=page-1
+                 $("#page .next").addClass("disabled")
+                 return 
+               }
               $("#alerts").html('')
+               $("#page .previous").removeClass("disabled")
+               $("#page .next").removeClass("disabled")
               $.each(result.data,function(i,alert){
                 var html='<div class="col-sm-6 col-md-4 col-lg-4 alertInfo" id="'+alert.mark+'">'+
                     '<div class="thumbnail">'+
@@ -166,8 +171,9 @@
                       '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
                       '</div>'+
                       '<div class="caption">'+
-                       ' <table class="table table-bordered"><tbody><td><b>'+alert.annotations.LabelSet.description+'</b></td></tbody></table>'+
-                        '<div class="labels_show"><table class="table table-bordered">'+
+                        '<div class="labels_show">'+
+                          ' <table class="table table-bordered"><tbody><td><b>'+alert.annotations.LabelSet.description+'</b></td></tbody></table>'+
+                        '<table class="table table-bordered">'+
                          ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">'+alert.startsAt.substring(0,19)+'</td></tr>'+
                          ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt.substring(0,19)+'</td></tr>'
 
@@ -179,7 +185,7 @@
 
                         html+='</table></div>'+
                         '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.mark+'" data-loading-text="处理中...">忽略报警</button>'+
-                        //'<button style="margin-left: 20px" class="btn btn-success handle" type="button" data="handle" alert-id="'+alert.mark+'" data-loading-text="处理中...">我已解决</button>'+
+                        '<button style="margin-left: 20px" class="btn btn-info handle" type="button" alert-id="'+alert.mark+'" data-loading-text="跳转中...">查看历史</button>'+
                       '</div>'+
                     '</div>'+
                   '</div>'
@@ -189,7 +195,7 @@
              if (page==1){
                $("#page .previous").addClass("disabled")
              }
-             if (result.data.length<pageSize){
+             if (result.data==null || result.data.length<pageSize){
                $("#page .next").addClass("disabled")
              } 
             }else{

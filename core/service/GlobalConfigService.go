@@ -127,7 +127,7 @@ func (e *GlobalConfigService) GetAllConfig(name string) (configs []*models.Globa
 func (e *GlobalConfigService) CheckExist(name string, value interface{}) (bool, error) {
 	if globalConfigs != nil {
 		for _, config := range globalConfigs {
-			beego.Debug(config.Name, name, config.Value, value)
+			//beego.Debug(config.Name, name, config.Value, value)
 			if config.Name == name && config.Value.(string) == value.(string) {
 				return true, nil
 			}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    
+    <meta charset="utf-8">
+    <title>光音网络监控报警处理平台-报警历史</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="author" content="Goyoo-Cloud-zengqingguo">
+    <meta name="robots" content="index,follow">
+    <meta name="application-name" content="goyoo.com">
+    <!-- Site CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/site.css" rel="stylesheet">
+    <style>
+    .table-body{
+      border:1px solid #ddd;
+      padding:0;
+      border-bottom:0px;
+    }  
+    .table-body table{
+      margin-bottom:0;
+    }
+    #home .table-body th{
+          padding: 12px 0 12px 10px !important;
+          background: #f1f9ff;
+          border-bottom:1px solid #ddd !important;
+          font: 14px/16px "宋体";
+          border-left:1px solid #ddd !important;
+          text-align:center;
+    }
+
+    #home .table-body th:first-child,#home .table-body tr td:first-child{
+      border-left:0px solid #ddd !important;
+    }
+    #home .table-body td{
+      padding: 12px 0 12px 10px !important;
+      border-bottom:1px solid #ddd !important;
+      font: 12px/14px "宋体";
+      border-left:1px solid #ddd !important;
+      text-align:center;
+    }
+    #home .alert-body{
+      border:1px solid #ddd;
+      min-height:40px;
+    }
+    .title{
+         width: 100%;
+         height: 40px;
+         color: #fff;
+         padding: 10px 0px;
+         background-color: #F20F4C;
+       }
+       .title.title3{
+         background-color: #F20F4C;
+       }
+       .title.title2{
+         background-color: #F20FE3;
+       }
+       .title.title1{
+         background-color: #0F6EF2;
+       }
+       .title span{
+         width:100%;
+         text-align: center;
+         display:block;
+       }
+       .message{
+         border:1px solid #ddd;
+         border-top:0;
+         padding:10px;
+         font:16px/18px;
+         font-weight:600;
+         margin-bottom:15px;
+       }
+       .main_title {
+          padding: 3px 0 5px 0;
+          font-size: 13px;
+          font-weight: bold;
+          color: #434343;
+          border-bottom: 1px solid #cdcdcd;
+      }
+      .labels_show table{
+         table-layout: fixed;
+       }
+       .labels_show td{
+         word-break: break-all;
+       }
+    </style>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+    <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+    
+    <script>
+      var _hmt = _hmt || [];
+    </script>
+  </head>
+  <body>
+    {{template "menu.html" .}}
+    <div class="container projects">
+      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+      <div id="alert"></div>
+      <div id="home" class="row">
+          <div class=" col-md-3 col-lg-3">
+          <div class="title">
+            <span>{{.alertName}}</span>
+          </div>
+          <div class="labels_show"> 
+            <div class="message">{{.description}} </div>
+            <table class="table table-bordered  hidden-sm hidden-xs"> 
+              <tbody><tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td>
+              <td class="col-md-8">{{.startsAt}}</td></tr> <tr>
+                <td><b>结束时间</b></td><td>{{.endsAt}}</td></tr> 
+                {{range $key,$val := .labels}}
+                <tr><td><b>{{$key}}</b></td><td>{{$val}}</td></tr> 
+                {{end}}
+                </tbody></table></div>
+         </div>
+          <div class="col-md-9 col-lg-9">
+          <div class="main_title">告警<span class="level_divide">&gt; &gt;</span>告警历史</div>   
+          <div class="table-body table-responsive">
+             <table class="table table-hover ">
+                <thead>
+                    <tr>
+                    <th>发送日期</th>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                    <th>持续时长</th>
+                    <th>报警标志量</th>
+                    </tr>
+                </thead>
+                <tbody id="historys">
+                  
+                </tbody>
+             </table>  
+          </div>
+          <div id="page"></div>
+          </div>
+      </div>
+    </div><!-- /.container -->
+    <footer class="footer ">
+      <div class="container">
+        <div class="row footer-bottom">
+           <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script>
+      var pageSize=15
+       var page =1
+       $(function(){
+          load()
+          $("#page").on('click','.previous a',function(){
+            if ($('.previous').attr("class")!="previous disabled"){
+              if (page>1){
+                page=page-1
+              }else{
+                page=1
+              }
+              load()
+            }
+         })
+         $("#page").on('click','.next a',function(){
+          if ($('.next').attr("class")!="next disabled"){
+             page=page+1
+             load()
+          }  
+         })
+       })
+       
+       function load(){
+         $.get({{.token}},{{.userName}},"/api/history/{{.mark}}?pageSize="+pageSize+"&page="+page,function(result){
+            if(result.status=="success"){
+               if (result.data == null){
+                 //还原
+                 page=page-1
+                 $("#page .next").addClass("disabled")
+                 return 
+               }
+              $("#historys").html('')
+               $("#page .previous").removeClass("disabled")
+               $("#page .next").removeClass("disabled")
+              $.each(result.data,function(i,history){
+                var html='<tr><td>'+history.addTime.substring(0,19)+'</td>'+
+                '<td>'+history.startsat.substring(0,19)+'</td>'+
+                '<td>'+history.endsat.substring(0,19)+'</td>'+
+                '<td>'+arrive_timer_format(Math.floor(history.duration/1000000000))+'</td>'+
+                '<td>'+history.value+'</td></tr>'
+               $("#historys").append(html)   
+              })
+               $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
+             if (page==1){
+               $("#page .previous").addClass("disabled")
+             }
+             if (result.data==null || result.data.length<pageSize){
+               $("#page .next").addClass("disabled")
+             } 
+            }else{
+              $.alert("alert",result)
+            }
+          })
+       }
+       function arrive_timer_format(s) {
+        var t;
+        if(s > -1){
+            hour = Math.floor(s/3600);
+            min = Math.floor(s/60) % 60;
+            sec = s % 60;
+            day = parseInt(hour / 24);
+            if (day > 0) {
+                hour = hour - 24 * day;
+                t = day + "d" + hour + "h";
+                }
+            else t = hour + "h";   
+            if(min < 10){t += "0";}
+                t += min + "m";
+            if(sec < 10){t += "0";}
+                t += sec + "s";
+        }
+        return t;
+        }
+    </script>
+  </body>
+</html>

@@ -27,7 +27,7 @@ type APIController struct {
 func (e *APIController) Receive() {
 	data := e.Ctx.Input.RequestBody
 	if data != nil && len(data) > 0 {
-		var Alerts []*models.Alert = make([]*models.Alert, 0)
+		var Alerts []*models.Alert
 		err := json.Unmarshal(data, &Alerts)
 		if err == nil {
 			core.HandleAlerts(Alerts)
@@ -98,6 +98,44 @@ func (e *APIController) GetAlerts() {
 			}
 		} else {
 			e.Data["json"] = util.GetErrorJson("api use error,please provide receiver")
+			goto over
+		}
+	}
+over:
+	e.ServeJSON()
+}
+func (e *APIController) GetHistorys() {
+	pageSizeStr := e.Ctx.Request.FormValue("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		pageSize = 20
+	}
+
+	pageStr := e.Ctx.Request.FormValue("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+	mark := e.GetString(":mark")
+	if mark == "" {
+		e.Data["json"] = util.GetFailJson("mark is empty")
+		goto over
+	}
+	e.session = db.GetMongoSession()
+	if e.session != nil {
+		defer e.session.Close()
+	}
+	if e.session == nil {
+		e.Data["json"] = util.GetFailJson("get database session faild.")
+		goto over
+	} else {
+		e.alertService = service.GetAlertService(e.session)
+		historys, err := e.alertService.GetHistoryByMark(mark, pageSize, page)
+		if err != nil && err.Error() != mgo.ErrNotFound.Error() {
+			e.Data["json"] = util.GetFailJson("get historys error.")
+			goto over
+		} else {
+			e.Data["json"] = util.GetSuccessReJson(historys)
 			goto over
 		}
 	}

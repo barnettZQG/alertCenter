@@ -27,14 +27,13 @@ func (e *PrometheusAPI) ReceivePrometheus() {
 	if ok, _ := configService.CheckExist("TrustIP", ip); ok {
 		data := e.Ctx.Input.RequestBody
 		if data != nil && len(data) > 0 {
-			var Alerts []*models.Alert = make([]*models.Alert, 0)
+			var Alerts []*models.Alert
 			err := json.Unmarshal(data, &Alerts)
 			if err == nil {
 				core.HandleAlerts(Alerts)
 				e.Data["json"] = util.GetSuccessJson("receive alert success")
 			} else {
-				beego.Error("receive a unknow data")
-				//util.Info(string(data))
+				e.Data["json"] = util.GetErrorJson("receive a unknow data")
 			}
 		}
 	} else {

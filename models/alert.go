@@ -8,7 +8,6 @@ import (
 )
 
 type Alert struct {
-	_ID           bson.ObjectId
 	Labels        Label     `json:"labels"`
 	Annotations   Label     `json:"annotations"`
 	StartsAt      time.Time `json:"startsAt,omitempty"`
@@ -21,7 +20,7 @@ type Alert struct {
 	HandleDate    time.Time `json:"handleDate,omitempty"`
 	HandleMessage string
 	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
-	Level         int        `json:"level,omitempty"`
+	Level         int       `json:"level,omitempty"`
 }
 
 type Label struct {
@@ -90,8 +89,12 @@ func (a *Alert) Reset(o *Alert) *Alert {
 }
 
 type AlertHistory struct {
-	Mark     string    `json:"mark"`
-	StartsAt time.Time `json:"startsat"`
-	EndsAt   time.Time `json:"endsat"`
-	Message  string    `json:"message"`
+	ID       bson.ObjectId `bson:"_id"`
+	Mark     string        `json:"mark"`
+	AddTime  time.Time     `json:"addTime"`
+	StartsAt time.Time     `json:"startsat"`
+	EndsAt   time.Time     `json:"endsat"`
+	Duration time.Duration `json:"duration"`
+	Message  string        `json:"message"`
+	Value    string        `json:"value"`
 }

@@ -16,6 +16,7 @@ func init() {
 	beego.Router("teamUsers", &controllers.TeamController{}, "get:GetTeamUsers")
 	beego.Router("/user/:userName", &controllers.UserController{}, "get:UserHome")
 	beego.Router("/token/addToken", &controllers.TokenController{}, "post:AddToken")
+	beego.Router("/history/:mark", &controllers.AlertController{}, "get:HistoryList")
 
 	beego.Router("/api/teams", &controllers.TeamAPIController{}, "get:GetTeams")
 	beego.Router("/api/addTeam", &controllers.TeamAPIController{}, "post:AddTeam")
@@ -26,6 +27,7 @@ func init() {
 	beego.Router("/api/ignoreRules", &controllers.IgnoreRuleAPIControll{}, "get:GetRulesByUser")
 	beego.Router("/api/ignoreRule/:ruleID", &controllers.IgnoreRuleAPIControll{}, "delete:DeleteRule")
 	beego.Router("/api/alerts", &controllers.APIController{}, "get:GetAlerts")
+	beego.Router("/api/history/:mark", &controllers.APIController{}, "get:GetHistorys")
 	beego.Router("/api/addIgnoreRule", &controllers.IgnoreRuleAPIControll{}, "post:AddRule")
 	beego.Router("/api/ignoreAlert/:mark", &controllers.IgnoreRuleAPIControll{}, "post:AddRuleByAlert")
 	beego.Router("/api/projects", &controllers.TokenAPIController{}, "get:GetAllToken")

@@ -11,6 +11,8 @@ import (
 	"alertCenter/core/user"
 	"alertCenter/models"
 
+	"gopkg.in/mgo.v2/bson"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -212,9 +214,13 @@ func CheckRules(alert *models.Alert) ([]string, bool) {
 //SaveHistory 存快照纪录
 func SaveHistory(alertService *service.AlertService, alert *models.Alert) {
 	history := &models.AlertHistory{
+		ID:       bson.NewObjectId(),
 		Mark:     alert.Fingerprint().String(),
+		AddTime:  time.Now(),
 		StartsAt: alert.StartsAt,
 		EndsAt:   alert.EndsAt,
+		Duration: alert.EndsAt.Sub(alert.StartsAt),
+		Value:    string(alert.Annotations.LabelSet["value"]),
 		Message:  string(alert.Annotations.LabelSet["description"]),
 	}
 	alertService.Session.Insert("AlertHistory", history)

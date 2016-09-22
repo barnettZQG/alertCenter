@@ -14,6 +14,7 @@
   <!-- Site CSS -->
   <link href="/static/css/bootstrap.css" rel="stylesheet">
   <link href="/static/css/site.css" rel="stylesheet">
+  <link href="/static/css/bootstrap-switch.css" rel="stylesheet">
   <style>
     .job-hot {
       position: absolute;
@@ -23,6 +24,37 @@
     }
     .table{
       margin-bottom: 0px
+    }
+    .table-body{
+      border:1px solid #ddd;
+      padding:0;
+      border-bottom:0px;
+    }  
+    .table-body table{
+      margin-bottom:0;
+    }
+    #home .table-body th{
+          padding: 12px 0 12px 10px !important;
+          background: #f1f9ff;
+          border-bottom:1px solid #ddd !important;
+          font: 14px/16px "宋体";
+          border-left:1px solid #ddd !important;
+          text-align:center;
+    }
+
+    #home .table-body th:first-child,#home .table-body tr td:first-child{
+      border-left:0px solid #ddd !important;
+    }
+    #home .table-body td{
+      padding: 12px 0 12px 10px !important;
+      border-bottom:1px solid #ddd !important;
+      font: 12px/14px "宋体";
+      border-left:1px solid #ddd !important;
+      text-align:center;
+    }
+    #home .alert-body{
+      border:1px solid #ddd;
+      min-height:40px;
     }
   </style>
 
@@ -76,6 +108,15 @@
     .caption p {
       border-bottom: 1px solid #ddd;
     }
+    #report_title {
+    background: #fbfbfb;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-bottom:none;
+   }
+   .right{
+     float:right
+   }
   </style>
 </head>
 
@@ -85,9 +126,16 @@
 
     <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
     <div id="alert"></div>
-    <div class="row">
-      <div class="table-responsive" style="border-color: #ddd;border-width: 1px;border-radius: 4px 4px 0 0;padding: 5px;border-style: solid;">
-        <table class="table table-hover table-bordered">
+    <div id="home" class="row">
+      <div id="report_title">
+            <span class="left">显示已停止的报警: </span>
+            <input id="switch-onColor" type="checkbox" data-size="small" checked data-on-color="info">
+            <div class="right">
+                <a href="javascript:void(0);" class="btn btn-default" onclick="JKB.loader.exportFaultList();"><i class="download2_icon"></i>导出Excel</a>
+            </div>
+        </div>
+      <div class="table-responsive table-body" style="">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th>报警名</th>
@@ -124,10 +172,12 @@
   <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/bootstrap.js"></script>
   <script src="/static/js/site.js"></script>
+   <script src="/static/js/bootstrap-switch.js"></script>
   <script>
        var page = 1
        var pageSize = 12
        $(function(){
+          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
          $("#alerts").html('加载中。。。')
          load()
          $("#page").on('click','.previous a',function(){

@@ -174,9 +174,7 @@
                         '<div class="labels_show">'+
                           ' <table class="table table-bordered"><tbody><td><b>'+alert.annotations.LabelSet.description+'</b></td></tbody></table>'+
                         '<table class="table table-bordered">'+
-                         ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">'+alert.startsAt.substring(0,19)+'</td></tr>'+
-                         ' <tr><td><b>结束时间</b></td><td>'+alert.endsAt.substring(0,19)+'</td></tr>'
-
+                         ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">'+alert.startsAt.substring(0,19)+'</td></tr>'
                         $.each(alert.labels.LabelSet,function(k,v){
                                if (k.length<10){
                                html+=' <tr><td><b>'+k+'</b></td><td>'+v+'</td></tr>'

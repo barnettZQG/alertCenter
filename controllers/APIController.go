@@ -50,20 +50,23 @@ func (e *APIController) GetAlerts() {
 	}
 
 	pageStr := e.Ctx.Request.FormValue("page")
+
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		page = 1
 	}
-
+	blogStr := e.Ctx.Request.FormValue("blog")
+	blog, err := strconv.ParseBool(blogStr)
+	if err != nil {
+		blog = false
+	}
 	receiver := e.APIBaseController.Username
 
 	// if admin. Should show all the alerts.
 	//user, err := gitlab.GetUserByUsername(receiver)
 	relation := user.Relation{}
 	user := relation.GetUserByName(receiver)
-	if err != nil {
-		beego.Error(err)
-	} else if user.IsAdmin {
+	if user != nil && user.IsAdmin {
 		receiver = "all"
 	}
 
@@ -78,7 +81,7 @@ func (e *APIController) GetAlerts() {
 	} else {
 		e.alertService = service.GetAlertService(e.session)
 		if len(receiver) != 0 && receiver != "all" {
-			alerts, err := e.alertService.FindByUser(receiver, pageSize, page)
+			alerts, err := e.alertService.FindByUser(receiver, pageSize, page, blog)
 			beego.Info("Get", len(alerts), " alerts")
 			if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 				e.Data["json"] = util.GetFailJson("get alerts error.")
@@ -88,7 +91,7 @@ func (e *APIController) GetAlerts() {
 				goto over
 			}
 		} else if receiver == "all" {
-			alerts, err := e.alertService.FindAll(pageSize, page)
+			alerts, err := e.alertService.FindAll(pageSize, page, blog)
 			if err != nil && err.Error() != mgo.ErrNotFound.Error() {
 				e.Data["json"] = util.GetFailJson("get alerts error.")
 				goto over

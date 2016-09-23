@@ -48,7 +48,7 @@
     #home .table-body td{
       padding: 12px 0 12px 10px !important;
       border-bottom:1px solid #ddd !important;
-      font: 12px/14px "宋体";
+      font: 12px/20px "宋体";
       border-left:1px solid #ddd !important;
       text-align:center;
     }
@@ -129,7 +129,7 @@
     <div id="home" class="row">
       <div id="report_title">
             <span class="left">显示已停止的报警: </span>
-            <input id="switch-onColor" type="checkbox" data-size="small" checked data-on-color="info">
+            <input id="blog" type="checkbox" data-size="small" checked data-on-color="info">
             <div class="right">
                 <a href="javascript:void(0);" class="btn btn-default" onclick="JKB.loader.exportFaultList();"><i class="download2_icon"></i>导出Excel</a>
             </div>
@@ -145,6 +145,7 @@
               <th>结束时间</th>
               <th>处理团队</th>
               <th>处理状态</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody id="alerts">
@@ -176,6 +177,7 @@
   <script>
        var page = 1
        var pageSize = 12
+       var blog=true
        $(function(){
           $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
          $("#alerts").html('加载中。。。')
@@ -196,39 +198,50 @@
              load()
           }  
          })
+         $('input[id="blog"]').on('switchChange.bootstrapSwitch', function(event, state) {
+            // console.log(this); // DOM element
+            // console.log(event); // jQuery event
+            // console.log(state); // true | false
+            blog=state
+            page=1
+            load()   
+          });
        })
 
        function load(){
-         $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
+         $.get({{.token}},{{.userName}},"/api/alerts?blog="+blog+"&pageSize="+pageSize+"&page="+page,function(result){
            $("#alerts").html("")
            if(result.status == "success"){
              $.each(result.data,function(i,alert){
                 var html='<td>'+alert.labels.LabelSet.alertname+'</td>'+
                  '<td>'+alert.AlertCount+'</td>'+
                  '<td>'+alert.labels.LabelSet.instance+'</td>'
-                   html+='<td>'+alert.startsAt+'</td>'
+                   html+='<td>'+alert.startsAt.substring(0,19)+'</td>'
                  if(alert.endsAt=="0001-01-01T00:00:00Z"){
                    html+='<td>持续中。。。</td>'
                  }else{
-                   html+='<td>'+alert.endsAt+'</td>'
+                   html+='<td>'+alert.endsAt.substring(0,19)+'</td>'
                  }
                  if (alert.receiver!=null){
                     html+='<td>'+alert.receiver.name+'</td>';
                  }else{
                    html+='<td>未知</td>';
                  }
-                 
                  if(alert.IsHandle==1){
                    html+='<td>'+已处理+'</td>'
+                   html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
                    html='<tr class="success">'+html+'</tr>'
                  }else if (alert.IsHandle==2){
                     html+='<td>报警已自动停止</td>'
+                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
                     html='<tr class="success">'+html+'</tr>'
                  }else if (alert.IsHandle==-1){
                     html+='<td>报警已忽略</td>'
+                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
                     html='<tr class="warning">'+html+'</tr>'
                  }else{
                     html+='<td>未处理</td>'
+                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
                     html='<tr class="danger">'+html+'</tr>'
                  }
                  $("#alerts").append(html)

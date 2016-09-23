@@ -96,12 +96,16 @@ func (e *AlertService) Save(alert *models.Alert) bool {
 }
 
 //FindByUser 根据receiver的name或者id获取报警信息
-func (e *AlertService) FindByUser(user string, pageSize int, page int) (alerts []*models.Alert, err error) {
+func (e *AlertService) FindByUser(user string, pageSize int, page int, blog bool) (alerts []*models.Alert, err error) {
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {
 		return nil, fmt.Errorf("get alert collection error")
 	}
-	err = coll.Find(bson.M{"receiver.usernames": user, "ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	if blog {
+		err = coll.Find(bson.M{"receiver.usernames": user}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	} else {
+		err = coll.Find(bson.M{"receiver.usernames": user, "ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	}
 	return
 }
 
@@ -119,12 +123,16 @@ func (e *AlertService) FindByID(ID string) (alert *models.Alert, err error) {
 }
 
 //FindAll 获取全部报警
-func (e *AlertService) FindAll(pageSize int, page int) (alerts []*models.Alert, err error) {
+func (e *AlertService) FindAll(pageSize int, page int, blog bool) (alerts []*models.Alert, err error) {
 	coll := e.Session.GetCollection("Alert")
 	if coll == nil {
 		return nil, fmt.Errorf("get alert collection error")
 	}
-	err = coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	if blog {
+		err = coll.Find(nil).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	} else {
+		err = coll.Find(bson.M{"ishandle": bson.M{"$ne": 2}}).Skip(pageSize * (page - 1)).Limit(pageSize).Select(nil).All(&alerts)
+	}
 	return
 }
 

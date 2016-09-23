@@ -66,6 +66,7 @@ func (a *Alert) Merge(o *Alert) *Alert {
 	if a.EndsAt.Before(o.EndsAt) {
 		res.EndsAt = o.EndsAt
 	}
+	res.Annotations = o.Annotations
 	return &res
 }
 
@@ -74,6 +75,7 @@ func (a *Alert) Reset(o *Alert) *Alert {
 	res := *a
 	res.StartsAt = o.StartsAt
 	res.EndsAt = o.EndsAt
+	res.Annotations = o.Annotations
 	if res.EndsAt.IsZero() {
 		res.AlertCount = 1
 		res.IsHandle = 0

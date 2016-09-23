@@ -72,7 +72,7 @@ func HandleAlerts(alerts []*models.Alert) {
 	}
 	for _, alert := range alerts {
 		//start := time.Now()
-		old, err := alertService.GetAlertByLabels(alert)
+		old, err := alertService.GetAlertByMark(alert.Labels.Fingerprint().String())
 		if err != nil {
 			if err.Error() == mgo.ErrNotFound.Error() {
 				SaveAlert(alertService, alert)

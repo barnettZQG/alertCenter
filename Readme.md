@@ -1,20 +1,19 @@
+# 使用说明
+如果你想要使用本项目，请联系我：qq：576501057
+我很高兴为你解答遇到的问题。
+
 # 安装要求
 项目 | 要求
 ---- | ---
 go    | 版本1.6.3及以上
 beego | 版本1.7.0及以上
 
-# API说明
-
-API | 说明
----- | ----
-/api/teams |获取全部团队信息
-/api/teamUsers | 获取团队带用户信息
-/api/addTeam | 添加团队
-/api/receive | 接收报警信息
-/api/v1/alerts | 接收prometheus报警信息
-/api/alert/handle/?:ID/?:type | 处理报警
-/api/alerts/?:receiver/:pageSize/:page | 获取报警信息带分页
-/api/ignoreRule/:user"| 获取忽略规则
-/api/addIgnoreRule" | 添加忽略规则
-/api/ignoreAlert/:mark" | 忽略某报警
+# 功能说明
+1. 兼容prometheus报警信息，比alertmanager更完善的功能
+2. 多种安全验证方式的API
+3. 支持报警信息分类存储，查询
+4. 支持gitlab,ldap用户管理
+5. 支持邮件，微信报警
+6. 支持多维度报警忽略
+7. 支持报警历史查询
+8. 简洁完善的ui

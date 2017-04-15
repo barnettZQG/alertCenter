@@ -1,28 +1,29 @@
-
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
-      <div class="navbar-header">
-        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-        <a class="navbar-brand" href="/" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'navbar-首页'])">光音网络报警平台</a>
-      </div>
-      <div class="navbar-collapse collapse" role="navigation">
-        <ul class="nav navbar-nav">
-          <li class=""><a href="/alertsCurrent" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">报警信息</a></li>
-         <li class=""><a href="/teams" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">团队信息</a></li>
+            <a class="navbar-brand" href="/" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'navbar-首页'])">一云报警平台</a>
+        </div>
+        <div class="navbar-collapse collapse" role="navigation">
+            <ul class="nav navbar-nav">
+                <li class=""><a href="/alertsCurrent" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">报警信息</a></li>
+                <li class=""><a href="/teams" onclick="_hmt.push(['_trackEvent', 'navbar', 'click', 'v2doc'])">团队信息</a></li>
 
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-        <li class="hidden-xs"><a href="/user/{{.userName}}" class="top_avatovr" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}"><img src="{{.user.AvatarURL}}"/></a></li>
-        <li class="hidden-sm hidden-md hidden-lg"><a href="/user/{{.userName}}"  onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}">{{.userName}}</a></li>
-        <li>
-            <a id="logout">登出</a>
-        </li>
-        </ul>
-      </div>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="hidden-xs">
+                    <a href="/user/{{.userName}}" class="top_avatovr" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}"><img src="{{.user.AvatarURL}}" /></a>
+                </li>
+                <li class="hidden-sm hidden-md hidden-lg"><a href="/user/{{.userName}}" onclick="_hmt.push(['_trackEvent', 'docv3-navbar', 'click', 'doc-home-navbar-job'])" title="{{.userName}}">{{.userName}}</a></li>
+                <li>
+                    <a id="logout">登出</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

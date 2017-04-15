@@ -3,263 +3,277 @@
 
 <head>
 
-  <meta charset="utf-8">
-  <title>光音网络监控报警处理平台</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
-  <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
-  <meta name="author" content="Goyoo-Cloud-zengqingguo">
-  <meta name="robots" content="index,follow">
-  <meta name="application-name" content="goyoo.com">
-  <!-- Site CSS -->
-  <link href="/static/css/bootstrap.css" rel="stylesheet">
-  <link href="/static/css/site.css" rel="stylesheet">
-  <link href="/static/css/bootstrap-switch.css" rel="stylesheet">
-  <style>
-    .job-hot {
-      position: absolute;
-      color: #d9534f;
-      right: 0;
-      top: 15px;
-    }
-    .table{
-      margin-bottom: 0px
-    }
-    .table-body{
-      border:1px solid #ddd;
-      padding:0;
-      border-bottom:0px;
-    }  
-    .table-body table{
-      margin-bottom:0;
-    }
-    #home .table-body th{
-          padding: 12px 0 12px 10px !important;
-          background: #f1f9ff;
-          border-bottom:1px solid #ddd !important;
-          font: 14px/16px "宋体";
-          border-left:1px solid #ddd !important;
-          text-align:center;
-    }
+    <meta charset="utf-8">
+    <title>一云监控报警处理平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一云监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="一云监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="author" content="Goyoo-Cloud-zengqingguo">
+    <meta name="robots" content="index,follow">
+    <meta name="application-name" content="goyoo.com">
+    <!-- Site CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/site.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-switch.css" rel="stylesheet">
+    <style>
+        .job-hot {
+            position: absolute;
+            color: #d9534f;
+            right: 0;
+            top: 15px;
+        }
+        
+        .table {
+            margin-bottom: 0px
+        }
+        
+        .table-body {
+            border: 1px solid #ddd;
+            padding: 0;
+            border-bottom: 0px;
+        }
+        
+        .table-body table {
+            margin-bottom: 0;
+        }
+        
+        #home .table-body th {
+            padding: 12px 0 12px 10px !important;
+            background: #f1f9ff;
+            border-bottom: 1px solid #ddd !important;
+            font: 14px/16px "宋体";
+            border-left: 1px solid #ddd !important;
+            text-align: center;
+        }
+        
+        #home .table-body th:first-child,
+        #home .table-body tr td:first-child {
+            border-left: 0px solid #ddd !important;
+        }
+        
+        #home .table-body td {
+            padding: 12px 0 12px 10px !important;
+            border-bottom: 1px solid #ddd !important;
+            font: 12px/20px "宋体";
+            border-left: 1px solid #ddd !important;
+            text-align: center;
+        }
+        
+        #home .alert-body {
+            border: 1px solid #ddd;
+            min-height: 40px;
+        }
+    </style>
 
-    #home .table-body th:first-child,#home .table-body tr td:first-child{
-      border-left:0px solid #ddd !important;
-    }
-    #home .table-body td{
-      padding: 12px 0 12px 10px !important;
-      border-bottom:1px solid #ddd !important;
-      font: 12px/20px "宋体";
-      border-left:1px solid #ddd !important;
-      text-align:center;
-    }
-    #home .alert-body{
-      border:1px solid #ddd;
-      min-height:40px;
-    }
-  </style>
-
-  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!--[if lt IE 9]>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
       <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-  <!-- Favicons -->
-  <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
-  <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
+    <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
 
-  <script>
-      var _hmt = _hmt || [];
+    <script>
+        var _hmt = _hmt || [];
     </script>
 
-  <style>
-    .title {
-      width: 100%;
-      height: 50px;
-      color: #fff;
-      padding: 15px 0px;
-      background-color: #F20F4C;
-    }
-    
-    .title.title3 {
-      background-color: #F20F4C;
-    }
-    
-    .title.title2 {
-      background-color: #F20FE3;
-    }
-    
-    .title.title1 {
-      background-color: #0F6EF2;
-    }
-    
-    .title span {
-      text-align: center;
-    }
-    
-    .thumbnail {
-      max-width: 100% !important
-    }
-    
-    .caption {
-      height: auto!important;
-    }
-    
-    .caption p {
-      border-bottom: 1px solid #ddd;
-    }
-    #report_title {
-    background: #fbfbfb;
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-bottom:none;
-   }
-   .right{
-     float:right
-   }
-  </style>
+    <style>
+        .title {
+            width: 100%;
+            height: 50px;
+            color: #fff;
+            padding: 15px 0px;
+            background-color: #F20F4C;
+        }
+        
+        .title.title3 {
+            background-color: #F20F4C;
+        }
+        
+        .title.title2 {
+            background-color: #F20FE3;
+        }
+        
+        .title.title1 {
+            background-color: #0F6EF2;
+        }
+        
+        .title span {
+            text-align: center;
+        }
+        
+        .thumbnail {
+            max-width: 100% !important
+        }
+        
+        .caption {
+            height: auto!important;
+        }
+        
+        .caption p {
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #report_title {
+            background: #fbfbfb;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-bottom: none;
+        }
+        
+        .right {
+            float: right
+        }
+    </style>
 </head>
 
 <body>
-{{template "menu.html" .}}
-  <div class="container projects">
+    {{template "menu.html" .}}
+    <div class="container projects">
 
-    <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
-    <div id="alert"></div>
-    <div id="home" class="row">
-      <div id="report_title">
-            <span class="left">显示已停止的报警: </span>
-            <input id="blog" type="checkbox" data-size="small" checked data-on-color="info">
-            <div class="right">
-                <a href="javascript:void(0);" class="btn btn-default" onclick="JKB.loader.exportFaultList();"><i class="download2_icon"></i>导出Excel</a>
+        <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+        <div id="alert"></div>
+        <div id="home" class="row">
+            <div id="report_title">
+                <span class="left">显示已停止的报警: </span>
+                <input id="blog" type="checkbox" data-size="small" checked data-on-color="info">
+                <div class="right">
+                    <a href="javascript:void(0);" class="btn btn-default" onclick="JKB.loader.exportFaultList();"><i class="download2_icon"></i>导出Excel</a>
+                </div>
+            </div>
+            <div class="table-responsive table-body" style="">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>报警名</th>
+                            <th>报警次数</th>
+                            <th>目标主机</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>处理团队</th>
+                            <th>处理状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alerts">
+
+                    </tbody>
+                </table>
+            </div>
+            <div id="page"></div>
+        </div>
+    </div>
+    <!-- /.container -->
+
+    <footer class="footer ">
+        <div class="container">
+            <div class="row footer-bottom">
+                <!--<h2>一云监控报警平台</h2>-->
+                <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
             </div>
         </div>
-      <div class="table-responsive table-body" style="">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>报警名</th>
-              <th>报警次数</th>
-              <th>目标主机</th>
-              <th>开始时间</th>
-              <th>结束时间</th>
-              <th>处理团队</th>
-              <th>处理状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="alerts">
+    </footer>
 
-          </tbody>
-        </table>
-      </div>
-      <div id="page"></div>
-    </div>
-  </div>
-  <!-- /.container -->
-
-  <footer class="footer ">
-    <div class="container">
-      <div class="row footer-bottom">
-       <!--<h2>光音网络监控报警平台</h2>-->
-        <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Bootstrap core JavaScript
+    <!-- Bootstrap core JavaScript
     ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="/static/js/jquery.min.js"></script>
-  <script src="/static/js/bootstrap.js"></script>
-  <script src="/static/js/site.js"></script>
-   <script src="/static/js/bootstrap-switch.js"></script>
-  <script>
-       var page = 1
-       var pageSize = 12
-       var blog=true
-       $(function(){
-          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
-         $("#alerts").html('加载中。。。')
-         load()
-         $("#page").on('click','.previous a',function(){
-            if ($('.previous').attr("class")!="previous disabled"){
-              if (page>1){
-                page=page-1
-              }else{
-                page=1
-              }
-              load()
-            }
-         })
-         $("#page").on('click','.next a',function(){
-          if ($('.next').attr("class")!="next disabled"){
-             page=page+1
-             load()
-          }  
-         })
-         $('input[id="blog"]').on('switchChange.bootstrapSwitch', function(event, state) {
-            // console.log(this); // DOM element
-            // console.log(event); // jQuery event
-            // console.log(state); // true | false
-            blog=state
-            page=1
-            load()   
-          });
-       })
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script src="/static/js/bootstrap-switch.js"></script>
+    <script>
+        var page = 1
+        var pageSize = 12
+        var blog = true
+        $(function() {
+            $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
+            $("#alerts").html('加载中。。。')
+            load()
+            $("#page").on('click', '.previous a', function() {
+                if ($('.previous').attr("class") != "previous disabled") {
+                    if (page > 1) {
+                        page = page - 1
+                    } else {
+                        page = 1
+                    }
+                    load()
+                }
+            })
+            $("#page").on('click', '.next a', function() {
+                if ($('.next').attr("class") != "next disabled") {
+                    page = page + 1
+                    load()
+                }
+            })
+            $('input[id="blog"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                // console.log(this); // DOM element
+                // console.log(event); // jQuery event
+                // console.log(state); // true | false
+                blog = state
+                page = 1
+                load()
+            });
+        })
 
-       function load(){
-         $.get({{.token}},{{.userName}},"/api/alerts?blog="+blog+"&pageSize="+pageSize+"&page="+page,function(result){
-           $("#alerts").html("")
-           if(result.status == "success"){
-             $.each(result.data,function(i,alert){
-                var html='<td>'+alert.labels.LabelSet.alertname+'</td>'+
-                 '<td>'+alert.AlertCount+'</td>'+
-                 '<td>'+alert.labels.LabelSet.instance+'</td>'
-                   html+='<td>'+alert.startsAt.substring(0,19)+'</td>'
-                 if(alert.endsAt=="0001-01-01T00:00:00Z"){
-                   html+='<td>持续中。。。</td>'
-                 }else{
-                   html+='<td>'+alert.endsAt.substring(0,19)+'</td>'
-                 }
-                 if (alert.receiver!=null){
-                    html+='<td>'+alert.receiver.name+'</td>';
-                 }else{
-                   html+='<td>未知</td>';
-                 }
-                 if(alert.IsHandle==1){
-                   html+='<td>'+已处理+'</td>'
-                   html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
-                   html='<tr class="success">'+html+'</tr>'
-                 }else if (alert.IsHandle==2){
-                    html+='<td>报警已自动停止</td>'
-                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
-                    html='<tr class="success">'+html+'</tr>'
-                 }else if (alert.IsHandle==-1){
-                    html+='<td>报警已忽略</td>'
-                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
-                    html='<tr class="warning">'+html+'</tr>'
-                 }else{
-                    html+='<td>未处理</td>'
-                    html+='<td><a class="btn-info btn btn-xs" href="/history/'+alert.mark+'">查看历史</button></td>'
-                    html='<tr class="danger">'+html+'</tr>'
-                 }
-                 $("#alerts").append(html)
-             })
-             
-             $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
-             if (page==1){
-               $("#page .previous").addClass("disabled")
-             }
-             if (result.data.length<pageSize){
-               $("#page .next").addClass("disabled")
-             } 
-          }else{
-             $.alert("alert",result)
-           }
-         })
-       }
+        function load() {
+            $.get({
+                {.token
+                }
+            }, {
+                {.userName
+                }
+            }, "/api/alerts?blog=" + blog + "&pageSize=" + pageSize + "&page=" + page, function(result) {
+                $("#alerts").html("")
+                if (result.status == "success") {
+                    $.each(result.data, function(i, alert) {
+                        var html = '<td>' + alert.labels.LabelSet.alertname + '</td>' +
+                            '<td>' + alert.AlertCount + '</td>' +
+                            '<td>' + alert.labels.LabelSet.instance + '</td>'
+                        html += '<td>' + alert.startsAt.substring(0, 19) + '</td>'
+                        if (alert.endsAt == "0001-01-01T00:00:00Z") {
+                            html += '<td>持续中。。。</td>'
+                        } else {
+                            html += '<td>' + alert.endsAt.substring(0, 19) + '</td>'
+                        }
+                        if (alert.receiver != null) {
+                            html += '<td>' + alert.receiver.name + '</td>';
+                        } else {
+                            html += '<td>未知</td>';
+                        }
+                        if (alert.IsHandle == 1) {
+                            html += '<td>' + 已处理 + '</td>'
+                            html += '<td><a class="btn-info btn btn-xs" href="/history/' + alert.mark + '">查看历史</button></td>'
+                            html = '<tr class="success">' + html + '</tr>'
+                        } else if (alert.IsHandle == 2) {
+                            html += '<td>报警已自动停止</td>'
+                            html += '<td><a class="btn-info btn btn-xs" href="/history/' + alert.mark + '">查看历史</button></td>'
+                            html = '<tr class="success">' + html + '</tr>'
+                        } else if (alert.IsHandle == -1) {
+                            html += '<td>报警已忽略</td>'
+                            html += '<td><a class="btn-info btn btn-xs" href="/history/' + alert.mark + '">查看历史</button></td>'
+                            html = '<tr class="warning">' + html + '</tr>'
+                        } else {
+                            html += '<td>未处理</td>'
+                            html += '<td><a class="btn-info btn btn-xs" href="/history/' + alert.mark + '">查看历史</button></td>'
+                            html = '<tr class="danger">' + html + '</tr>'
+                        }
+                        $("#alerts").append(html)
+                    })
 
+                    $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
+                    if (page == 1) {
+                        $("#page .previous").addClass("disabled")
+                    }
+                    if (result.data.length < pageSize) {
+                        $("#page .next").addClass("disabled")
+                    }
+                } else {
+                    $.alert("alert", result)
+                }
+            })
+        }
     </script>
 </body>
 

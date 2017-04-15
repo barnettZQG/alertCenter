@@ -41,6 +41,7 @@ func (r *Relation) Init() error {
 	if err != nil {
 		return err
 	}
+
 	autoRefreshTime, err := time.ParseDuration(beego.AppConfig.String("autoRefreshTime"))
 	if err == nil {
 		autoRefreshDura = autoRefreshTime
@@ -151,6 +152,9 @@ func initUser() error {
 
 //初始化app数据
 func initApp() error {
+	if beego.AppConfig.String("cloudURI") == "" {
+		return nil
+	}
 	as, err := GetAllAppInfo()
 	if err != nil {
 		return err

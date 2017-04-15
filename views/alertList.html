@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
-  <head>
-    
+<head>
+
     <meta charset="utf-8">
-    <title>光音网络监控报警处理平台</title>
+    <title>一云监控报警处理平台</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
-    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="description" content="一云监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="一云监控报警处理平台，prometheus,cAdvisor,docker">
     <meta name="author" content="Goyoo-Cloud-zengqingguo">
     <meta name="robots" content="index,follow">
     <meta name="application-name" content="goyoo.com">
@@ -15,95 +15,107 @@
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/site.css" rel="stylesheet">
     <style>
-    .job-hot {
-    	position: absolute;
-    	color: #d9534f;
-    	right: 0;
-    	top: 15px;
-    }
-    td{
-      text-align: left
-    }
+        .job-hot {
+            position: absolute;
+            color: #d9534f;
+            right: 0;
+            top: 15px;
+        }
+        
+        td {
+            text-align: left
+        }
     </style>
-    
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
+
     <!-- Favicons -->
     <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
     <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
-    
+
     <script>
-      var _hmt = _hmt || [];
+        var _hmt = _hmt || [];
     </script>
-    
+
     <script>
-    var qqgroup = '318630708';
+        var qqgroup = '318630708';
     </script>
     <style>
-       .title{
-         width: 100%;
-         height: 50px;
-         color: #fff;
-         padding: 15px 0px;
-         background-color: #F20F4C;
-       }
-       .title.title3{
-         background-color: #F20F4C;
-       }
-       .title.title2{
-         background-color: #F20FE3;
-       }
-       .title.title1{
-         background-color: #0F6EF2;
-       }
-       .title span{
-         text-align: center;
-       }
-       .thumbnail{
-         max-width: 100% !important
-       }
-       .caption{
-         height: auto!important;
-       }
-       .labels_show{
-         height:350px;
-         overflow-y:scroll;
-       }
-       table{
-         table-layout: fixed;
-       }
-       td{
-         word-break: break-all;
-       }
+        .title {
+            width: 100%;
+            height: 50px;
+            color: #fff;
+            padding: 15px 0px;
+            background-color: #F20F4C;
+        }
+        
+        .title.title3 {
+            background-color: #F20F4C;
+        }
+        
+        .title.title2 {
+            background-color: #F20FE3;
+        }
+        
+        .title.title1 {
+            background-color: #0F6EF2;
+        }
+        
+        .title span {
+            text-align: center;
+        }
+        
+        .thumbnail {
+            max-width: 100% !important
+        }
+        
+        .caption {
+            height: auto!important;
+        }
+        
+        .labels_show {
+            height: 350px;
+            overflow-y: scroll;
+        }
+        
+        table {
+            table-layout: fixed;
+        }
+        
+        td {
+            word-break: break-all;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
 
     {{template "menu.html" .}}
     <div class="container projects">
 
-      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
-      <div id="alert"></div>
-      <div class="row" id="alerts">
-      </div>
-    <div class="row">
-     <div id="page"></div>
+        <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+        <div id="alert"></div>
+        <div class="row" id="alerts">
+        </div>
+        <div class="row">
+            <div id="page"></div>
+        </div>
     </div>
-</div><!-- /.container -->
+    <!-- /.container -->
 
 
     <footer class="footer ">
-      <div class="container">
-        <div class="row footer-bottom">
-          <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        <div class="container">
+            <div class="row footer-bottom">
+                <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+            </div>
         </div>
-      </div>
     </footer>
-    
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -111,96 +123,109 @@
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/site.js"></script>
     <script>
-       var page=1
-       var pageSize=12
-       $(function(){
-          load()
-         $("#page").on('click','.previous a',function(){
-            if ($('.previous').attr("class")!="previous disabled"){
-              if (page>1){
-                page=page-1
-              }else{
-                page=1
-              }
-              load()
-            }
-         })
-         $("#page").on('click','.next a',function(){
-          if ($('.next').attr("class")!="next disabled"){
-             page=page+1
-             load()
-          }  
-         })
-        $("#alerts").on("click",".handle",function(){
-             $(this).button("loading")
-              var alertID= $(this).attr("alert-id")
-              var handleType= $(this).attr("data")
-              if (handleType=="miss"){
-                var url="/api/ignoreAlert/"+alertID
-              }else{
-                window.location.href='/history/'+alertID;  
-              }
-             $.post({{.token}},{{.userName}},url,'{"message":"用户主动操作"}',function(data,status){
-                if(status=="success"){
-                  if(data.status=="success"){
-                     $("#"+alertID).fadeOut(1000)
-                  }
-                }else{
-                  $.alert("alert",result)
+        var page = 1
+        var pageSize = 12
+        $(function() {
+            load()
+            $("#page").on('click', '.previous a', function() {
+                if ($('.previous').attr("class") != "previous disabled") {
+                    if (page > 1) {
+                        page = page - 1
+                    } else {
+                        page = 1
+                    }
+                    load()
                 }
-             })
-          })
-       })
+            })
+            $("#page").on('click', '.next a', function() {
+                if ($('.next').attr("class") != "next disabled") {
+                    page = page + 1
+                    load()
+                }
+            })
+            $("#alerts").on("click", ".handle", function() {
+                $(this).button("loading")
+                var alertID = $(this).attr("alert-id")
+                var handleType = $(this).attr("data")
+                if (handleType == "miss") {
+                    var url = "/api/ignoreAlert/" + alertID
+                } else {
+                    window.location.href = '/history/' + alertID;
+                }
+                $.post({
+                    {.token
+                    }
+                }, {
+                    {.userName
+                    }
+                }, url, '{"message":"用户主动操作"}', function(data, status) {
+                    if (status == "success") {
+                        if (data.status == "success") {
+                            $("#" + alertID).fadeOut(1000)
+                        }
+                    } else {
+                        $.alert("alert", result)
+                    }
+                })
+            })
+        })
 
-       function load(){
-         $.get({{.token}},{{.userName}},"/api/alerts?pageSize="+pageSize+"&page="+page,function(result){
-            if(result.status=="success"){
-               if (result.data == null){
-                 //还原
-                 page=page-1
-                 $("#page .next").addClass("disabled")
-                 return 
-               }
-              $("#alerts").html('')
-               $("#page .previous").removeClass("disabled")
-               $("#page .next").removeClass("disabled")
-              $.each(result.data,function(i,alert){
-                var html='<div class="col-sm-6 col-md-4 col-lg-4 alertInfo" id="'+alert.mark+'">'+
-                    '<div class="thumbnail">'+
-                     '<div class="title title'+alert.AlertCount+'">'+
-                      '<span>'+alert.labels.LabelSet.alertname+'('+alert.AlertCount+'次报警)</span>'+
-                      '</div>'+
-                      '<div class="caption">'+
-                        '<div class="labels_show">'+
-                          ' <table class="table table-bordered"><tbody><td><b>'+alert.annotations.LabelSet.description+'</b></td></tbody></table>'+
-                        '<table class="table table-bordered">'+
-                         ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">'+alert.startsAt.substring(0,19)+'</td></tr>'
-                        $.each(alert.labels.LabelSet,function(k,v){
-                               if (k.length<10){
-                               html+=' <tr><td><b>'+k+'</b></td><td>'+v+'</td></tr>'
-                               }
-                        }) 
+        function load() {
+            $.get({
+                {.token
+                }
+            }, {
+                {.userName
+                }
+            }, "/api/alerts?pageSize=" + pageSize + "&page=" + page, function(result) {
+                if (result.status == "success") {
+                    if (result.data == null) {
+                        //还原
+                        page = page - 1
+                        $("#page .next").addClass("disabled")
+                        return
+                    }
+                    $("#alerts").html('')
+                    $("#page .previous").removeClass("disabled")
+                    $("#page .next").removeClass("disabled")
+                    $.each(result.data, function(i, alert) {
+                        var html = '<div class="col-sm-6 col-md-4 col-lg-4 alertInfo" id="' + alert.mark + '">' +
+                            '<div class="thumbnail">' +
+                            '<div class="title title' + alert.AlertCount + '">' +
+                            '<span>' + alert.labels.LabelSet.alertname + '(' + alert.AlertCount + '次报警)</span>' +
+                            '</div>' +
+                            '<div class="caption">' +
+                            '<div class="labels_show">' +
+                            ' <table class="table table-bordered"><tbody><td><b>' + alert.annotations.LabelSet.description + '</b></td></tbody></table>' +
+                            '<table class="table table-bordered">' +
+                            ' <tr><td class="col-md-4 col-sm-4 col-xs-4"><b>开始时间</b></td><td class="col-md-8">' + alert.startsAt.substring(0, 19) + '</td></tr>'
+                        $.each(alert.labels.LabelSet, function(k, v) {
+                            if (k.length < 10) {
+                                html += ' <tr><td><b>' + k + '</b></td><td>' + v + '</td></tr>'
+                            }
+                        })
 
-                        html+='</table></div>'+
-                        '<button class="btn btn-danger handle" type="button" data="miss" alert-id="'+alert.mark+'" data-loading-text="处理中...">忽略报警</button>'+
-                        '<button style="margin-left: 20px" class="btn btn-info handle" type="button" alert-id="'+alert.mark+'" data-loading-text="跳转中...">查看历史</button>'+
-                      '</div>'+
-                    '</div>'+
-                  '</div>'
-               $("#alerts").append(html)   
-              })
-               $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
-             if (page==1){
-               $("#page .previous").addClass("disabled")
-             }
-             if (result.data==null || result.data.length<pageSize){
-               $("#page .next").addClass("disabled")
-             } 
-            }else{
-              $.alert("alert",result)
-            }
-          })
-       }
+                        html += '</table></div>' +
+                            '<button class="btn btn-danger handle" type="button" data="miss" alert-id="' + alert.mark + '" data-loading-text="处理中...">忽略报警</button>' +
+                            '<button style="margin-left: 20px" class="btn btn-info handle" type="button" alert-id="' + alert.mark + '" data-loading-text="跳转中...">查看历史</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>'
+                        $("#alerts").append(html)
+                    })
+                    $("#page").html('<nav><ul class="pager"><li class="previous"><a href="#">&larr; Older</a></li><li class="next"><a href="#">Newer &rarr;</a></li></ul></nav>')
+                    if (page == 1) {
+                        $("#page .previous").addClass("disabled")
+                    }
+                    if (result.data == null || result.data.length < pageSize) {
+                        $("#page .next").addClass("disabled")
+                    }
+                } else {
+                    $.alert("alert", result)
+                }
+            })
+        }
     </script>
-  </body>
+</body>
+
 </html>

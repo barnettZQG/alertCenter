@@ -36,7 +36,7 @@ func main() {
 		}
 		return service.Init()
 	})
-	beego.SetLogger("file", `{"filename":"log/test.log","level":10}`)
+	//beego.SetLogger("file", `{"filename":"log/test.log","level":10}`)
 	beego.Info("mongo:", beego.AppConfig.String("mongoURI"))
 	beego.Run()
 }

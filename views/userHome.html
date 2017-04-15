@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
-  <head>
-    
+<head>
+
     <meta charset="utf-8">
-    <title>光音网络监控报警处理平台-个人主页</title>
+    <title>一云监控报警处理平台-个人主页</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
-    <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
+    <meta name="description" content="一云监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
+    <meta name="keywords" content="一云监控报警处理平台，prometheus,cAdvisor,docker">
     <meta name="author" content="Goyoo-Cloud-zengqingguo">
     <meta name="robots" content="index,follow">
     <meta name="application-name" content="goyoo.com">
@@ -15,217 +15,232 @@
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/site.css" rel="stylesheet">
     <link href="/static/css/bootstrap-switch.css" rel="stylesheet">
-    <style> 
-     .content{
-       margin-bottom: 20px;
-     }
-     #home{
-          min-height: 300px;
-          background: #ffffff;
-          opacity: 1;
-          position: relative;
-          transform: none;
-          -webkit-transform: none;
-          transform-origin: 50% 0 0;
-          -webkit-transform-origin: 50% 0 0;
-          border-bottom: 1px solid #e6e6e6;
-          border: 1px solid #dbdfd6;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-     }
-     .member-info {
-    padding: 15px 30px;
-    }
-    .member-info .avatar {
-    float: left;
-    width: 50px;
-    height: 50px;
-    margin-top: 2px;
-    border-radius: 50%;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
-    }
-    .member-info .info {
-    margin-left: 70px;
-    } 
-    .member-info h2{
-      margin:0;padding:0;
-    }
-    .tab-pane{
-      padding:15px;
-    }
-    .btn-hide{
-      display: none;
-    }
-    .rule{
-      background: #bfbfbf;
-      padding: .8em;
-      margin-bottom:15px; 
-    }
-    .rule div{
-    margin: 0px 0px 10px 0px;
-    padding: 0px;
-    }
-    .lbl{
-      background:#333;
-      display: inline-block;
-      font-size: 0.7em;
-      padding: 3px 6px;
-      margin: 0 2px 2px 0;
-      font-family: Menlo, Monaco, Consolas, sans-serif;
-      border: 1px solid #ccc;
-      border-radius: 2px;
-      background: #555;
-      color: #fff;
-    }
-
+    <style>
+        .content {
+            margin-bottom: 20px;
+        }
+        
+        #home {
+            min-height: 300px;
+            background: #ffffff;
+            opacity: 1;
+            position: relative;
+            transform: none;
+            -webkit-transform: none;
+            transform-origin: 50% 0 0;
+            -webkit-transform-origin: 50% 0 0;
+            border-bottom: 1px solid #e6e6e6;
+            border: 1px solid #dbdfd6;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .member-info {
+            padding: 15px 30px;
+        }
+        
+        .member-info .avatar {
+            float: left;
+            width: 50px;
+            height: 50px;
+            margin-top: 2px;
+            border-radius: 50%;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+        }
+        
+        .member-info .info {
+            margin-left: 70px;
+        }
+        
+        .member-info h2 {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .tab-pane {
+            padding: 15px;
+        }
+        
+        .btn-hide {
+            display: none;
+        }
+        
+        .rule {
+            background: #bfbfbf;
+            padding: .8em;
+            margin-bottom: 15px;
+        }
+        
+        .rule div {
+            margin: 0px 0px 10px 0px;
+            padding: 0px;
+        }
+        
+        .lbl {
+            background: #333;
+            display: inline-block;
+            font-size: 0.7em;
+            padding: 3px 6px;
+            margin: 0 2px 2px 0;
+            font-family: Menlo, Monaco, Consolas, sans-serif;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background: #555;
+            color: #fff;
+        }
     </style>
-    
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
+
     <!-- Favicons -->
     <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
     <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
-    
+
     <script>
-      var _hmt = _hmt || [];
+        var _hmt = _hmt || [];
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     {{template "menu.html" .}}
     <div class="container content">
-      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
-      <div id="alert"></div>
-      <div id="home">
-         <div class="row">
-          <div class="member-info col-lg-6 col-md-6">
-              <img class="avatar" alt="{{.userInfo.Name}}" src="{{.userInfo.AvatarURL}}">
-              <div class="info">
-                  <h2>{{.userInfo.Name}}</h2>
-                  <p><a class="link email" href="mailto:{{.userInfo.Mail}}" target="_blank">{{.userInfo.Mail}}</a></p>
-              </div>
-          </div>
-          {{if .isAdmin}}
-           <div class="col-lg-6 col-md-6" style="padding:15px 30px;">
-             <div style="float:right">
-              <label>更新缓存：</label>
-              <button class="btn btn-info refreshCache" type="button"  data-loading-text="更新中...">更新缓存</button>
-              </div>
-              <div style="float:right;margin-right: 10px">
-              <label>外部通知：</label>  
-              <input id="switch-onColor" type="checkbox" checked data-on-color="info">
-              </div>
-          </div>
-          {{end}}
-         </div> 
-          {{if .self}}
-          <!-- Nav tabs -->
-          <ul class="nav nav-tabs" role="tablist">
-            <!--<li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>-->
-            <li role="presentation" class="active"><a href="#project" data="project" role="tab" data-toggle="tab">Project</a></li>
-            <li role="presentation"><a href="#ignore" data="ignore" role="tab" data-toggle="tab">Ignore</a></li>
-            {{if .isAdmin}}
-            <li role="presentation"><a href="#trustIP" data="trustIP" role="tab" data-toggle="tab">TrustIP</a></li>
-            {{end}}
-          </ul>
-
-          <!-- Tab panes -->
-          <div class="tab-content">
-            <div role="tabpanel" class="tab-pane" id="UserHome">...</div>
-            <div role="tabpanel" class="tab-pane active" id="project">
-              <form id="projectForm" >
-                <div class="form-group">
-                  <label for="projectName">ProjectName</label>
-                  <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter projectName">
+        <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+        <div id="alert"></div>
+        <div id="home">
+            <div class="row">
+                <div class="member-info col-lg-6 col-md-6">
+                    <img class="avatar" alt="{{.userInfo.Name}}" src="{{.userInfo.AvatarURL}}">
+                    <div class="info">
+                        <h2>{{.userInfo.Name}}</h2>
+                        <p><a class="link email" href="mailto:{{.userInfo.Mail}}" target="_blank">{{.userInfo.Mail}}</a></p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-default" id="projectSubmit">创建</button>
-              </form>
-              <div class="project-body" style="margin-top:20px ">
-
-              </div>
+                {{if .isAdmin}}
+                <div class="col-lg-6 col-md-6" style="padding:15px 30px;">
+                    <div style="float:right">
+                        <label>更新缓存：</label>
+                        <button class="btn btn-info refreshCache" type="button" data-loading-text="更新中...">更新缓存</button>
+                    </div>
+                    <div style="float:right;margin-right: 10px">
+                        <label>外部通知：</label>
+                        <input id="switch-onColor" type="checkbox" checked data-on-color="info">
+                    </div>
+                </div>
+                {{end}}
             </div>
-            <div role="tabpanel" class="tab-pane" id="ignore">
-               <div class="ignore">
-                  <div class="right">
-                    <button id="showForm" type="primary"   class="btn btn-info">New Ignore</button>
-                    <button id="hideForm" type="primary"  class="btn btn-info btn-hide">Hide Form</button>
-                  </div>
-                  <div id="ignoreForm" class="" style="display:none;">
-                    <silence-form sil="silence" class="ng-isolate-scope">
-                      <form novalidate="" name="form" class="forms ng-pristine ng-scope ng-valid-email ng-invalid ng-invalid-required" ng-controller="SilenceCreateCtrl">
-                        <fieldset id="silence-create">
-                          <row class="row">
-                            <column class="col-lg-3 col-md-3 col-xs-12 form-group" style="margin-bottom: 0px;padding-right: 0px;">
-                              <label>Start</label>
-                              <input ng-model="silence.startsAt" type="datetime-local"  name="start-time" required="" class="form-control">
-                            </column>
-                            <column class="col-lg-3 col-md-3 col-xs-12 form-group" style="margin-bottom: 0px;padding-right: 0px;">
-                              <label>End</label>
-                              <input ng-model="silence.endsAt" type="datetime-local"  name="end-time" required="" class="form-control">
-                            </column>
-                          </row>
-                              
-                          <!-- ngRepeat: m in silence.matchers -->
+            {{if .self}}
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <!--<li role="presentation" class="active"><a href="#UserHome" role="tab" data-toggle="tab">Home</a></li>-->
+                <li role="presentation" class="active"><a href="#project" data="project" role="tab" data-toggle="tab">Project</a></li>
+                <li role="presentation"><a href="#ignore" data="ignore" role="tab" data-toggle="tab">Ignore</a></li>
+                {{if .isAdmin}}
+                <li role="presentation"><a href="#trustIP" data="trustIP" role="tab" data-toggle="tab">TrustIP</a></li>
+                {{end}}
+            </ul>
 
-                          <row class="row kv" id="kv1">
-                            <column  class="form-group col-lg-3 col-md-3 col-xs-3" style="margin-bottom: 0px;padding-right: 0px;">   
-                              <label>Key</label>      
-                              <input class="form-control" type="text" name="k" ng-model="m.name" required="">
-                            </column>
-                            <column  class="form-group col-lg-3 col-md-3 col-xs-6" style="margin-bottom: 0px;padding-right: 0px;">   
-                              <label>Value</label>      
-                              <input class="form-control" type="text" name="v" ng-model="m.value" required="">
-                            </column>
-                            <column class="col-lg-1 col-md-1 col-xs-3 form-group" style="margin-bottom: 0px;padding-right: 0px;">
-                                <label>AddRow</label>
-                                <div class="btn-group">   
-                                <!--<button type="primary"  class="btn btn-default btn-hide" handle-type="remove" data-id="kv1">-</button>-->
-                                <button type="secondary"  class="btn btn-default" handle-type="add"  data-id="kv1">+</button>
-                                </div>
-                            </column>
-                           </row>
-
-                        </fieldset>
-
-                        <div class="btn-group">
-                          <button id="submit" type="primary" class="btn btn-default">Add</button>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="UserHome">...</div>
+                <div role="tabpanel" class="tab-pane active" id="project">
+                    <form id="projectForm">
+                        <div class="form-group">
+                            <label for="projectName">ProjectName</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter projectName">
                         </div>
-                      </form>
-                    </silence-form>
-                  </div><!--end ignoreForm-->
-                 <div class="ignore-body" style="margin-top:20px;">
-                    
+                        <button type="submit" class="btn btn-default" id="projectSubmit">创建</button>
+                    </form>
+                    <div class="project-body" style="margin-top:20px ">
+
+                    </div>
                 </div>
-               </div><!--end ignore-->
-            </div><!--end tabpanel-->
-             {{if .isAdmin}}
-            <div role="tabpanel" class="tab-pane" id="trustIP">
-               <form id="ipForm" >
-                <div class="form-group">
-                  <label for="projectName">TrustIP</label>
-                  <input type="text" class="form-control" id="trustIP" name="trustIP" placeholder="Enter trustIP">
+                <div role="tabpanel" class="tab-pane" id="ignore">
+                    <div class="ignore">
+                        <div class="right">
+                            <button id="showForm" type="primary" class="btn btn-info">New Ignore</button>
+                            <button id="hideForm" type="primary" class="btn btn-info btn-hide">Hide Form</button>
+                        </div>
+                        <div id="ignoreForm" class="" style="display:none;">
+                            <silence-form sil="silence" class="ng-isolate-scope">
+                                <form novalidate="" name="form" class="forms ng-pristine ng-scope ng-valid-email ng-invalid ng-invalid-required" ng-controller="SilenceCreateCtrl">
+                                    <fieldset id="silence-create">
+                                        <row class="row">
+                                            <column class="col-lg-3 col-md-3 col-xs-12 form-group" style="margin-bottom: 0px;padding-right: 0px;">
+                                                <label>Start</label>
+                                                <input ng-model="silence.startsAt" type="datetime-local" name="start-time" required="" class="form-control">
+                                            </column>
+                                            <column class="col-lg-3 col-md-3 col-xs-12 form-group" style="margin-bottom: 0px;padding-right: 0px;">
+                                                <label>End</label>
+                                                <input ng-model="silence.endsAt" type="datetime-local" name="end-time" required="" class="form-control">
+                                            </column>
+                                        </row>
+
+                                        <!-- ngRepeat: m in silence.matchers -->
+
+                                        <row class="row kv" id="kv1">
+                                            <column class="form-group col-lg-3 col-md-3 col-xs-3" style="margin-bottom: 0px;padding-right: 0px;">
+                                                <label>Key</label>
+                                                <input class="form-control" type="text" name="k" ng-model="m.name" required="">
+                                            </column>
+                                            <column class="form-group col-lg-3 col-md-3 col-xs-6" style="margin-bottom: 0px;padding-right: 0px;">
+                                                <label>Value</label>
+                                                <input class="form-control" type="text" name="v" ng-model="m.value" required="">
+                                            </column>
+                                            <column class="col-lg-1 col-md-1 col-xs-3 form-group" style="margin-bottom: 0px;padding-right: 0px;">
+                                                <label>AddRow</label>
+                                                <div class="btn-group">
+                                                    <!--<button type="primary"  class="btn btn-default btn-hide" handle-type="remove" data-id="kv1">-</button>-->
+                                                    <button type="secondary" class="btn btn-default" handle-type="add" data-id="kv1">+</button>
+                                                </div>
+                                            </column>
+                                        </row>
+
+                                    </fieldset>
+
+                                    <div class="btn-group">
+                                        <button id="submit" type="primary" class="btn btn-default">Add</button>
+                                    </div>
+                                </form>
+                            </silence-form>
+                        </div>
+                        <!--end ignoreForm-->
+                        <div class="ignore-body" style="margin-top:20px;">
+
+                        </div>
+                    </div>
+                    <!--end ignore-->
                 </div>
-                <button type="submit" class="btn btn-default" id="ipSubmit">添加</button>
-              </form>
-              <div class="ip-body" style="margin-top:20px ">
-                
-              </div>
+                <!--end tabpanel-->
+                {{if .isAdmin}}
+                <div role="tabpanel" class="tab-pane" id="trustIP">
+                    <form id="ipForm">
+                        <div class="form-group">
+                            <label for="projectName">TrustIP</label>
+                            <input type="text" class="form-control" id="trustIP" name="trustIP" placeholder="Enter trustIP">
+                        </div>
+                        <button type="submit" class="btn btn-default" id="ipSubmit">添加</button>
+                    </form>
+                    <div class="ip-body" style="margin-top:20px ">
+
+                    </div>
+                </div>
+                {{end}}
             </div>
-              {{end}}
-          </div>
-          {{end}}
-      </div>
-    </div><!-- /.container -->
-    <footer class="footer ">
-      <div class="container">
-        <div class="row footer-bottom">
-           <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+            {{end}}
         </div>
-      </div>
+    </div>
+    <!-- /.container -->
+    <footer class="footer ">
+        <div class="container">
+            <div class="row footer-bottom">
+                <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+            </div>
+        </div>
     </footer>
-    
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -234,307 +249,363 @@
     <script src="/static/js/site.js"></script>
     <script src="/static/js/bootstrap-switch.js"></script>
     <script>
-       $(function(){
-          {{if .isAdmin}}
-          $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
-          $.get({{.token}},{{.userName}},"/api/noticeOn",function(result,status){
-             if (status!="success"){
-                $.alertFail("alert","请求noticeON API错误")
-              }else{
-                if(result.status=="success"){
-                  $('input[id="switch-onColor"]').bootstrapSwitch('state', result.data.Value, true);
-                }else{
-                  $.alert("alert",result)
+        $(function() {
+            {
+                {
+                    if .isAdmin
                 }
-              }
-          })
-          $('input[id="switch-onColor"]').on('switchChange.bootstrapSwitch', function(event, state) {
-            // console.log(this); // DOM element
-            // console.log(event); // jQuery event
-            // console.log(state); // true | false
-            $.post({{.token}},{{.userName}},"/api/noticeOn/"+state,"",function(result,status){
-              if (status!="success"){
-                  $.alertFail("alert","请求noticeON API错误")
-                }else{
-                    $.alert("alert",result)
-                }
-            })   
-          });
-          $.get({{.token}},{{.userName}},"/api/trustIP",function(result,status){
-              if (status!="success"){
-                $.alertFail("alert","请求Trust API错误")
-              }else{
-                if(result.status=="success"){
-                   $.each(result.data,function(i,item){
-                     addIP(item)
-                   })
-                }else{
-                  $.alert("alert",result)
-                }
-              }
-          })
-          $("#ipSubmit").click(function(){
-            ip = $("input[name='trustIP']").val()
-            console.log(ip)
-            if(!verify(ip,"ip")){
-               $.alertFail("alert","IP格式不正确")
-            }else{
-              $.post("{{.token}}","{{.userName}}","/api/trustIP",'{"Value":"'+ip+'","Name":"TrustIP"}',function(result,status){
-                 if(status!="success"){
-                  $.alertFail("alert","异步请求错误")
-                  }else{
-                    if(result.status=="success"){
-                      addIP(result.data)
-                      $.alert("alert",result)
-                    }else{
-                      $.alert("alert",result)
-                    }
-                  }
-              })
             }
-            return false
-          })
-          $(".refreshCache").click(function(){
-             var b=$(this)
-             b.button("loading")
-             $.post({{.token}},{{.userName}},"/api/refreshCache",'',function(result,status){
-                if(status=="success"){
-                  b.button('reset')
-                  $.alert("alert",result)
+            $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
+            $.get({
+                {.token
                 }
-             })
-          })
-          {{end}}
-
-          $.get({{.token}},{{.userName}},"/api/ignoreRules",function(result,status){
-              if (status!="success"){
-                $.alertFail("alert","请求规则api错误")
-              }else{
-                if(result.status=="success"){
-                   $.each(result.data,function(i,item){
-                     addRule(item)
-                   })
-                }else{
-                  $.alert("alert",result)
+            }, {
+                {.userName
                 }
-              }
-          })
-          $.get({{.token}},{{.userName}},"/api/projects",function(result,status){
-              if (status!="success"){
-                $.alertFail("alert","请求Token API错误")
-              }else{
-                if(result.status=="success"){
-                   $.each(result.data,function(i,item){
-                     addProject(item)
-                   })
-                }else{
-                  $.alert("alert",result)
-                }
-              }
-          })
-
-          $("#projectSubmit").click(function(){
-            projectName = $("input[name='projectName']").val()
-            if(projectName == ""){
-               $.alertFail("alert","项目名不能为空！")
-            }else{
-              $.post("{{.token}}","{{.userName}}","/token/addToken",'{"Project":"'+projectName+'"}',function(result,status){
-                 if(status!="success"){
-                  $.alertFail("alert","异步请求错误")
-                  }else{
-                    if(result.status=="success"){
-                            addProject(result.data)
-                            $.alert("alert",result)
-                    }else{
-                      $.alert("alert",result)
+            }, "/api/noticeOn", function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "请求noticeON API错误")
+                } else {
+                    if (result.status == "success") {
+                        $('input[id="switch-onColor"]').bootstrapSwitch('state', result.data.Value, true);
+                    } else {
+                        $.alert("alert", result)
                     }
-                  }
-              })
-            }
-            return false
-          })
-
-          $("#silence-create").on("click",'button',function(){
-             handle= $(this).attr("handle-type")
-             if (handle=="add"){
-               addRow($(this).attr("data-id"))
-             }else if (handle=="remove"){
-               removeRow($(this).attr("data-id"))
-             }
-             return false
-          })
-
-          $("#showForm").click(function(){
-            $("#ignoreForm").slideDown()
-            $(this).hide()
-            $("#hideForm").show()
-          })
-
-          $("#hideForm").click(function(){
-            $("#ignoreForm").slideUp()
-            $(this).hide()
-            $("#showForm").show()
-          })
-          $("#submit").click(function(){
-             startTime=$('input[name="start-time"]').val()
-             console.log(startTime)
-             if (startTime==""){
-               $.alertFail("alert","开始时间不完整")
-               return false
-             }
-             
-             //转golang时间
-             var start = startTime+":00.000+08:00"
-             endTime=$('input[name="end-time"]').val()
-             if (endTime==""){
-               $.alertFail("alert","结束时间不完整")
-               return false
-             }
-            var end = endTime+":00.000+08:00" 
-            var labels='{'
-            $(".kv").each(function(){
-              var k=$(this).find("input[name='k']").val()
-              var v=$(this).find("input[name='v']").val()
-              labels+='"'+k+'":"'+v+'",'
+                }
             })
-            labels=labels.substring(0,labels.length-1)
-            labels+="}"
-            var postData='{"userName":"{{.userName}}","startsAt":"'+start+'","endsAt":"'+end+'","labels":'+labels+'}'
-            $.post({{.token}},{{.userName}},"/api/addIgnoreRule",postData,function(result,status){
-               if(status!="success"){
-                  $.alertFail("alert","异步请求错误")
-               }else{
-                 if(result.status=="success"){
-                       $("#ignoreForm").slideUp()
-                       $("#showForm").show()
-                       $("#hideForm").hide()
-                        addRule(result.data)
-                        $.alert("alert",result)
-                    }else{
-                      $alert("alert",result)
+            $('input[id="switch-onColor"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                // console.log(this); // DOM element
+                // console.log(event); // jQuery event
+                // console.log(state); // true | false
+                $.post({
+                    {.token
                     }
-               }
-            })
-             return false
-          })
-
-       })
-
-       var row = 1
-
-       function addRule(item){
-         var html='<div class="row rule" id="'+item.ruleID+'">'+
-                     '<div class="col-lg-6 col-md-6">'
-                        $.each(item.labels.LabelSet,function(k,v){
-                            html+='<span class="lbl">'+k+' = '+v+'</span>'
+                }, {
+                    {.userName
+                    }
+                }, "/api/noticeOn/" + state, "", function(result, status) {
+                    if (status != "success") {
+                        $.alertFail("alert", "请求noticeON API错误")
+                    } else {
+                        $.alert("alert", result)
+                    }
+                })
+            });
+            $.get({
+                {.token
+                }
+            }, {
+                {.userName
+                }
+            }, "/api/trustIP", function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "请求Trust API错误")
+                } else {
+                    if (result.status == "success") {
+                        $.each(result.data, function(i, item) {
+                            addIP(item)
                         })
-                        
-                     html+=' </div>'+
-                     ' <div class="col-lg-4 col-md-4 col-xs-8">'+
-                      '  <button class="btn-sm btn btn-info" >From '+item.startsAt.substring(0,item.startsAt.length-9)+'</button>'+
-                       ' <button class="btn-sm btn btn-info" >To '+item.endsAt.substring(0,item.endsAt.length-9)+'</button>'+
-                        '</div><div class="col-lg-2 col-md-2 col-xs-4 btn-group">'+
-                        '<button type="primary" class="btn-sm btn btn-danger"  onclick="deleteRule(\''+item.ruleID+'\')" >Delete</button>'+
-                        '<button type="secondary" class="btn-sm btn btn-info"  onclick="edit(\''+item.ruleID+'\')">Edit</button>'+
-                     ' </div>'+
-                   ' </div>'
-                    $(".ignore-body").append(html)
-       }
-       function addRow(dom){
-              row++
-              ID="kv"+row.toString()
-              rowHtml='<row class="row kv" id="'+ID+'">'+
-                            '<column  class="form-group col-lg-3 col-md-3 col-xs-3" style="margin-bottom: 0px;padding-right: 0px;">'+   
-                             ' <label>Key</label>'+
-                              '<input class="form-control" type="text" name="k" required="">'+
-                           ' </column>'+
-                            '<column  class="form-group col-lg-3 col-md-3 col-xs-6" style="margin-bottom: 0px;padding-right: 0px;">'+   
-                             ' <label>Value</label>'+     
-                             ' <input class="form-control" type="text" name="v" required="">'+
-                            '</column>'+
-                            '<column class="col-lg-1 col-md-1 col-xs-3 form-group" style="margin-bottom: 0px;padding-right: 0px;">'+
-                               ' <label>AddRow</label> '+
-                               '<div class="btn-group">  '+  
-                                '<button type="primary"  class="btn btn-default" handle-type="remove" data-id="'+ID+'">-</button>'+
-                                '<button type="secondary"  class="btn btn-default" handle-type="add"  data-id="'+ID+'">+</button>'+
-                                '</div>'+
-                            '</column>'+
-                           '</row>'
-              $("#"+dom).after(rowHtml)
-              return false
-          }
-    function addProject(item){
-            var html='<div class="row rule" id="'+item.Project+'">'+
-                     ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">'+
-                      '  <button class="btn-sm btn btn-info" >Create: '+item.CreateTime.substring(0,19)+'</button>'+
-                      '  <button class="btn-sm btn btn-info" >Project: '+item.Project+'</button>'+
-                      '  <button class="btn-sm btn btn-info" >Token: <input style="background:#5bc0de;border: 0;" value="'+item.Value+'"></input></button>'+
-                        '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">'+
-                        '<button  class="btn-sm btn btn-danger"  onclick="deleteProject(\''+item.Project+'\')" >Delete</button>'+
-                     ' </div>'+
-                   ' </div>'
-            $(".project-body").append(html)       
-          }
-          function addIP(item){
-            var html='<div class="row rule" id="'+item.ID+'">'+
-                     ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">'+
-                      '  <button class="btn-sm btn btn-info" >TrustIP: '+item.Value+'</button>'+
-                      '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">'+
-                        '<button  class="btn-sm btn btn-danger"  onclick="deleteTrustIP(\''+item.ID+'\')" >Delete</button>'+
-                     ' </div>'+
-                   ' </div>'
-            $(".ip-body").append(html)       
-          }
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+            $("#ipSubmit").click(function() {
+                ip = $("input[name='trustIP']").val()
+                console.log(ip)
+                if (!verify(ip, "ip")) {
+                    $.alertFail("alert", "IP格式不正确")
+                } else {
+                    $.post("{{.token}}", "{{.userName}}", "/api/trustIP", '{"Value":"' + ip + '","Name":"TrustIP"}', function(result, status) {
+                        if (status != "success") {
+                            $.alertFail("alert", "异步请求错误")
+                        } else {
+                            if (result.status == "success") {
+                                addIP(result.data)
+                                $.alert("alert", result)
+                            } else {
+                                $.alert("alert", result)
+                            }
+                        }
+                    })
+                }
+                return false
+            })
+            $(".refreshCache").click(function() {
+                var b = $(this)
+                b.button("loading")
+                $.post({
+                    {.token
+                    }
+                }, {
+                    {.userName
+                    }
+                }, "/api/refreshCache", '', function(result, status) {
+                    if (status == "success") {
+                        b.button('reset')
+                        $.alert("alert", result)
+                    }
+                })
+            }) {
+                {
+                    end
+                }
+            }
 
-    function removeRow(dom){
-             $("#"+dom).remove()
-             return false
-          }
-    function deleteProject(project){
-      
-      $.delete("{{.token}}","{{.userName}}","/api/project/"+project,function(result,status){
-        if(status!="success"){
-        $.alertFail("alert","异步请求错误")
-        }else{
-          if(result.status=="success"){
-              $("#"+project).slideUp()
-              $.alert("alert",result)
-          }else{
-            $.alert("alert",result)
-          }
+            $.get({
+                {.token
+                }
+            }, {
+                {.userName
+                }
+            }, "/api/ignoreRules", function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "请求规则api错误")
+                } else {
+                    if (result.status == "success") {
+                        $.each(result.data, function(i, item) {
+                            addRule(item)
+                        })
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+            $.get({
+                {.token
+                }
+            }, {
+                {.userName
+                }
+            }, "/api/projects", function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "请求Token API错误")
+                } else {
+                    if (result.status == "success") {
+                        $.each(result.data, function(i, item) {
+                            addProject(item)
+                        })
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+
+            $("#projectSubmit").click(function() {
+                projectName = $("input[name='projectName']").val()
+                if (projectName == "") {
+                    $.alertFail("alert", "项目名不能为空！")
+                } else {
+                    $.post("{{.token}}", "{{.userName}}", "/token/addToken", '{"Project":"' + projectName + '"}', function(result, status) {
+                        if (status != "success") {
+                            $.alertFail("alert", "异步请求错误")
+                        } else {
+                            if (result.status == "success") {
+                                addProject(result.data)
+                                $.alert("alert", result)
+                            } else {
+                                $.alert("alert", result)
+                            }
+                        }
+                    })
+                }
+                return false
+            })
+
+            $("#silence-create").on("click", 'button', function() {
+                handle = $(this).attr("handle-type")
+                if (handle == "add") {
+                    addRow($(this).attr("data-id"))
+                } else if (handle == "remove") {
+                    removeRow($(this).attr("data-id"))
+                }
+                return false
+            })
+
+            $("#showForm").click(function() {
+                $("#ignoreForm").slideDown()
+                $(this).hide()
+                $("#hideForm").show()
+            })
+
+            $("#hideForm").click(function() {
+                $("#ignoreForm").slideUp()
+                $(this).hide()
+                $("#showForm").show()
+            })
+            $("#submit").click(function() {
+                startTime = $('input[name="start-time"]').val()
+                console.log(startTime)
+                if (startTime == "") {
+                    $.alertFail("alert", "开始时间不完整")
+                    return false
+                }
+
+                //转golang时间
+                var start = startTime + ":00.000+08:00"
+                endTime = $('input[name="end-time"]').val()
+                if (endTime == "") {
+                    $.alertFail("alert", "结束时间不完整")
+                    return false
+                }
+                var end = endTime + ":00.000+08:00"
+                var labels = '{'
+                $(".kv").each(function() {
+                    var k = $(this).find("input[name='k']").val()
+                    var v = $(this).find("input[name='v']").val()
+                    labels += '"' + k + '":"' + v + '",'
+                })
+                labels = labels.substring(0, labels.length - 1)
+                labels += "}"
+                var postData = '{"userName":"{{.userName}}","startsAt":"' + start + '","endsAt":"' + end + '","labels":' + labels + '}'
+                $.post({
+                    {.token
+                    }
+                }, {
+                    {.userName
+                    }
+                }, "/api/addIgnoreRule", postData, function(result, status) {
+                    if (status != "success") {
+                        $.alertFail("alert", "异步请求错误")
+                    } else {
+                        if (result.status == "success") {
+                            $("#ignoreForm").slideUp()
+                            $("#showForm").show()
+                            $("#hideForm").hide()
+                            addRule(result.data)
+                            $.alert("alert", result)
+                        } else {
+                            $alert("alert", result)
+                        }
+                    }
+                })
+                return false
+            })
+
+        })
+
+        var row = 1
+
+        function addRule(item) {
+            var html = '<div class="row rule" id="' + item.ruleID + '">' +
+                '<div class="col-lg-6 col-md-6">'
+            $.each(item.labels.LabelSet, function(k, v) {
+                html += '<span class="lbl">' + k + ' = ' + v + '</span>'
+            })
+
+            html += ' </div>' +
+                ' <div class="col-lg-4 col-md-4 col-xs-8">' +
+                '  <button class="btn-sm btn btn-info" >From ' + item.startsAt.substring(0, item.startsAt.length - 9) + '</button>' +
+                ' <button class="btn-sm btn btn-info" >To ' + item.endsAt.substring(0, item.endsAt.length - 9) + '</button>' +
+                '</div><div class="col-lg-2 col-md-2 col-xs-4 btn-group">' +
+                '<button type="primary" class="btn-sm btn btn-danger"  onclick="deleteRule(\'' + item.ruleID + '\')" >Delete</button>' +
+                '<button type="secondary" class="btn-sm btn btn-info"  onclick="edit(\'' + item.ruleID + '\')">Edit</button>' +
+                ' </div>' +
+                ' </div>'
+            $(".ignore-body").append(html)
         }
-      })
-    }  
-    function deleteRule(id){
-      
-      $.delete("{{.token}}","{{.userName}}","/api/ignoreRule/"+id,function(result,status){
-        if(status!="success"){
-        $.alertFail("alert","异步请求错误")
-        }else{
-          if(result.status=="success"){
-              $("#"+id).slideUp()
-              $.alert("alert",result)
-          }else{
-            $.alert("alert",result)
-          }
+
+        function addRow(dom) {
+            row++
+            ID = "kv" + row.toString()
+            rowHtml = '<row class="row kv" id="' + ID + '">' +
+                '<column  class="form-group col-lg-3 col-md-3 col-xs-3" style="margin-bottom: 0px;padding-right: 0px;">' +
+                ' <label>Key</label>' +
+                '<input class="form-control" type="text" name="k" required="">' +
+                ' </column>' +
+                '<column  class="form-group col-lg-3 col-md-3 col-xs-6" style="margin-bottom: 0px;padding-right: 0px;">' +
+                ' <label>Value</label>' +
+                ' <input class="form-control" type="text" name="v" required="">' +
+                '</column>' +
+                '<column class="col-lg-1 col-md-1 col-xs-3 form-group" style="margin-bottom: 0px;padding-right: 0px;">' +
+                ' <label>AddRow</label> ' +
+                '<div class="btn-group">  ' +
+                '<button type="primary"  class="btn btn-default" handle-type="remove" data-id="' + ID + '">-</button>' +
+                '<button type="secondary"  class="btn btn-default" handle-type="add"  data-id="' + ID + '">+</button>' +
+                '</div>' +
+                '</column>' +
+                '</row>'
+            $("#" + dom).after(rowHtml)
+            return false
         }
-      })
-    }     
-    function deleteTrustIP(id){
-      
-      $.delete("{{.token}}","{{.userName}}","/api/trustIP/"+id,function(result,status){
-        if(status!="success"){
-        $.alertFail("alert","异步请求错误")
-        }else{
-          if(result.status=="success"){
-              $("#"+id).slideUp()
-               $.alert("alert",result)
-          }else{
-            $.alert("alert",result)
-          }
+
+        function addProject(item) {
+            var html = '<div class="row rule" id="' + item.Project + '">' +
+                ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">' +
+                '  <button class="btn-sm btn btn-info" >Create: ' + item.CreateTime.substring(0, 19) + '</button>' +
+                '  <button class="btn-sm btn btn-info" >Project: ' + item.Project + '</button>' +
+                '  <button class="btn-sm btn btn-info" >Token: <input style="background:#5bc0de;border: 0;" value="' + item.Value + '"></input></button>' +
+                '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">' +
+                '<button  class="btn-sm btn btn-danger"  onclick="deleteProject(\'' + item.Project + '\')" >Delete</button>' +
+                ' </div>' +
+                ' </div>'
+            $(".project-body").append(html)
         }
-      })
-    }     
+
+        function addIP(item) {
+            var html = '<div class="row rule" id="' + item.ID + '">' +
+                ' <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">' +
+                '  <button class="btn-sm btn btn-info" >TrustIP: ' + item.Value + '</button>' +
+                '</div><div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 btn-group">' +
+                '<button  class="btn-sm btn btn-danger"  onclick="deleteTrustIP(\'' + item.ID + '\')" >Delete</button>' +
+                ' </div>' +
+                ' </div>'
+            $(".ip-body").append(html)
+        }
+
+        function removeRow(dom) {
+            $("#" + dom).remove()
+            return false
+        }
+
+        function deleteProject(project) {
+
+            $.delete("{{.token}}", "{{.userName}}", "/api/project/" + project, function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "异步请求错误")
+                } else {
+                    if (result.status == "success") {
+                        $("#" + project).slideUp()
+                        $.alert("alert", result)
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+        }
+
+        function deleteRule(id) {
+
+            $.delete("{{.token}}", "{{.userName}}", "/api/ignoreRule/" + id, function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "异步请求错误")
+                } else {
+                    if (result.status == "success") {
+                        $("#" + id).slideUp()
+                        $.alert("alert", result)
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+        }
+
+        function deleteTrustIP(id) {
+
+            $.delete("{{.token}}", "{{.userName}}", "/api/trustIP/" + id, function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "异步请求错误")
+                } else {
+                    if (result.status == "success") {
+                        $("#" + id).slideUp()
+                        $.alert("alert", result)
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+        }
     </script>
-  </body>
+</body>
+
 </html>

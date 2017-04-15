@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
-  <head>
-    
+<head>
+
     <meta charset="utf-8">
-    <title>光音网络监控报警处理平台-团队信息管理</title>
+    <title>一云监控报警处理平台-团队信息管理</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker,容器监控">
     <meta name="keywords" content="光音网络监控报警处理平台，prometheus,cAdvisor,docker">
@@ -15,87 +15,96 @@
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/site.css" rel="stylesheet">
     <style>
-    .job-hot {
-    	position: absolute;
-    	color: #d9534f;
-    	right: 0;
-    	top: 15px;
-    }
-    .group_hd h3{
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      border-bottom: solid #ccc 2px;
-      line-height: 20px;
-      margin: 0;
-      padding: 10px;
-    }
-    .group_bd .member .avatar{
-      width: 42px;
-    height: 42px;
-    float: left;
-    border-radius: 50%;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
-    -webkit-transition: box-shadow 200ms ease-in-out;
-    -moz-transition: box-shadow 200ms ease-in-out;
-    transition: box-shadow 200ms ease-in-out;
-    }
-    .member{
-      padding:10px 15px;
-    }
-    .member-link .role {
-    font-size: 12px;
-    line-height: 1;
-    color: #999;
-    margin-top: 2px;
-    }
-    .member-link .name,.member-link .role {
-    display: block;
-    margin: 0 0 0 50px;
-    width: 88px;
-    font-size: 14px;
-    text-align: left;
-    }
-    .member-link .name {
-      color: #333;
-    padding-top: 2px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    }
+        .job-hot {
+            position: absolute;
+            color: #d9534f;
+            right: 0;
+            top: 15px;
+        }
+        
+        .group_hd h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: solid #ccc 2px;
+            line-height: 20px;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        .group_bd .member .avatar {
+            width: 42px;
+            height: 42px;
+            float: left;
+            border-radius: 50%;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+            -webkit-transition: box-shadow 200ms ease-in-out;
+            -moz-transition: box-shadow 200ms ease-in-out;
+            transition: box-shadow 200ms ease-in-out;
+        }
+        
+        .member {
+            padding: 10px 15px;
+        }
+        
+        .member-link .role {
+            font-size: 12px;
+            line-height: 1;
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .member-link .name,
+        .member-link .role {
+            display: block;
+            margin: 0 0 0 50px;
+            width: 88px;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        .member-link .name {
+            color: #333;
+            padding-top: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     </style>
-    
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
+
     <!-- Favicons -->
     <link rel="apple-touch-icon-precomposed" href="http://static.bootcss.com/www/assets/ico/apple-touch-icon-precomposed.png">
     <link rel="shortcut icon" href="http://static.bootcss.com/www/assets/ico/favicon.png">
-    
+
     <script>
-      var _hmt = _hmt || [];
+        var _hmt = _hmt || [];
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     {{template "menu.html" .}}
     <div class="container projects">
-      <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
-      <div id="alert"></div>
-      <div id="teams">
-          
-      </div>
-    </div><!-- /.container -->
-    <footer class="footer ">
-      <div class="container">
-        <div class="row footer-bottom">
-           <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+        <div class="page-header" style="width:100%;margin-bottom: 0;border: 0"></div>
+        <div id="alert"></div>
+        <div id="teams">
+
         </div>
-      </div>
+    </div>
+    <!-- /.container -->
+    <footer class="footer ">
+        <div class="container">
+            <div class="row footer-bottom">
+                <p style="text-align: center">本平台报警数据来源于Prometheus监控体系</p>
+            </div>
+        </div>
     </footer>
-    
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -103,40 +112,41 @@
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/site.js"></script>
     <script>
-       $(function(){
-          $.get("{{.token}}","{{.userName}}","/teamUsers",function(result,status){
-            if(status!="success"){
-              $.alertFail("alert","异步请求错误")
-            }else{
-               if(result.status="success"){
-              $("#teams").html('')
-              $.each(result.data,function(i,team){
-                var html='<div class="group row">'+
-                          '<div class="group_hd">'+
-                         ' <h3>'+
-                           ' <span class="group-name" data-id="'+team.Team.id+'" >'+team.Team.name+'</span>'+
-                         ' </h3>'+
-                         ' </div>'+
-                         ' <div class="group_bd">'+
-                           ' <div class="members">'
-                              $.each(team.User,function(i,user){
-                                html+='<div class="member col-lg-3 col-md-3 col-sm-6 col-xs-12" data-guid="'+user.id+'" data-team-guid="'+team.Team.id+'">'+
-                                      '<a href="/user/'+user.Name+'" title="'+user.Name+'" class="member-link" >'+
-                                          '<img class="avatar" src="'+user.avatar_url+'" alt="'+user.Name+'">'+
-                                          '<span class="name">'+user.Name+'</span>'+
-                                          '<span class="role">'+user.mail+'</span>'+
-                                      '</a>'+
-                                  '</div>'
-                              })
-                        html+='</div></div></div>'
-               $("#teams").append(html)   
-              })
-            }else{
-              $.alert("alert",result)
-            }
-            }
-          })
-       })
+        $(function() {
+            $.get("{{.token}}", "{{.userName}}", "/teamUsers", function(result, status) {
+                if (status != "success") {
+                    $.alertFail("alert", "异步请求错误")
+                } else {
+                    if (result.status = "success") {
+                        $("#teams").html('')
+                        $.each(result.data, function(i, team) {
+                            var html = '<div class="group row">' +
+                                '<div class="group_hd">' +
+                                ' <h3>' +
+                                ' <span class="group-name" data-id="' + team.Team.id + '" >' + team.Team.name + '</span>' +
+                                ' </h3>' +
+                                ' </div>' +
+                                ' <div class="group_bd">' +
+                                ' <div class="members">'
+                            $.each(team.User, function(i, user) {
+                                html += '<div class="member col-lg-3 col-md-3 col-sm-6 col-xs-12" data-guid="' + user.id + '" data-team-guid="' + team.Team.id + '">' +
+                                    '<a href="/user/' + user.Name + '" title="' + user.Name + '" class="member-link" >' +
+                                    '<img class="avatar" src="' + user.avatar_url + '" alt="' + user.Name + '">' +
+                                    '<span class="name">' + user.Name + '</span>' +
+                                    '<span class="role">' + user.mail + '</span>' +
+                                    '</a>' +
+                                    '</div>'
+                            })
+                            html += '</div></div></div>'
+                            $("#teams").append(html)
+                        })
+                    } else {
+                        $.alert("alert", result)
+                    }
+                }
+            })
+        })
     </script>
-  </body>
+</body>
+
 </html>

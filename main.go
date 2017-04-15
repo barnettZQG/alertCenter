@@ -5,8 +5,6 @@ import (
 	"alertCenter/core/notice"
 	"alertCenter/core/user"
 	_ "alertCenter/routers"
-	"log"
-	"net/http"
 	_ "net/http/pprof"
 
 	"alertCenter/core/service"
@@ -15,10 +13,6 @@ import (
 )
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
-
 	re := user.Relation{}
 	beego.AddAPPStartHook(func() error {
 		return re.Init()
@@ -37,6 +31,5 @@ func main() {
 		return service.Init()
 	})
 	//beego.SetLogger("file", `{"filename":"log/test.log","level":10}`)
-	beego.Info("mongo:", beego.AppConfig.String("mongoURI"))
 	beego.Run()
 }

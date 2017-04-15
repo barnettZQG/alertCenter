@@ -1,7 +1,7 @@
 GO_LDFLAGS=-ldflags " -w"
 
-TAG=latest
-PREFIX=dhub.yunpro.cn/barnett/alert
+TAG=0415
+PREFIX=barnettzqg/alert-center
 
 build: ## build the go packages
 	@echo "🐳 $@"

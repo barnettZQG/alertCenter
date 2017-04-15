@@ -23,11 +23,12 @@ func init() {
 }
 func Open() (*mgo.Session, error) {
 	var mongoHost string
-	if os.Getenv("MONGODB_HOST") != "" && os.Getenv("MONGODB_HOST") != "" {
-		mongoHost = fmt.Sprintf("%s:%s", os.Getenv("MONGODB_HOST"), os.Getenv("MONGODB_HOST"))
+	if os.Getenv("MONGODB_HOST") != "" && os.Getenv("MONGODB_PORT") != "" {
+		mongoHost = fmt.Sprintf("%s:%s", os.Getenv("MONGODB_HOST"), os.Getenv("MONGODB_PORT"))
 	} else {
 		mongoHost = beego.AppConfig.String("mongoURI")
 	}
+	beego.Info("mongoHost:", mongoHost)
 	if Session == nil {
 		login := &mgo.DialInfo{
 			Addrs:    []string{mongoHost},

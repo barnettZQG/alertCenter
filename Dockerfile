@@ -1,4 +1,4 @@
-FROM dhub.yunpro.cn/barnett/alpinessl:3.4
+FROM alpine:3.4
 MAINTAINER Barnett <zengqg@yiyun.pro>
 
 RUN mkdir /alert

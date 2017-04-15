@@ -17,7 +17,8 @@ var Session *mgo.Session
 func init() {
 	session, err := Open()
 	if err != nil || session == nil {
-		panic("mongodb init error!" + err.Error())
+		beego.Error("mongodb init error!" + err.Error())
+		os.Exit(1)
 	}
 	defer session.Close()
 }
@@ -34,8 +35,8 @@ func Open() (*mgo.Session, error) {
 			Addrs:    []string{mongoHost},
 			Timeout:  60 * time.Second,
 			Database: beego.AppConfig.String("mongoDB"),
-			Username: beego.AppConfig.String("mongoUser"),
-			Password: beego.AppConfig.String("mongoPass"),
+			// Username: beego.AppConfig.String("mongoUser"),
+			// Password: beego.AppConfig.String("mongoPass"),
 		}
 		//log.Debug("Connectting mongodb, host:", login.Addrs, "user:", login.Username, ", password:", login.Password, ", db:", login.Database)
 		session, err := mgo.DialWithInfo(login)

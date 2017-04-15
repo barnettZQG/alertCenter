@@ -3,13 +3,12 @@
 我很高兴为你解答遇到的问题。
 
 # 安装要求
-项目 | 要求
+项目 | 要求说明
 ---- | ---
 go    | 版本1.6.3及以上
 beego | 版本1.7.0及以上
-
-* 依赖gitlab账号体系，需要gitlab应用。
-* 依赖mongodb服务作为存储。
+gitlab | 账号体系依赖gitlab应用。
+mongodb | 存储服务。
 # 功能说明
 1. 兼容prometheus报警信息，比alertmanager更完善的功能
 2. 多种安全验证方式的API

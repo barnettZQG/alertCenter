@@ -4,6 +4,10 @@ import (
 	"errors"
 	"time"
 
+	"os"
+
+	"fmt"
+
 	"github.com/astaxie/beego"
 	mgo "gopkg.in/mgo.v2"
 )
@@ -18,9 +22,15 @@ func init() {
 	defer session.Close()
 }
 func Open() (*mgo.Session, error) {
+	var mongoHost string
+	if os.Getenv("MONGODB_HOST") != "" && os.Getenv("MONGODB_HOST") != "" {
+		mongoHost = fmt.Sprintf("%s:%s", os.Getenv("MONGODB_HOST"), os.Getenv("MONGODB_HOST"))
+	} else {
+		mongoHost = beego.AppConfig.String("mongoURI")
+	}
 	if Session == nil {
 		login := &mgo.DialInfo{
-			Addrs:    []string{beego.AppConfig.String("mongoURI")},
+			Addrs:    []string{mongoHost},
 			Timeout:  60 * time.Second,
 			Database: beego.AppConfig.String("mongoDB"),
 			Username: beego.AppConfig.String("mongoUser"),

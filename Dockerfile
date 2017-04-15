@@ -1,5 +1,5 @@
 FROM dhub.yunpro.cn/barnett/alpinessl:3.4
-MAINTAINER Barnett <zengqingguo@goyoo.com>
+MAINTAINER Barnett <zengqg@yiyun.pro>
 
 RUN mkdir /alert
 COPY ./conf /alert/conf

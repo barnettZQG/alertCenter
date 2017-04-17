@@ -1,7 +1,7 @@
 FROM alpine:3.4
 MAINTAINER Barnett <zengqg@yiyun.pro>
 
-RUN mkdir /alert && apt-get
+RUN mkdir /alert
 COPY ./conf /alert/conf
 COPY ./static /alert/static
 COPY ./views /alert/views

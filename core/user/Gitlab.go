@@ -108,6 +108,7 @@ func (e *GitlabServer) SearchUsers() ([]*models.User, error) {
 			tmp.Name = u.Username
 			tmp.Mail = u.Email
 			tmp.AvatarURL = u.AvatarUrl
+			tmp.IsAdmin = u.IsAdmin
 			users = append(users, tmp)
 		}
 		page = page + 1

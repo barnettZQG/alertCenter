@@ -1,23 +1,34 @@
 package gitlab
 
 import (
-	"github.com/astaxie/beego"
-	"net/url"
-	"strings"
 	"alertCenter/models"
+	"net/url"
+	"os"
 	"strconv"
+	"strings"
+
+	"github.com/astaxie/beego"
 )
 
 func GetGitlabUrl() string {
+	if os.Getenv("GitlabURL") != "" {
+		return strings.TrimSuffix(os.Getenv("GitlabURL"), "/")
+	}
 	return strings.TrimSuffix(beego.AppConfig.String("Gitlab"), "/")
 }
 
 func GetAdminAccessToken() string {
+	if os.Getenv("GitlabAccessToken") != "" {
+		return os.Getenv("GitlabAccessToken")
+	}
 	return beego.AppConfig.String("GitlabAccessToken")
 }
 
 // call back url
 func GetCallBackUrl() string {
+	if os.Getenv("GitlabCallBackUrl") != "" {
+		return os.Getenv("GitlabCallBackUrl")
+	}
 	return beego.AppConfig.String("GitlabCallBackUrl")
 }
 
@@ -29,11 +40,17 @@ func GetCallBackUrlEncode() string {
 
 // clientId
 func GetGitlabClientId() string {
+	if os.Getenv("GitlabOAuthClientId") != "" {
+		return os.Getenv("GitlabOAuthClientId")
+	}
 	return beego.AppConfig.String("GitlabOAuthClientId")
 }
 
 // sercetId
 func GetGitlabSercetId() string {
+	if os.Getenv("GitlabOAuthSercet") != "" {
+		return os.Getenv("GitlabOAuthSercet")
+	}
 	return beego.AppConfig.String("GitlabOAuthSercet")
 }
 
@@ -42,14 +59,14 @@ func GetGitlabOAuthUrl() string {
 	return GetGitlabUrl() + "/oauth/authorize?response_type=code&client_id=" + GetGitlabClientId() + "&redirect_uri=" + GetCallBackUrlEncode()
 }
 
-func ConvertGitlabGroupToAlertModel(gitlab GitlabGroup) ( *models.Team) {
+func ConvertGitlabGroupToAlertModel(gitlab GitlabGroup) *models.Team {
 	team := &models.Team{}
 	team.ID = strconv.Itoa(gitlab.Id)
 	team.Name = gitlab.Name
 	return team
 }
 
-func ConvertGitlabUserToAlertModel(gitlab GitlabUser) ( *models.User) {
+func ConvertGitlabUserToAlertModel(gitlab GitlabUser) *models.User {
 	user := &models.User{}
 	user.ID = strconv.Itoa(gitlab.Id)
 	user.Name = gitlab.Username
@@ -60,8 +77,8 @@ func ConvertGitlabUserToAlertModel(gitlab GitlabUser) ( *models.User) {
 	return user
 }
 
-func ConvertGitlabUsers(gitlab []*GitlabUser) ([]*models.User) {
-	users := make([]*models.User,len(gitlab))
+func ConvertGitlabUsers(gitlab []*GitlabUser) []*models.User {
+	users := make([]*models.User, len(gitlab))
 	for i, u := range gitlab {
 		users[i] = ConvertGitlabUserToAlertModel(*u)
 	}

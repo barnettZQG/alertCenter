@@ -212,13 +212,7 @@
         })
 
         function load() {
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/history/{{.mark}}?pageSize=" + pageSize + "&page=" + page, function(result) {
+            $.get("{{.token}}", "{{.userName}}","/api/history/{{.mark}}?pageSize=" + pageSize + "&page=" + page, function(result) {
                 if (result.status == "success") {
                     if (result.data == null) {
                         //还原

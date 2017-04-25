@@ -152,13 +152,7 @@
                 } else {
                     window.location.href = '/history/' + alertID;
                 }
-                $.post({
-                    {.token
-                    }
-                }, {
-                    {.userName
-                    }
-                }, url, '{"message":"用户主动操作"}', function(data, status) {
+                $.post("{{.token}}", "{{.userName}}",url, '{"message":"用户主动操作"}', function(data, status) {
                     if (status == "success") {
                         if (data.status == "success") {
                             $("#" + alertID).fadeOut(1000)
@@ -171,13 +165,7 @@
         })
 
         function load() {
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/alerts?pageSize=" + pageSize + "&page=" + page, function(result) {
+            $.get("{{.token}}", "{{.userName}}", "/api/alerts?pageSize=" + pageSize + "&page=" + page, function(result) {
                 if (result.status == "success") {
                     if (result.data == null) {
                         //还原

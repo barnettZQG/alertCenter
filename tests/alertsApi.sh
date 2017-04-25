@@ -6,7 +6,7 @@ alerts1='[
             "instance": "10.10.12.18:9100",
             "job": "node",
             "monitor": "codelab-monitor",
-            "team":"cloud",
+            "team":"yiyun",
             "asdasfasfasfasfasfasfasfasfasfasfafs":"asfasfasfasfasfasfasfasfasfasfasfasfafs"
         },
         "annotations": {
@@ -23,7 +23,7 @@ alerts1='[
             "instance": "10.10.12.18:9100",
             "job": "node",
             "monitor": "codelab-monitor",
-            "team":"cloud"
+            "team":"yiyun"
         },
         "annotations": {
             "description": "10.10.12.18:9100 of node memory active out "
@@ -39,7 +39,7 @@ alerts1='[
             "instance": "10.10.12.18:9100",
             "job": "node",
             "monitor": "codelab-monitor",
-            "team":"cloud"
+            "team":"yiyun"
         },
         "annotations": {
             "description": "10.10.12.18:9100 of node memory active out "

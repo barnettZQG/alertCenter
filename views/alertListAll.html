@@ -218,13 +218,7 @@
         })
 
         function load() {
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/alerts?blog=" + blog + "&pageSize=" + pageSize + "&page=" + page, function(result) {
+            $.get("{{.token}}", "{{.userName}}","/api/alerts?blog=" + blog + "&pageSize=" + pageSize + "&page=" + page, function(result) {
                 $("#alerts").html("")
                 if (result.status == "success") {
                     $.each(result.data, function(i, alert) {

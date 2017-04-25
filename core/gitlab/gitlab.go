@@ -11,23 +11,23 @@ import (
 )
 
 func GetGitlabUrl() string {
-	if os.Getenv("GitlabURL") != "" {
-		return strings.TrimSuffix(os.Getenv("GitlabURL"), "/")
+	if os.Getenv("GITLAB_URL") != "" {
+		return strings.TrimSuffix(os.Getenv("GITLAB_URL"), "/")
 	}
 	return strings.TrimSuffix(beego.AppConfig.String("Gitlab"), "/")
 }
 
 func GetAdminAccessToken() string {
-	if os.Getenv("GitlabAccessToken") != "" {
-		return os.Getenv("GitlabAccessToken")
+	if os.Getenv("GITLAB_ACCESS_TOKEN") != "" {
+		return os.Getenv("GITLAB_ACCESS_TOKEN")
 	}
 	return beego.AppConfig.String("GitlabAccessToken")
 }
 
 // call back url
 func GetCallBackUrl() string {
-	if os.Getenv("GitlabCallBackUrl") != "" {
-		return os.Getenv("GitlabCallBackUrl")
+	if os.Getenv("GITLAB_CALLBACK_URL") != "" {
+		return os.Getenv("GITLAB_CALLBACK_URL")
 	}
 	return beego.AppConfig.String("GitlabCallBackUrl")
 }
@@ -40,16 +40,16 @@ func GetCallBackUrlEncode() string {
 
 // clientId
 func GetGitlabClientId() string {
-	if os.Getenv("GitlabOAuthClientId") != "" {
-		return os.Getenv("GitlabOAuthClientId")
+	if os.Getenv("GITLAB_OAUTH_APPLICATION_ID") != "" {
+		return os.Getenv("GITLAB_OAUTH_APPLICATION_ID")
 	}
 	return beego.AppConfig.String("GitlabOAuthClientId")
 }
 
 // sercetId
 func GetGitlabSercetId() string {
-	if os.Getenv("GitlabOAuthSercet") != "" {
-		return os.Getenv("GitlabOAuthSercet")
+	if os.Getenv("GITLAB_OAUTH_APPLICATION_SECRET") != "" {
+		return os.Getenv("GITLAB_OAUTH_APPLICATION_SECRET")
 	}
 	return beego.AppConfig.String("GitlabOAuthSercet")
 }

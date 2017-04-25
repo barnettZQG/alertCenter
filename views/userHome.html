@@ -250,19 +250,9 @@
     <script src="/static/js/bootstrap-switch.js"></script>
     <script>
         $(function() {
-            {
-                {
-                    if .isAdmin
-                }
-            }
+            {{if .isAdmin}}
             $("input[type=\"checkbox\"], input[type=\"radio\"]").not("[data-switch-no-init]").bootstrapSwitch();
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/noticeOn", function(result, status) {
+            $.get("{{.token}}", "{{.userName}}", "/api/noticeOn", function(result, status) {
                 if (status != "success") {
                     $.alertFail("alert", "请求noticeON API错误")
                 } else {
@@ -277,13 +267,7 @@
                 // console.log(this); // DOM element
                 // console.log(event); // jQuery event
                 // console.log(state); // true | false
-                $.post({
-                    {.token
-                    }
-                }, {
-                    {.userName
-                    }
-                }, "/api/noticeOn/" + state, "", function(result, status) {
+                $.post("{{.token}}", "{{.userName}}", "/api/noticeOn/" + state, "", function(result, status) {
                     if (status != "success") {
                         $.alertFail("alert", "请求noticeON API错误")
                     } else {
@@ -291,13 +275,7 @@
                     }
                 })
             });
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/trustIP", function(result, status) {
+            $.get("{{.token}}", "{{.userName}}", "/api/trustIP", function(result, status) {
                 if (status != "success") {
                     $.alertFail("alert", "请求Trust API错误")
                 } else {
@@ -334,31 +312,16 @@
             $(".refreshCache").click(function() {
                 var b = $(this)
                 b.button("loading")
-                $.post({
-                    {.token
-                    }
-                }, {
-                    {.userName
-                    }
-                }, "/api/refreshCache", '', function(result, status) {
+                $.post("{{.token}}", "{{.userName}}", "/api/refreshCache", '', function(result, status) {
                     if (status == "success") {
                         b.button('reset')
                         $.alert("alert", result)
                     }
                 })
-            }) {
-                {
-                    end
-                }
-            }
+            })
+            {{end}}
 
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/ignoreRules", function(result, status) {
+            $.get("{{.token}}", "{{.userName}}", "/api/ignoreRules", function(result, status) {
                 if (status != "success") {
                     $.alertFail("alert", "请求规则api错误")
                 } else {
@@ -371,13 +334,7 @@
                     }
                 }
             })
-            $.get({
-                {.token
-                }
-            }, {
-                {.userName
-                }
-            }, "/api/projects", function(result, status) {
+            $.get("{{.token}}", "{{.userName}}", "/api/projects", function(result, status) {
                 if (status != "success") {
                     $.alertFail("alert", "请求Token API错误")
                 } else {
@@ -458,13 +415,7 @@
                 labels = labels.substring(0, labels.length - 1)
                 labels += "}"
                 var postData = '{"userName":"{{.userName}}","startsAt":"' + start + '","endsAt":"' + end + '","labels":' + labels + '}'
-                $.post({
-                    {.token
-                    }
-                }, {
-                    {.userName
-                    }
-                }, "/api/addIgnoreRule", postData, function(result, status) {
+                $.post("{{.token}}", "{{.userName}}", "/api/addIgnoreRule", postData, function(result, status) {
                     if (status != "success") {
                         $.alertFail("alert", "异步请求错误")
                     } else {

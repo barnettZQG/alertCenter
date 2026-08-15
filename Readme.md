@@ -1,3 +1,5 @@
+
+
 # 使用说明
 如果你想要使用本项目，请联系我：qq：576501057
 我很高兴为你解答遇到的问题。
@@ -10,7 +12,7 @@ beego | 版本1.7.0及以上
 gitlab | 账号体系依赖gitlab应用。
 mongodb | 存储服务。
 # 功能说明
-1. 兼容prometheus报警信息，比alertmanager更完善的功能
+1. 兼容prometheus报警信息（POST /api/v1/alerts），比alertmanager更完善的功能
 2. 多种安全验证方式的API
 3. 支持报警信息分类存储，查询
 4. 支持gitlab,ldap用户管理
